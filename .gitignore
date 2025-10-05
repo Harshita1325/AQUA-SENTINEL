@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch
+*.pth
+*.pt
+!netG_*.pt
+
+# Virtual Environment
+deepwave_env/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Web Application
+webapp/uploads/*
+!webapp/uploads/.gitkeep
+webapp/results/*
+!webapp/results/.gitkeep
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Images (except samples)
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+!imgs/
+!**/clean_test/
+!**/hazy_test/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
