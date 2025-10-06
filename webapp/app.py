@@ -69,18 +69,40 @@ def upload_file():
             if processor is None:
                 processor = get_processor()
             
-            # Process image
-            start_time = time.time()
-            processor.process_image(input_path, output_path, model_type)
-            processing_time = time.time() - start_time
+            # Check if adaptive mode is requested
+            adaptive_mode = request.form.get('adaptive_mode', 'off')
             
-            return jsonify({
-                'success': True,
-                'input_file': input_filename,
-                'output_file': output_filename,
-                'processing_time': round(processing_time, 2),
-                'model_used': model_type
-            })
+            if adaptive_mode != 'off':
+                # Use adaptive enhancement
+                start_time = time.time()
+                result_path, detected_env = processor.apply_adaptive_enhancement(
+                    input_path, output_path, adaptive_mode
+                )
+                processing_time = time.time() - start_time
+                
+                return jsonify({
+                    'success': True,
+                    'input_file': input_filename,
+                    'output_file': output_filename,
+                    'processing_time': round(processing_time, 2),
+                    'model_used': model_type,
+                    'adaptive_mode': True,
+                    'detected_environment': detected_env.upper()
+                })
+            else:
+                # Standard processing
+                start_time = time.time()
+                processor.process_image(input_path, output_path, model_type)
+                processing_time = time.time() - start_time
+                
+                return jsonify({
+                    'success': True,
+                    'input_file': input_filename,
+                    'output_file': output_filename,
+                    'processing_time': round(processing_time, 2),
+                    'model_used': model_type,
+                    'adaptive_mode': False
+                })
             
         except Exception as e:
             # Clean up files on error
@@ -361,6 +383,99 @@ def download_video(filename):
     if os.path.exists(video_path):
         return send_file(video_path, as_attachment=True, download_name=f"enhanced_{filename}")
     return jsonify({'error': 'Video not found'}), 404
+
+@app.route('/detect_threats', methods=['POST'])
+def detect_threats():
+    """
+    Detect and highlight underwater threats
+    """
+    global processor
+    
+    try:
+        # Get file from request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if file and allowed_file(file.filename):
+            # Generate unique filename
+            unique_id = str(uuid.uuid4())
+            filename = secure_filename(file.filename)
+            file_ext = filename.rsplit('.', 1)[1].lower()
+            
+            input_filename = f"{unique_id}_threat_input.{file_ext}"
+            output_filename = f"{unique_id}_threat_output.{file_ext}"
+            
+            input_path = os.path.join(app.config['UPLOAD_FOLDER'], input_filename)
+            output_path = os.path.join(app.config['RESULTS_FOLDER'], output_filename)
+            
+            # Save uploaded file
+            file.save(input_path)
+            
+            try:
+                # Initialize processor if needed
+                if processor is None:
+                    processor = get_processor()
+                
+                # Load threat detector
+                processor.load_threat_detector()
+                
+                # Get options
+                enhance_first = request.form.get('enhance_first', 'true').lower() == 'true'
+                exclude_marine_life = request.form.get('exclude_marine_life', 'true').lower() == 'true'
+                
+                # Detect and highlight threats
+                start_time = time.time()
+                output_with_threats, threats, summary = processor.detect_and_highlight_threats(
+                    input_path,
+                    output_path,
+                    enhance_first=enhance_first,
+                    exclude_marine_life=exclude_marine_life
+                )
+                processing_time = time.time() - start_time
+                
+                # Format threat data for JSON response
+                threat_list = []
+                for threat in threats:
+                    threat_list.append({
+                        'type': threat['threat_type'],
+                        'confidence': float(threat['confidence']),
+                        'risk_level': threat['risk_level'],
+                        'bbox': threat['bbox'],
+                        'center': threat['center']
+                    })
+                
+                return jsonify({
+                    'success': True,
+                    'input_file': input_filename,
+                    'output_file': output_filename,
+                    'processing_time': round(processing_time, 2),
+                    'threats_detected': len(threats) > 0,
+                    'threat_count': summary['total'],
+                    'threats': threat_list,
+                    'summary': {
+                        'total': summary['total'],
+                        'high_risk': summary['high_risk'],
+                        'medium_risk': summary['medium_risk'],
+                        'low_risk': summary['low_risk'],
+                        'types': summary['types']
+                    }
+                })
+                
+            except Exception as e:
+                # Clean up files on error
+                if os.path.exists(input_path):
+                    os.remove(input_path)
+                return jsonify({'error': str(e)}), 500
+        
+        return jsonify({'error': 'Invalid file type'}), 400
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     print("🌊 Deep WaveNet Web Application")

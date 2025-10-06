@@ -348,6 +348,225 @@
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         }
 
+        /* Adaptive Mode Dropdown */
+        .adaptive-mode-selector {
+            margin: 30px auto;
+            max-width: 600px;
+        }
+
+        .adaptive-mode-dropdown {
+            width: 100%;
+            padding: 18px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            padding-right: 50px;
+        }
+
+        .adaptive-mode-dropdown:hover {
+            border-color: rgba(139, 92, 246, 0.8);
+            background: rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .adaptive-mode-dropdown:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+
+        .adaptive-mode-dropdown option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        /* Environment Badge */
+        .environment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            border-radius: 15px;
+            margin: 20px auto;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .environment-badge.clear {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.5);
+            color: #fbbf24;
+        }
+
+        .environment-badge.turbid {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #22c55e;
+        }
+
+        .environment-badge.deep {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+
+        .environment-badge.night {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.5);
+            color: #8b5cf6;
+        }
+
+        /* Threat Detection Toggle */
+        .threat-detection-toggle {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .threat-detection-toggle:hover {
+            border-color: rgba(239, 68, 68, 0.7);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .threat-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .threat-checkbox {
+            display: none;
+        }
+
+        .threat-toggle-slider {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .threat-toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            left: 4px;
+            top: 2px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .threat-checkbox:checked + .threat-toggle-slider {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+
+        .threat-checkbox:checked + .threat-toggle-slider::before {
+            transform: translateX(30px);
+            background: #fff;
+        }
+
+        .threat-toggle-label {
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: left;
+        }
+
+        .threat-toggle-label strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        /* Threat Summary Panel */
+        .threat-summary-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .threat-summary-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ef4444;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .threat-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .threat-stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .threat-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .threat-stat-number.high {
+            color: #ef4444;
+        }
+
+        .threat-stat-number.medium {
+            color: #f59e0b;
+        }
+
+        .threat-stat-number.low {
+            color: #eab308;
+        }
+
+        .threat-stat-label {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .process-button {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -1012,6 +1231,38 @@
                     </div>
                 </div>
 
+                <!-- Adaptive Enhancement Mode -->
+                <div class="adaptive-mode-selector" style="margin-top: 30px;">
+                    <label style="display: block; margin-bottom: 15px; color: #fff; font-weight: 600;">
+                        🌊 Adaptive Enhancement Mode
+                    </label>
+                    <select id="adaptiveMode" class="adaptive-mode-dropdown">
+                        <option value="off">Standard Enhancement</option>
+                        <option value="auto" selected>🤖 Auto-Detect Environment</option>
+                        <option value="clear">🌟 Clear Water (Tropical)</option>
+                        <option value="turbid">🌿 Turbid Water (Coastal)</option>
+                        <option value="deep">🌊 Deep Water (Ocean)</option>
+                        <option value="night">🌙 Night / Low Light</option>
+                    </select>
+                    <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 10px; text-align: center;">
+                        Automatically adjusts enhancement based on water conditions
+                    </p>
+                </div>
+
+                <!-- Threat Detection Toggle -->
+                <div class="threat-detection-toggle" style="margin-top: 25px; text-align: center;">
+                    <label class="threat-toggle-container">
+                        <input type="checkbox" id="enableThreatDetection" class="threat-checkbox">
+                        <span class="threat-toggle-slider"></span>
+                        <span class="threat-toggle-label">
+                            🎯 <strong>Enable AI Threat Detection</strong>
+                            <small style="display: block; color: #a0aec0; margin-top: 5px;">
+                                Detect submarines, mines, divers, and underwater objects
+                            </small>
+                        </span>
+                    </label>
+                </div>
+
                 <button class="process-button" id="processButton" onclick="processImage()">
                     🚀 Process Image
                 </button>
@@ -1027,6 +1278,46 @@
 
             <div class="preview-section" id="previewSection">
                 <h2 style="text-align: center;">Results</h2>
+                
+                <!-- Environment Detection Badge -->
+                <div id="environmentBadge" style="display: none; text-align: center; margin-bottom: 30px;">
+                    <div class="environment-badge" id="environmentBadgeContent">
+                        <span id="environmentIcon">🌊</span>
+                        <span>Detected Environment: <strong id="environmentType">Auto</strong></span>
+                    </div>
+                    <p style="color: #a0aec0; font-size: 0.95rem; margin-top: 10px;" id="environmentDescription"></p>
+                </div>
+                
+                <!-- Threat Detection Summary -->
+                <div id="threatSummary" class="threat-summary-panel" style="display: none;">
+                    <div class="threat-summary-title">
+                        <span>⚠️</span>
+                        <span>THREAT DETECTION REPORT</span>
+                    </div>
+                    <div class="threat-stats-grid">
+                        <div class="threat-stat-card">
+                            <div class="threat-stat-number" id="totalThreats">0</div>
+                            <div class="threat-stat-label">Total Threats</div>
+                        </div>
+                        <div class="threat-stat-card">
+                            <div class="threat-stat-number high" id="highRiskThreats">0</div>
+                            <div class="threat-stat-label">High Risk</div>
+                        </div>
+                        <div class="threat-stat-card">
+                            <div class="threat-stat-number medium" id="mediumRiskThreats">0</div>
+                            <div class="threat-stat-label">Medium Risk</div>
+                        </div>
+                        <div class="threat-stat-card">
+                            <div class="threat-stat-number low" id="lowRiskThreats">0</div>
+                            <div class="threat-stat-label">Low Risk</div>
+                        </div>
+                    </div>
+                    <div id="threatTypesList" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                        <h4 style="color: #fff; margin-bottom: 10px;">Detected Threat Types:</h4>
+                        <div id="threatTypesContent"></div>
+                    </div>
+                </div>
+
                 <div class="images-container">
                     <div class="image-card">
                         <h3>Original Image</h3>
@@ -1447,14 +1738,37 @@
             
             const selectedModel = document.querySelector('input[name="model"]:checked').value;
             formData.append('model_type', selectedModel);
+            
+            // Add adaptive mode
+            const adaptiveMode = document.getElementById('adaptiveMode').value;
+            formData.append('adaptive_mode', adaptiveMode);
+            
+            // Check if threat detection is enabled
+            const enableThreatDetection = document.getElementById('enableThreatDetection').checked;
 
             document.getElementById('loading').style.display = 'block';
             document.getElementById('statusInfo').style.display = 'none';
             document.getElementById('processButton').disabled = true;
             document.getElementById('previewSection').style.display = 'none';
             document.getElementById('metricsSection').style.display = 'none';
+            document.getElementById('environmentBadge').style.display = 'none';
+            
+            // Hide threat summary if exists
+            const threatSummary = document.getElementById('threatSummary');
+            if (threatSummary) {
+                threatSummary.style.display = 'none';
+            }
+            
+            // Choose endpoint based on threat detection toggle
+            const endpoint = enableThreatDetection ? '/detect_threats' : '/upload';
+            
+            // Add threat detection options if enabled
+            if (enableThreatDetection) {
+                formData.append('enhance_first', 'true');
+                formData.append('exclude_marine_life', 'true');
+            }
 
-            fetch('/upload', {
+            fetch(endpoint, {
                 method: 'POST',
                 body: formData
             })
@@ -1473,12 +1787,30 @@
                     document.getElementById('previewSection').style.display = 'block';
                     document.getElementById('downloadSection').style.display = 'block';
                     
-                    showStatus(
-                        `✅ Image processed successfully in ${data.processing_time}s using ${data.model_used.toUpperCase()} model!`, 
-                        'success'
-                    );
+                    // Display environment detection if adaptive mode was used
+                    if (data.adaptive_mode && data.detected_environment) {
+                        displayEnvironmentBadge(data.detected_environment);
+                    }
+                    
+                    // Display threat detection results if enabled
+                    if (enableThreatDetection && data.threats_detected) {
+                        displayThreatSummary(data);
+                    }
+                    
+                    let statusMsg = `✅ Image processed successfully in ${data.processing_time}s`;
+                    if (data.model_used) {
+                        statusMsg += ` using ${data.model_used.toUpperCase()} model`;
+                    }
+                    if (data.adaptive_mode) {
+                        statusMsg += ` (${data.detected_environment} environment detected)`;
+                    }
+                    if (enableThreatDetection) {
+                        statusMsg += ` - ${data.threat_count} threat(s) detected`;
+                    }
+                    statusMsg += '!';
+                    showStatus(statusMsg, 'success');
 
-                    // Calculate and display metrics
+                    // Calculate and display metrics (always show metrics)
                     setTimeout(() => {
                         calculateAndDisplayMetrics(data.input_file, data.output_file);
                     }, 500);
@@ -1491,6 +1823,79 @@
                 document.getElementById('processButton').disabled = false;
                 showStatus(`❌ Network error: ${error.message}`, 'error');
             });
+        }
+
+        function displayEnvironmentBadge(environment) {
+            const badge = document.getElementById('environmentBadge');
+            const badgeContent = document.getElementById('environmentBadgeContent');
+            const environmentType = document.getElementById('environmentType');
+            const environmentIcon = document.getElementById('environmentIcon');
+            const environmentDescription = document.getElementById('environmentDescription');
+            
+            // Remove previous classes
+            badgeContent.className = 'environment-badge';
+            
+            // Set content based on environment
+            const envData = {
+                'CLEAR': {
+                    icon: '🌟',
+                    class: 'clear',
+                    description: 'Tropical/clear water - High visibility, balanced color correction'
+                },
+                'TURBID': {
+                    icon: '🌿',
+                    class: 'turbid',
+                    description: 'Coastal/turbid water - Enhanced green channel reduction, contrast boost'
+                },
+                'DEEP': {
+                    icon: '🌊',
+                    class: 'deep',
+                    description: 'Deep ocean water - Blue channel correction, red spectrum enhancement'
+                },
+                'NIGHT': {
+                    icon: '🌙',
+                    class: 'night',
+                    description: 'Low light/night - Gamma correction, brightness enhancement'
+                }
+            };
+            
+            const env = envData[environment.toUpperCase()] || envData['CLEAR'];
+            
+            badgeContent.classList.add(env.class);
+            environmentIcon.textContent = env.icon;
+            environmentType.textContent = environment;
+            environmentDescription.textContent = env.description;
+            
+            badge.style.display = 'block';
+        }
+        
+        function displayThreatSummary(data) {
+            const summary = data.summary;
+            const threats = data.threats;
+            
+            // Update counts
+            document.getElementById('totalThreats').textContent = summary.total;
+            document.getElementById('highRiskThreats').textContent = summary.high_risk;
+            document.getElementById('mediumRiskThreats').textContent = summary.medium_risk;
+            document.getElementById('lowRiskThreats').textContent = summary.low_risk;
+            
+            // Display threat types
+            const typesContent = document.getElementById('threatTypesContent');
+            typesContent.innerHTML = '';
+            
+            if (Object.keys(summary.types).length > 0) {
+                for (const [type, count] of Object.entries(summary.types)) {
+                    const typeDiv = document.createElement('div');
+                    typeDiv.style.cssText = 'padding: 8px; margin: 5px 0; background: rgba(239, 68, 68, 0.2); border-left: 3px solid #ef4444; border-radius: 5px;';
+                    typeDiv.innerHTML = `<span style="color: #fff; font-weight: 600;">${type.replace(/_/g, ' ').toUpperCase()}</span>: <span style="color: #fbbf24;">${count} detected</span>`;
+                    typesContent.appendChild(typeDiv);
+                }
+            } else {
+                typesContent.innerHTML = '<p style="color: #a0aec0;">No specific threat types identified</p>';
+            }
+            
+            // Show the summary panel
+            document.getElementById('threatSummary').style.display = 'block';
         }
 
         // ==================== VIDEO PROCESSING FUNCTIONS ====================
