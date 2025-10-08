@@ -117,7 +117,7 @@ class ThreatVisualizer:
     
     def draw_label(self, image, threat):
         """
-        Draw label with threat type and confidence
+        Draw label with threat type and confidence (NO distance on image)
         
         Args:
             image: OpenCV image (BGR)
@@ -132,8 +132,9 @@ class ThreatVisualizer:
         risk_level = threat['risk_level']
         color = self.COLORS.get(risk_level, (0, 0, 255))
         
-        # Create label text
+        # Create label text WITHOUT distance (distance shown in UI card only)
         label = f"{threat_type} {confidence:.0%}"
+        
         risk_label = f"[{risk_level}]"
         
         # Calculate label position (above bounding box)

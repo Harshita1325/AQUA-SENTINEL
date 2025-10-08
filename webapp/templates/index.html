@@ -1231,8 +1231,39 @@
                     </div>
                 </div>
 
+                <!-- Smart Enhancement Mode -->
+                <div class="adaptive-mode-selector" style="margin-top: 30px; border: 2px solid #10b981; border-radius: 12px; padding: 20px; background: rgba(16, 185, 129, 0.1);">
+                    <label style="display: block; margin-bottom: 15px; color: #10b981; font-weight: 700; font-size: 1.1rem;">
+                        ⚡ Smart AI Enhancement
+                        <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">NEW</span>
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                        <label class="switch">
+                            <input type="checkbox" id="smartMode">
+                            <span class="slider round"></span>
+                        </label>
+                        <span style="color: #fff; font-weight: 600;">Enable Smart Mode</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; padding-left: 60px;" id="aggressiveOption" style="display: none;">
+                        <label class="switch" style="transform: scale(0.8);">
+                            <input type="checkbox" id="aggressiveMode">
+                            <span class="slider round"></span>
+                        </label>
+                        <span style="color: #cbd5e0; font-size: 0.9rem;">Aggressive Enhancement (for extreme cases)</span>
+                    </div>
+                    <p style="color: #a0ffe0; font-size: 0.9rem; margin-top: 15px; text-align: left; line-height: 1.6;">
+                        <strong>🎯 Advanced AI Processing:</strong><br>
+                        • Automatic quality assessment<br>
+                        • CLAHE histogram equalization<br>
+                        • White balance correction<br>
+                        • Adaptive denoising & sharpening<br>
+                        • HDR tone mapping & detail enhancement<br>
+                        <em>Best for dark, blurry, or dull images!</em>
+                    </p>
+                </div>
+
                 <!-- Adaptive Enhancement Mode -->
-                <div class="adaptive-mode-selector" style="margin-top: 30px;">
+                <div class="adaptive-mode-selector" style="margin-top: 30px;" id="adaptiveModeSection">
                     <label style="display: block; margin-bottom: 15px; color: #fff; font-weight: 600;">
                         🌊 Adaptive Enhancement Mode
                     </label>
@@ -1739,9 +1770,18 @@
             const selectedModel = document.querySelector('input[name="model"]:checked').value;
             formData.append('model_type', selectedModel);
             
-            // Add adaptive mode
-            const adaptiveMode = document.getElementById('adaptiveMode').value;
-            formData.append('adaptive_mode', adaptiveMode);
+            // Check smart mode first (priority over adaptive)
+            const smartMode = document.getElementById('smartMode').checked;
+            formData.append('smart_mode', smartMode ? 'on' : 'off');
+            
+            if (smartMode) {
+                const aggressiveMode = document.getElementById('aggressiveMode').checked;
+                formData.append('aggressive', aggressiveMode ? 'on' : 'off');
+            } else {
+                // Add adaptive mode only if smart mode is off
+                const adaptiveMode = document.getElementById('adaptiveMode').value;
+                formData.append('adaptive_mode', adaptiveMode);
+            }
             
             // Check if threat detection is enabled
             const enableThreatDetection = document.getElementById('enableThreatDetection').checked;
@@ -1787,6 +1827,11 @@
                     document.getElementById('previewSection').style.display = 'block';
                     document.getElementById('downloadSection').style.display = 'block';
                     
+                    // Display smart mode results if used
+                    if (data.smart_mode) {
+                        displaySmartModeResults(data);
+                    }
+                    
                     // Display environment detection if adaptive mode was used
                     if (data.adaptive_mode && data.detected_environment) {
                         displayEnvironmentBadge(data.detected_environment);
@@ -1798,7 +1843,12 @@
                     }
                     
                     let statusMsg = `✅ Image processed successfully in ${data.processing_time}s`;
-                    if (data.model_used) {
+                    if (data.smart_mode) {
+                        statusMsg += ` using SMART AI Enhancement`;
+                        if (data.improvement && data.improvement.quality_score_change) {
+                            statusMsg += ` (Quality: ${data.input_quality.quality_score.toFixed(1)} → ${data.output_quality.quality_score.toFixed(1)}, +${data.improvement.quality_score_change.toFixed(1)} points)`;
+                        }
+                    } else if (data.model_used) {
                         statusMsg += ` using ${data.model_used.toUpperCase()} model`;
                     }
                     if (data.adaptive_mode) {
@@ -1823,6 +1873,35 @@
                 document.getElementById('processButton').disabled = false;
                 showStatus(`❌ Network error: ${error.message}`, 'error');
             });
+        }
+
+        function displaySmartModeResults(data) {
+            // Show alert with quality improvement
+            if (data.improvement) {
+                const improvement = data.improvement;
+                const qualityChange = improvement.quality_score_change;
+                
+                let message = '🤖 Smart AI Enhancement Complete!\n\n';
+                message += `Quality Score: ${data.input_quality.quality_score.toFixed(1)} → ${data.output_quality.quality_score.toFixed(1)} `;
+                message += `(${qualityChange > 0 ? '+' : ''}${qualityChange.toFixed(1)} points)\n\n`;
+                message += 'Improvements:\n';
+                message += `• Brightness: ${improvement.brightness_change > 0 ? '+' : ''}${improvement.brightness_change.toFixed(1)}\n`;
+                message += `• Sharpness: ${improvement.sharpness_change > 0 ? '+' : ''}${improvement.sharpness_change.toFixed(1)}\n`;
+                message += `• Contrast: ${improvement.contrast_change > 0 ? '+' : ''}${improvement.contrast_change.toFixed(1)}\n`;
+                message += `• Saturation: ${improvement.saturation_change > 0 ? '+' : ''}${improvement.saturation_change.toFixed(1)}\n`;
+                
+                // Add preprocessing info
+                if (data.preprocessing_log) {
+                    message += `\nPreprocessing: ${data.preprocessing_log.mode || 'standard'}`;
+                }
+                
+                // Show in console for debugging
+                console.log('Smart Enhancement Results:', data);
+                
+                // You could also display this in a modal or dedicated section
+                // For now, we'll show it in the status
+                showStatus(message, 'success');
+            }
         }
 
         function displayEnvironmentBadge(environment) {
@@ -1879,11 +1958,49 @@
             document.getElementById('mediumRiskThreats').textContent = summary.medium_risk;
             document.getElementById('lowRiskThreats').textContent = summary.low_risk;
             
-            // Display threat types
+            // Display threat types with distance information
             const typesContent = document.getElementById('threatTypesContent');
             typesContent.innerHTML = '';
             
-            if (Object.keys(summary.types).length > 0) {
+            if (threats && threats.length > 0) {
+                threats.forEach((threat, index) => {
+                    const typeDiv = document.createElement('div');
+                    typeDiv.style.cssText = 'padding: 10px; margin: 5px 0; background: rgba(239, 68, 68, 0.2); border-left: 3px solid #ef4444; border-radius: 5px;';
+                    
+                    // Format threat type
+                    const threatType = threat.type.replace(/_/g, ' ').toUpperCase();
+                    const confidence = (threat.confidence * 100).toFixed(0);
+                    
+                    // Build HTML with distance if available
+                    let threatHTML = `
+                        <div style="color: #fff; font-weight: 600; margin-bottom: 5px;">
+                            ${index + 1}. ${threatType} [${threat.risk_level}]
+                        </div>
+                        <div style="color: #fbbf24; font-size: 0.9em;">
+                            Confidence: ${confidence}%
+                        </div>
+                    `;
+                    
+                    // Add distance information if available
+                    if (threat.distance) {
+                        const distColor = threat.distance.confidence === 'high' ? '#10b981' : 
+                                         threat.distance.confidence === 'medium' ? '#fbbf24' : '#f87171';
+                        
+                        threatHTML += `
+                            <div style="color: ${distColor}; font-size: 0.9em; margin-top: 5px;">
+                                📏 Distance: <strong>${threat.distance.display}</strong> <span style="color: #a0aec0;">(${threat.distance.error_margin})</span>
+                            </div>
+                            <div style="color: #a0aec0; font-size: 0.8em;">
+                                Estimation: ${threat.distance.confidence.toUpperCase()}
+                            </div>
+                        `;
+                    }
+                    
+                    typeDiv.innerHTML = threatHTML;
+                    typesContent.appendChild(typeDiv);
+                });
+            } else if (Object.keys(summary.types).length > 0) {
+                // Fallback to simple type display if detailed threat data not available
                 for (const [type, count] of Object.entries(summary.types)) {
                     const typeDiv = document.createElement('div');
                     typeDiv.style.cssText = 'padding: 8px; margin: 5px 0; background: rgba(239, 68, 68, 0.2); border-left: 3px solid #ef4444; border-radius: 5px;';
@@ -2068,6 +2185,30 @@
         }
 
         // ==================== END VIDEO FUNCTIONS ====================
+
+        // Smart Mode Toggle Handler
+        document.getElementById('smartMode').addEventListener('change', function() {
+            const isSmartMode = this.checked;
+            const aggressiveOption = document.getElementById('aggressiveOption');
+            const adaptiveModeSection = document.getElementById('adaptiveModeSection');
+            const adaptiveDropdown = document.getElementById('adaptiveMode');
+            
+            if (isSmartMode) {
+                // Show aggressive option
+                aggressiveOption.style.display = 'flex';
+                // Disable and gray out adaptive mode
+                adaptiveModeSection.style.opacity = '0.4';
+                adaptiveModeSection.style.pointerEvents = 'none';
+                adaptiveDropdown.disabled = true;
+            } else {
+                // Hide aggressive option
+                aggressiveOption.style.display = 'none';
+                // Enable adaptive mode
+                adaptiveModeSection.style.opacity = '1';
+                adaptiveModeSection.style.pointerEvents = 'auto';
+                adaptiveDropdown.disabled = false;
+            }
+        });
 
         fetch('/status')
             .then(response => response.json())

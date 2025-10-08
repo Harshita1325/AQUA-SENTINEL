@@ -15,13 +15,23 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from threat_detection.detector import ThreatDetector
 from threat_detection.visualizer import ThreatVisualizer
 
+# Import advanced processing modules
+from advanced_preprocessor import AdvancedPreprocessor
+from advanced_postprocessor import AdvancedPostprocessor
+
 class DeepWaveNetProcessor:
     def __init__(self):
         self.models = {}
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.threat_detector = None
         self.threat_visualizer = None
+        
+        # Initialize advanced processing modules
+        self.advanced_preprocessor = AdvancedPreprocessor()
+        self.advanced_postprocessor = AdvancedPostprocessor()
+        
         print(f"🔧 Initializing processor on device: {self.device}")
+        print("🎨 Advanced processing modules loaded")
         
     def load_models(self):
         """Load all Deep WaveNet models"""
@@ -448,6 +458,141 @@ class DeepWaveNetProcessor:
                 'sr4x': '4X Super-Resolution'
             }
         }
+    
+    def smart_enhance(self, input_path, output_path, aggressive=False):
+        """
+        Smart enhancement using advanced preprocessing and postprocessing
+        
+        This method applies:
+        1. Quality assessment
+        2. Advanced preprocessing (CLAHE, white balance, denoising, etc.)
+        3. Deep learning model inference
+        4. Advanced postprocessing (tone mapping, detail enhancement, etc.)
+        
+        Args:
+            input_path: Path to input image
+            output_path: Path to save final output
+            aggressive: If True, applies more aggressive enhancements
+            
+        Returns:
+            Dictionary with processing results and quality metrics
+        """
+        try:
+            print("\n🚀 Starting SMART ENHANCEMENT pipeline...")
+            results = {
+                'input_quality': {},
+                'output_quality': {},
+                'preprocessing_log': {},
+                'postprocessing_log': {},
+                'improvement': {}
+            }
+            
+            # Load original image
+            original_image = cv2.imread(input_path)
+            if original_image is None:
+                raise ValueError(f"Could not load image from {input_path}")
+            
+            original_rgb = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+            
+            # Step 1: Assess input image quality
+            print("\n📊 Step 1: Assessing input image quality...")
+            input_quality = self.advanced_preprocessor.assess_image_quality(original_rgb)
+            results['input_quality'] = input_quality
+            
+            print(f"  • Brightness: {input_quality['brightness']:.1f}")
+            print(f"  • Sharpness: {input_quality['sharpness']:.1f}")
+            print(f"  • Contrast: {input_quality['contrast']:.1f}")
+            print(f"  • Saturation: {input_quality['saturation']:.1f}")
+            print(f"  • Quality Score: {input_quality['quality_score']:.1f}/100")
+            
+            # Determine if extreme preprocessing is needed
+            needs_extreme = input_quality['quality_score'] < 30
+            
+            # Step 2: Advanced preprocessing
+            if needs_extreme:
+                print("\n⚡ Step 2: Applying EXTREME preprocessing...")
+                preprocessed = self.advanced_preprocessor.preprocess_for_extreme_cases(original_rgb)
+                results['preprocessing_log'] = {'mode': 'extreme', 'steps': 7}
+            else:
+                print("\n🎨 Step 2: Applying standard preprocessing...")
+                preprocessed, prep_log = self.advanced_preprocessor.preprocess_pipeline(
+                    original_rgb, 
+                    auto=True
+                )
+                results['preprocessing_log'] = prep_log
+            
+            # Save preprocessed image temporarily
+            temp_preprocessed_path = input_path.replace('.', '_smart_prep.')
+            preprocessed_bgr = cv2.cvtColor(preprocessed, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(temp_preprocessed_path, preprocessed_bgr)
+            
+            # Step 3: Run deep learning model
+            print("\n🧠 Step 3: Running deep learning inference...")
+            temp_model_output = input_path.replace('.', '_smart_model.')
+            self.process_image(temp_preprocessed_path, temp_model_output, 'uieb')
+            
+            # Load model output
+            model_output = cv2.imread(temp_model_output)
+            model_output_rgb = cv2.cvtColor(model_output, cv2.COLOR_BGR2RGB)
+            
+            # Step 4: Advanced postprocessing
+            print("\n✨ Step 4: Applying advanced postprocessing...")
+            if aggressive or needs_extreme:
+                final_output = self.advanced_postprocessor.extreme_postprocess(model_output_rgb)
+                results['postprocessing_log'] = {'mode': 'extreme'}
+            else:
+                final_output, post_log = self.advanced_postprocessor.postprocess_pipeline(
+                    model_output_rgb,
+                    aggressive=False
+                )
+                results['postprocessing_log'] = post_log
+            
+            # Step 5: Assess output quality
+            print("\n📈 Step 5: Assessing output quality...")
+            output_quality = self.advanced_preprocessor.assess_image_quality(final_output)
+            results['output_quality'] = output_quality
+            
+            print(f"  • Brightness: {output_quality['brightness']:.1f}")
+            print(f"  • Sharpness: {output_quality['sharpness']:.1f}")
+            print(f"  • Contrast: {output_quality['contrast']:.1f}")
+            print(f"  • Saturation: {output_quality['saturation']:.1f}")
+            print(f"  • Quality Score: {output_quality['quality_score']:.1f}/100")
+            
+            # Calculate improvements
+            results['improvement'] = {
+                'brightness_change': output_quality['brightness'] - input_quality['brightness'],
+                'sharpness_change': output_quality['sharpness'] - input_quality['sharpness'],
+                'contrast_change': output_quality['contrast'] - input_quality['contrast'],
+                'saturation_change': output_quality['saturation'] - input_quality['saturation'],
+                'quality_score_change': output_quality['quality_score'] - input_quality['quality_score']
+            }
+            
+            print("\n📊 Improvements:")
+            print(f"  • Brightness: {results['improvement']['brightness_change']:+.1f}")
+            print(f"  • Sharpness: {results['improvement']['sharpness_change']:+.1f}")
+            print(f"  • Contrast: {results['improvement']['contrast_change']:+.1f}")
+            print(f"  • Saturation: {results['improvement']['saturation_change']:+.1f}")
+            print(f"  • Quality Score: {results['improvement']['quality_score_change']:+.1f}")
+            
+            # Save final output
+            final_output_bgr = cv2.cvtColor(final_output, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(output_path, final_output_bgr)
+            
+            # Clean up temp files
+            for temp_file in [temp_preprocessed_path, temp_model_output]:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+            
+            print(f"\n✅ Smart enhancement complete! Saved to: {output_path}")
+            print(f"🎉 Overall quality improvement: {results['improvement']['quality_score_change']:+.1f} points")
+            
+            return results
+            
+        except Exception as e:
+            print(f"❌ Error in smart enhancement: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            raise
 
 # Global processor instance
 processor = None

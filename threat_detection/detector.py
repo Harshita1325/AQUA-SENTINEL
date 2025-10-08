@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 import os
+from .distance_estimator import DistanceEstimator
 
 class ThreatDetector:
     """
@@ -37,16 +38,19 @@ class ThreatDetector:
     HIGH_RISK = ['submarine', 'mine', 'underwater_vehicle', 'suspicious_object']
     MEDIUM_RISK = ['diver', 'underwater_drone', 'drone']
     
-    def __init__(self, model_size='n', confidence_threshold=0.25):
+    def __init__(self, model_size='n', confidence_threshold=0.25, estimate_distance=True, focal_length_px=None):
         """
         Initialize YOLOv8 detector
         
         Args:
             model_size: 'n' (nano), 's' (small), 'm' (medium), 'l' (large), 'x' (xlarge)
             confidence_threshold: Minimum confidence for detections (0-1)
+            estimate_distance: Enable distance estimation (default: True)
+            focal_length_px: Camera focal length in pixels (optional, will be estimated if not provided)
         """
         self.confidence_threshold = confidence_threshold
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.estimate_distance = estimate_distance
         
         print(f"🔍 Initializing YOLOv8 Threat Detector ({model_size})...")
         print(f"📱 Device: {self.device}")
@@ -57,6 +61,13 @@ class ThreatDetector:
             self.model = YOLO(model_name)
             self.model.to(self.device)
             print(f"✅ YOLOv8 model loaded: {model_name}")
+            
+            # Initialize distance estimator if enabled
+            if self.estimate_distance:
+                self.distance_estimator = DistanceEstimator(focal_length_px=focal_length_px)
+                print(f"✅ Distance estimation enabled")
+            else:
+                self.distance_estimator = None
             
         except Exception as e:
             print(f"❌ Error loading YOLOv8: {str(e)}")
@@ -164,17 +175,23 @@ class ThreatDetector:
     
     def detect_threats(self, image_path, exclude_marine_life=True):
         """
-        Complete threat detection pipeline
+        Complete threat detection pipeline with distance estimation
         
         Args:
             image_path: Path to input image
             exclude_marine_life: Filter out fish and natural objects
             
         Returns:
-            List of detected threats
+            List of detected threats with distance information
         """
         print(f"🔍 Scanning for threats in: {os.path.basename(image_path)}")
         print(f"   Confidence threshold: {self.confidence_threshold:.0%}")
+        
+        # Load image for distance estimation
+        image = cv2.imread(image_path)
+        if image is None:
+            raise ValueError(f"Could not load image: {image_path}")
+        image_shape = image.shape
         
         # Detect all objects
         detections = self.detect_objects(image_path)
@@ -192,12 +209,27 @@ class ThreatDetector:
         threats = self.filter_threats(detections, exclude_marine_life)
         print(f"⚠️  Threats identified: {len(threats)}")
         
-        # Print threat summary
+        # Add distance estimation to each threat
+        if self.estimate_distance and self.distance_estimator and threats:
+            print(f"📏 Estimating distances...")
+            for threat in threats:
+                distance_info = self.distance_estimator.estimate_distance(
+                    threat_type=threat['threat_type'],
+                    bbox=threat['bbox'],
+                    image_shape=image_shape
+                )
+                threat['distance'] = distance_info
+        
+        # Print threat summary with distances
         if threats:
             for threat in threats:
+                dist_str = ""
+                if 'distance' in threat and threat['distance'].get('distance_m'):
+                    dist_str = f" | 📏 {threat['distance']['distance_display']}"
+                
                 print(f"  🎯 {threat['threat_type'].upper()} "
                       f"[{threat['risk_level']}] - "
-                      f"Confidence: {threat['confidence']:.2%}")
+                      f"Confidence: {threat['confidence']:.2%}{dist_str}")
         
         return threats
     

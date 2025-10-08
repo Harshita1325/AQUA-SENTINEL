@@ -69,10 +69,37 @@ def upload_file():
             if processor is None:
                 processor = get_processor()
             
-            # Check if adaptive mode is requested
+            # Check processing mode
+            smart_mode = request.form.get('smart_mode', 'off')
             adaptive_mode = request.form.get('adaptive_mode', 'off')
             
-            if adaptive_mode != 'off':
+            # Priority: Smart Mode > Adaptive Mode > Standard
+            if smart_mode == 'on':
+                # Use smart enhancement with advanced preprocessing and postprocessing
+                start_time = time.time()
+                aggressive = request.form.get('aggressive', 'off') == 'on'
+                
+                enhancement_results = processor.smart_enhance(
+                    input_path, output_path, aggressive=aggressive
+                )
+                processing_time = time.time() - start_time
+                
+                return jsonify({
+                    'success': True,
+                    'input_file': input_filename,
+                    'output_file': output_filename,
+                    'processing_time': round(processing_time, 2),
+                    'model_used': model_type,
+                    'smart_mode': True,
+                    'aggressive': aggressive,
+                    'input_quality': enhancement_results['input_quality'],
+                    'output_quality': enhancement_results['output_quality'],
+                    'improvement': enhancement_results['improvement'],
+                    'preprocessing_log': enhancement_results['preprocessing_log'],
+                    'postprocessing_log': enhancement_results['postprocessing_log']
+                })
+                
+            elif adaptive_mode != 'off':
                 # Use adaptive enhancement
                 start_time = time.time()
                 result_path, detected_env = processor.apply_adaptive_enhancement(
@@ -441,13 +468,25 @@ def detect_threats():
                 # Format threat data for JSON response
                 threat_list = []
                 for threat in threats:
-                    threat_list.append({
+                    threat_data = {
                         'type': threat['threat_type'],
                         'confidence': float(threat['confidence']),
                         'risk_level': threat['risk_level'],
                         'bbox': threat['bbox'],
                         'center': threat['center']
-                    })
+                    }
+                    
+                    # Add distance information if available
+                    if 'distance' in threat and threat['distance'].get('distance_m'):
+                        dist_info = threat['distance']
+                        threat_data['distance'] = {
+                            'value': dist_info['distance_m'],
+                            'display': dist_info['distance_display'],
+                            'confidence': dist_info['confidence'],
+                            'error_margin': dist_info['error_margin']
+                        }
+                    
+                    threat_list.append(threat_data)
                 
                 return jsonify({
                     'success': True,
