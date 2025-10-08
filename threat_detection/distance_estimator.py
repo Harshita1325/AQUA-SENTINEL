@@ -26,6 +26,21 @@ KNOWN_OBJECT_SIZES = {
         'length': 3.0,     # meters (ROV/AUV average)
         'width': 1.5,      # meters
         'height': 1.2      # meters
+    },
+    'underwater_drone': {
+        'length': 1.5,     # meters (small underwater drone)
+        'width': 0.8,      # meters
+        'height': 0.5      # meters
+    },
+    'drone': {
+        'length': 1.0,     # meters (aerial drone)
+        'width': 1.0,      # meters (wingspan/diagonal)
+        'height': 0.3      # meters
+    },
+    'suspicious_object': {
+        'length': 0.8,     # meters (average suspicious package)
+        'width': 0.5,      # meters
+        'height': 0.4      # meters
     }
 }
 
@@ -102,6 +117,8 @@ class DistanceEstimator:
         """
         # Check if object size is known
         if threat_type not in KNOWN_OBJECT_SIZES:
+            print(f"  ⚠️ Distance estimation failed: Unknown threat type '{threat_type}'")
+            print(f"     Known types: {list(KNOWN_OBJECT_SIZES.keys())}")
             return {
                 'distance_m': None,
                 'distance_display': 'Unknown',

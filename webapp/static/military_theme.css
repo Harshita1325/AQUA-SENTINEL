@@ -1,0 +1,804 @@
+/* MARINE DEFENSE CYBER SHIELD - Military Theme CSS */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;500;600;700;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    background: #000000;
+    background-image: 
+        radial-gradient(at 20% 80%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 80% 20%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+    min-height: 100vh;
+    color: #00ff9f;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Animated grid background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes gridMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(50px); }
+}
+
+/* Scanline effect */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(16, 185, 129, 0.03) 0px,
+        rgba(16, 185, 129, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 1;
+    animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Military Header with emblems */
+.header {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+    border: 2px solid #10b981;
+    border-radius: 0;
+    padding: 25px 40px;
+    margin-bottom: 30px;
+    box-shadow: 
+        0 0 30px rgba(16, 185, 129, 0.4),
+        inset 0 0 30px rgba(16, 185, 129, 0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #000000;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.military-emblem {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #10b981;
+    border-radius: 50%;
+    padding: 5px;
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.header-content h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+    margin-bottom: 5px;
+}
+
+.header-content p {
+    color: #00ff9f;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.logout-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 1px solid #10b981;
+    color: #000000;
+    padding: 10px 25px;
+    border-radius: 0;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
+    transform: translateY(-2px);
+}
+
+.india-emblem {
+    width: 70px;
+    height: 70px;
+    border: 2px solid #10b981;
+    border-radius: 50%;
+    padding: 3px;
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* Main card with terminal style */
+.main-card {
+    background: #000000;
+    border: 2px solid #10b981;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: 
+        0 0 40px rgba(16, 185, 129, 0.4),
+        inset 0 0 40px rgba(16, 185, 129, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-card::before {
+    content: '▸ CLASSIFIED: LEVEL 5 CLEARANCE REQUIRED';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #000000;
+    padding: 8px 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.5);
+}
+
+.main-card-content {
+    padding: 50px 40px 40px 40px;
+}
+
+/* Tab Switcher Military Style */
+.tab-switcher {
+    display: flex;
+    gap: 0;
+    margin-bottom: 30px;
+    border: 2px solid #10b981;
+    background: #000000;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    background: #000000;
+    border: none;
+    border-right: 1px solid #10b981;
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-button:last-child {
+    border-right: none;
+}
+
+.tab-button:hover {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.2));
+    color: #00ff9f;
+    box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Section Headers */
+.section-header {
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    padding-left: 15px;
+    border-left: 4px solid #10b981;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+/* File Upload Military Style */
+.file-input-wrapper {
+    margin-bottom: 25px;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-input-button {
+    display: inline-block;
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 2px solid #10b981;
+    color: #000000;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.file-input-button::before {
+    content: '▸ ';
+    color: #000000;
+}
+
+.file-input-button:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+    transform: translateY(-2px);
+}
+
+.file-info {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid #10b981;
+    border-left: 4px solid #10b981;
+    color: #00ff9f;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+}
+
+.file-info.active {
+    display: block;
+}
+
+/* Model Options Terminal Style */
+.model-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.model-option {
+    position: relative;
+}
+
+.model-option input[type="radio"] {
+    display: none;
+}
+
+.model-option label {
+    display: block;
+    padding: 20px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 2px solid #10b981;
+    color: #00ff9f;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Share Tech Mono', monospace;
+    position: relative;
+    overflow: hidden;
+}
+
+.model-option label::before {
+    content: '[ ]';
+    color: #10b981;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.model-option input[type="radio"]:checked + label {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: #10b981;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+}
+
+.model-option input[type="radio"]:checked + label::before {
+    content: '[✓]';
+}
+
+.model-option label:hover {
+    background: rgba(16, 185, 129, 0.18);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.model-option label strong {
+    display: block;
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.model-option label small {
+    color: #10b981;
+    font-size: 0.85rem;
+}
+
+/* Smart Mode Section */
+.smart-mode-section {
+    margin: 30px 0;
+    padding: 25px;
+    border: 2px solid #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+    position: relative;
+}
+
+.smart-mode-section::before {
+    content: '🤖 ADVANCED AI SYSTEM';
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background: #000000;
+    padding: 0 10px;
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Toggle Switch Military Style */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000000;
+    transition: .4s;
+    border: 2px solid #10b981;
+}
+
+.slider.round {
+    border-radius: 0;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #10b981;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: rgba(16, 185, 129, 0.4);
+    border-color: #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+input:checked + .slider:before {
+    transform: translateX(32px);
+    background-color: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+
+/* Process Button */
+.process-btn {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 2px solid #10b981;
+    color: #000000;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.process-btn::before {
+    content: '▸ ';
+}
+
+.process-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+    transform: translateY(-3px);
+}
+
+.process-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading Animation */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 30px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 2px solid #10b981;
+    margin: 20px 0;
+}
+
+.loading.active {
+    display: block;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(16, 185, 129, 0.3);
+    border-top: 4px solid #10b981;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading p {
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Status Messages */
+.status-message {
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-left: 4px solid;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.status-message.active {
+    display: block;
+}
+
+.status-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+    color: #10b981;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+.status-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Preview Section */
+.preview-section {
+    display: none;
+    margin-top: 30px;
+    padding: 30px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 2px solid #10b981;
+}
+
+.preview-section.active {
+    display: block;
+}
+
+.preview-section h3 {
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.preview-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.preview-box {
+    border: 2px solid #10b981;
+    background: #000000;
+    padding: 15px;
+}
+
+.preview-box h4 {
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #10b981;
+}
+
+.preview-box img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid #10b981;
+}
+
+/* Metrics Display */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.metric-card {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid #10b981;
+    padding: 15px;
+    text-align: center;
+}
+
+.metric-card h4 {
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.metric-value {
+    color: #10b981;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.metric-bar {
+    width: 100%;
+    height: 8px;
+    background: #000000;
+    border: 1px solid #10b981;
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    transition: width 1s ease;
+}
+
+/* Threat Detection Styles */
+.threat-summary {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid #ef4444;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.threat-summary h3 {
+    color: #ef4444;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.threat-counts {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.threat-count {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #ef4444;
+}
+
+.threat-count .count {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #ef4444;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.threat-count .label {
+    font-size: 0.75rem;
+    color: #10b981;
+    text-transform: uppercase;
+}
+
+/* Download Button */
+.download-btn {
+    display: inline-block;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 2px solid #10b981;
+    color: #000000;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+.download-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+    transform: translateY(-2px);
+}
+
+/* Video Player Styling */
+video {
+    width: 100%;
+    border: 2px solid #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-left, .header-right {
+        justify-content: center;
+    }
+    
+    .header-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .military-emblem, .india-emblem {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .preview-images {
+        grid-template-columns: 1fr;
+    }
+    
+    .model-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Terminal Cursor Effect */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor::after {
+    content: '▮';
+    color: #10b981;
+    animation: blink 1s infinite;
+}

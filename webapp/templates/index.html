@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌊 Deep WaveNet - Underwater Image Restoration</title>
+    <title> MARINE DEFENSE CYBER SHIELD - Underwater Image Enhancement</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='military_theme.css') }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;500;600;700;900&display=swap');
 
         * {
             margin: 0;
@@ -14,15 +15,18 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0e27;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            background: #1a2332;
+            background-image: 
+                radial-gradient(at 20% 80%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(0, 96, 128, 0.1) 0px, transparent 50%);
             min-height: 100vh;
-            color: #fff;
+            color: #00ff9f;
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Animated gradient background */
+        /* Animated grid background */
         body::before {
             content: '';
             position: fixed;
@@ -30,17 +34,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 40%);
-            animation: gradientShift 15s ease infinite;
+            background-image: 
+                linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
             z-index: 0;
+            pointer-events: none;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
         }
 
         /* Floating particles */
@@ -604,8 +609,8 @@
         .spinner {
             width: 80px;
             height: 80px;
-            border: 6px solid rgba(102, 126, 234, 0.2);
-            border-top: 6px solid #667eea;
+            border: 6px solid rgba(16, 185, 129, 0.2);
+            border-top: 6px solid #10b981;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 30px;
@@ -815,14 +820,14 @@
         }
 
         .overall-score-card {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            background: rgba(16, 185, 129, 0.1);
             backdrop-filter: blur(20px);
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: 30px;
+            border: 2px solid #10b981;
+            border-radius: 0;
             padding: 40px;
             text-align: center;
             margin-bottom: 40px;
-            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
             animation: fadeInUp 0.6s ease;
         }
 
@@ -839,38 +844,38 @@
 
         .score-label {
             font-size: 1.5rem;
-            font-weight: 600;
-            color: #e0e7ff;
+            font-weight: 700;
+            color: #10b981;
             margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            font-family: 'Orbitron', sans-serif;
         }
 
         .score-value {
             font-size: 5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #00ff9f;
             margin-bottom: 25px;
+            text-shadow: 0 0 20px rgba(0, 255, 159, 0.5);
         }
 
         .score-bar {
             width: 100%;
             height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 100px;
+            background: #000000;
+            border: 1px solid #10b981;
+            border-radius: 0;
             overflow: hidden;
             position: relative;
         }
 
         .score-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            border-radius: 100px;
+            background: linear-gradient(90deg, #10b981 0%, #00ff9f 100%);
+            border-radius: 0;
             transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
         }
 
         .metrics-grid {
@@ -881,10 +886,10 @@
         }
 
         .metric-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(16, 185, 129, 0.05);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
+            border: 2px solid #10b981;
+            border-radius: 0;
             padding: 30px 25px;
             text-align: center;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -900,7 +905,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            background: rgba(16, 185, 129, 0.1);
             opacity: 0;
             transition: opacity 0.4s;
             z-index: -1;
@@ -908,8 +913,8 @@
 
         .metric-card:hover {
             transform: translateY(-8px) scale(1.03);
-            border-color: rgba(139, 92, 246, 0.5);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+            border-color: #00ff9f;
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
         }
 
         .metric-card:hover::before {
@@ -925,25 +930,24 @@
         .metric-name {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #fff;
+            color: #10b981;
             margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif;
         }
 
         .metric-value {
             font-size: 2.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #00ff9f;
             margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(0, 255, 159, 0.5);
         }
 
         .metric-description {
             font-size: 0.9rem;
-            color: #a0aec0;
+            color: #10b981;
             margin-bottom: 20px;
             font-weight: 500;
         }
@@ -951,38 +955,39 @@
         .metric-bar {
             width: 100%;
             height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 100px;
+            background: #000000;
+            border: 1px solid #10b981;
+            border-radius: 0;
             overflow: hidden;
             position: relative;
         }
 
         .metric-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            border-radius: 100px;
+            background: linear-gradient(90deg, #10b981 0%, #00ff9f 100%);
+            border-radius: 0;
             transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
-        }
-
-        .metric-bar-fill.excellent {
-            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
             box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
         }
 
+        .metric-bar-fill.excellent {
+            background: linear-gradient(90deg, #10b981 0%, #00ff9f 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+        }
+
         .metric-bar-fill.good {
-            background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
         }
 
         .metric-bar-fill.average {
-            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+            background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+            box-shadow: 0 0 15px rgba(5, 150, 105, 0.6);
         }
 
         .metric-bar-fill.poor {
-            background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+            background: linear-gradient(90deg, #047857 0%, #059669 100%);
+            box-shadow: 0 0 15px rgba(4, 120, 87, 0.6);
         }
 
         /* Video Processing Styles */
@@ -1153,43 +1158,43 @@
     </style>
 </head>
 <body>
-    <!-- Floating particles -->
-    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
-    <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
-    <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
-    <div class="particle" style="left: 50%; animation-delay: 1s;"></div>
-    <div class="particle" style="left: 60%; animation-delay: 3s;"></div>
-    <div class="particle" style="left: 80%; animation-delay: 5s;"></div>
-    <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
-
     <div class="container">
+        <!-- Military Header -->
         <div class="header">
-            <div class="logo glow">🌊</div>
-            <h1>Deep WaveNet</h1>
-            <p>AI-Powered Underwater Image & Video Restoration</p>
+            <div class="header-left">
+                <img src="https://i.postimg.cc/HnHPSLvr/drdo-logo.png" alt="DRDO" class="military-emblem" onerror="this.style.display='none'">
+                <div class="header-content">
+                    <h1>MARINE DEFENSE CYBER SHIELD</h1>
+                    <p>Underwater Image Enhancement System</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="logout-btn" onclick="alert('Secure logout initiated')">LOGOUT</button>
+                <img src="https://i.postimg.cc/W4p8R8q9/india-emblem.png" alt="India" class="india-emblem" onerror="this.style.display='none'">
+            </div>
         </div>
 
         <!-- Tab Switcher -->
         <div class="tab-switcher">
             <button class="tab-button active" onclick="switchTab('image')">
-                📷 Image Enhancement
+                📷 IMAGE ENHANCEMENT
             </button>
             <button class="tab-button" onclick="switchTab('video')">
-                🎬 Video Enhancement
+                🎬 VIDEO ENHANCEMENT
             </button>
         </div>
 
         <!-- Image Processing Tab -->
         <div id="imageTab" class="tab-content active">
         <div class="main-card">
+            <div class="main-card-content">
             <div class="upload-section">
-                <h2>Upload Your Underwater Image</h2>
-                <p>Select an underwater image to enhance or super-resolve</p>
+                <h2 class="section-header">[ENTER THE IMAGE EVIDENCE]</h2>
                 
                 <div class="file-input-wrapper">
                     <input type="file" id="imageFile" class="file-input" accept="image/*">
                     <button class="file-input-button" onclick="document.getElementById('imageFile').click()">
-                        📁 Choose Image File
+                        CHOOSE FILE
                     </button>
                 </div>
 
@@ -1197,83 +1202,18 @@
                     <strong>Selected:</strong> <span id="fileName"></span>
                 </div>
 
-                <div class="model-selector">
-                    <label>Select Processing Model:</label>
-                    <div class="model-options">
-                        <div class="model-option">
-                            <input type="radio" id="uieb" name="model" value="uieb" checked>
-                            <label for="uieb">
-                                <strong>Enhancement</strong><br>
-                                <small>UIEB Model</small>
-                            </label>
-                        </div>
-                        <div class="model-option">
-                            <input type="radio" id="sr2x" name="model" value="sr2x">
-                            <label for="sr2x">
-                                <strong>2X Resolution</strong><br>
-                                <small>Super-Resolution</small>
-                            </label>
-                        </div>
-                        <div class="model-option">
-                            <input type="radio" id="sr3x" name="model" value="sr3x">
-                            <label for="sr3x">
-                                <strong>3X Resolution</strong><br>
-                                <small>Super-Resolution</small>
-                            </label>
-                        </div>
-                        <div class="model-option">
-                            <input type="radio" id="sr4x" name="model" value="sr4x">
-                            <label for="sr4x">
-                                <strong>4X Resolution</strong><br>
-                                <small>Super-Resolution</small>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Smart Enhancement Mode -->
-                <div class="adaptive-mode-selector" style="margin-top: 30px; border: 2px solid #10b981; border-radius: 12px; padding: 20px; background: rgba(16, 185, 129, 0.1);">
-                    <label style="display: block; margin-bottom: 15px; color: #10b981; font-weight: 700; font-size: 1.1rem;">
-                        ⚡ Smart AI Enhancement
-                        <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">NEW</span>
-                    </label>
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                        <label class="switch">
-                            <input type="checkbox" id="smartMode">
-                            <span class="slider round"></span>
-                        </label>
-                        <span style="color: #fff; font-weight: 600;">Enable Smart Mode</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; padding-left: 60px;" id="aggressiveOption" style="display: none;">
-                        <label class="switch" style="transform: scale(0.8);">
-                            <input type="checkbox" id="aggressiveMode">
-                            <span class="slider round"></span>
-                        </label>
-                        <span style="color: #cbd5e0; font-size: 0.9rem;">Aggressive Enhancement (for extreme cases)</span>
-                    </div>
-                    <p style="color: #a0ffe0; font-size: 0.9rem; margin-top: 15px; text-align: left; line-height: 1.6;">
-                        <strong>🎯 Advanced AI Processing:</strong><br>
-                        • Automatic quality assessment<br>
-                        • CLAHE histogram equalization<br>
-                        • White balance correction<br>
-                        • Adaptive denoising & sharpening<br>
-                        • HDR tone mapping & detail enhancement<br>
-                        <em>Best for dark, blurry, or dull images!</em>
-                    </p>
-                </div>
-
                 <!-- Adaptive Enhancement Mode -->
                 <div class="adaptive-mode-selector" style="margin-top: 30px;" id="adaptiveModeSection">
                     <label style="display: block; margin-bottom: 15px; color: #fff; font-weight: 600;">
-                        🌊 Adaptive Enhancement Mode
+                        Adaptive Enhancement Mode
                     </label>
                     <select id="adaptiveMode" class="adaptive-mode-dropdown">
                         <option value="off">Standard Enhancement</option>
-                        <option value="auto" selected>🤖 Auto-Detect Environment</option>
-                        <option value="clear">🌟 Clear Water (Tropical)</option>
-                        <option value="turbid">🌿 Turbid Water (Coastal)</option>
-                        <option value="deep">🌊 Deep Water (Ocean)</option>
-                        <option value="night">🌙 Night / Low Light</option>
+                        <option value="auto" selected> Auto-Detect Environment</option>
+                        <option value="clear"> Clear Water (Tropical)</option>
+                        <option value="turbid"> Turbid Water (Coastal)</option>
+                        <option value="deep"> Deep Water (Ocean)</option>
+                        <option value="night"> Night / Low Light</option>
                     </select>
                     <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 10px; text-align: center;">
                         Automatically adjusts enhancement based on water conditions
@@ -1286,7 +1226,7 @@
                         <input type="checkbox" id="enableThreatDetection" class="threat-checkbox">
                         <span class="threat-toggle-slider"></span>
                         <span class="threat-toggle-label">
-                            🎯 <strong>Enable AI Threat Detection</strong>
+                             <strong>Enable AI Threat Detection</strong>
                             <small style="display: block; color: #a0aec0; margin-top: 5px;">
                                 Detect submarines, mines, divers, and underwater objects
                             </small>
@@ -1294,15 +1234,16 @@
                     </label>
                 </div>
 
-                <button class="process-button" id="processButton" onclick="processImage()">
-                    🚀 Process Image
+                <button class="process-btn" id="processButton" onclick="processImage()" disabled>
+                    ANALYZE IMAGE
                 </button>
+            </div>
             </div>
 
             <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <h3>Processing your image...</h3>
-                <p>This may take a few moments depending on image size</p>
+                <div class="loading-spinner"></div>
+                <h3> PROCESSING...</h3>
+                <p class="terminal-cursor">ANALYZING UNDERWATER EVIDENCE</p>
             </div>
 
             <div class="status-info" id="statusInfo"></div>
@@ -1313,7 +1254,7 @@
                 <!-- Environment Detection Badge -->
                 <div id="environmentBadge" style="display: none; text-align: center; margin-bottom: 30px;">
                     <div class="environment-badge" id="environmentBadgeContent">
-                        <span id="environmentIcon">🌊</span>
+                        <span id="environmentIcon"></span>
                         <span>Detected Environment: <strong id="environmentType">Auto</strong></span>
                     </div>
                     <p style="color: #a0aec0; font-size: 0.95rem; margin-top: 10px;" id="environmentDescription"></p>
@@ -1322,7 +1263,7 @@
                 <!-- Threat Detection Summary -->
                 <div id="threatSummary" class="threat-summary-panel" style="display: none;">
                     <div class="threat-summary-title">
-                        <span>⚠️</span>
+                        <span></span>
                         <span>THREAT DETECTION REPORT</span>
                     </div>
                     <div class="threat-stats-grid">
@@ -1349,34 +1290,56 @@
                     </div>
                 </div>
 
-                <div class="images-container">
+                <!-- 2x2 Image Grid: Original, Enhanced, Threat Detection, Distance Measurement -->
+                <div class="images-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                    <!-- Top Left: Original Image -->
                     <div class="image-card">
-                        <h3>Original Image</h3>
+                        <h3>[ORIGINAL IMAGE]</h3>
                         <div class="image-container">
                             <img id="originalImage" src="" alt="Original">
                         </div>
                     </div>
+                    
+                    <!-- Top Right: Enhanced Image -->
                     <div class="image-card">
-                        <h3>Enhanced Image</h3>
+                        <h3>[ENHANCED IMAGE]</h3>
                         <div class="image-container">
-                            <img id="processedImage" src="" alt="Processed">
+                            <img id="processedImage" src="" alt="Enhanced">
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Left: Threat Detection -->
+                    <div class="image-card">
+                        <h3>[THREAT DETECTION]</h3>
+                        <div class="image-container">
+                            <img id="threatImage" src="" alt="Threat Detection" style="display: none;">
+                            <p id="noThreatMessage" style="color: #10b981;">No threat detection performed</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Right: Distance Measurement -->
+                    <div class="image-card">
+                        <h3>[DISTANCE MEASUREMENT]</h3>
+                        <div class="image-container">
+                            <img id="distanceImage" src="" alt="Distance Measurement" style="display: none;">
+                            <p id="noDistanceMessage" style="color: #10b981;">No distance measurement performed</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Metrics Section -->
                 <div class="metrics-section" id="metricsSection" style="display: none;">
-                    <h2 style="text-align: center; margin: 40px 0 30px 0;">📊 Quality Metrics</h2>
+                    <h2 style="text-align: center; margin: 40px 0 30px 0; color: #10b981; font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">[QUALITY METRICS]</h2>
                     
                     <div class="metrics-loading" id="metricsLoading" style="display: none; text-align: center; padding: 20px;">
                         <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto 15px;"></div>
-                        <p style="color: #a0aec0;">Calculating metrics...</p>
+                        <p style="color: #10b981; font-family: 'Share Tech Mono', monospace;">CALCULATING METRICS...</p>
                     </div>
 
                     <div id="metricsContent" style="display: none;">
                         <!-- Overall Score Card -->
                         <div class="overall-score-card">
-                            <div class="score-icon">⭐</div>
+                            <div class="score-icon"></div>
                             <div class="score-label">Overall Quality Score</div>
                             <div class="score-value" id="overallScore">0</div>
                             <div class="score-bar">
@@ -1388,7 +1351,7 @@
                         <div class="metrics-grid">
                             <!-- UIQM -->
                             <div class="metric-card">
-                                <div class="metric-icon">🌊</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">UIQM</div>
                                 <div class="metric-value" id="uiqmValue">-</div>
                                 <div class="metric-description">Underwater Image Quality</div>
@@ -1399,7 +1362,7 @@
 
                             <!-- UCIQE -->
                             <div class="metric-card">
-                                <div class="metric-icon">🎨</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">UCIQE</div>
                                 <div class="metric-value" id="uciqeValue">-</div>
                                 <div class="metric-description">Color Quality</div>
@@ -1410,7 +1373,7 @@
 
                             <!-- Sharpness -->
                             <div class="metric-card">
-                                <div class="metric-icon">🔍</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">Sharpness</div>
                                 <div class="metric-value" id="sharpnessValue">-</div>
                                 <div class="metric-description">Edge Definition</div>
@@ -1421,7 +1384,7 @@
 
                             <!-- Contrast -->
                             <div class="metric-card">
-                                <div class="metric-icon">🌓</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">Contrast</div>
                                 <div class="metric-value" id="contrastValue">-</div>
                                 <div class="metric-description">Dynamic Range</div>
@@ -1432,7 +1395,7 @@
 
                             <!-- Colorfulness -->
                             <div class="metric-card">
-                                <div class="metric-icon">🌈</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">Colorfulness</div>
                                 <div class="metric-value" id="colorfulnessValue">-</div>
                                 <div class="metric-description">Color Vibrancy</div>
@@ -1443,7 +1406,7 @@
 
                             <!-- SSIM -->
                             <div class="metric-card">
-                                <div class="metric-icon">📏</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">SSIM</div>
                                 <div class="metric-value" id="ssimValue">-</div>
                                 <div class="metric-description">Structural Similarity</div>
@@ -1454,7 +1417,7 @@
 
                             <!-- PSNR -->
                             <div class="metric-card">
-                                <div class="metric-icon">📊</div>
+                                <div class="metric-icon"></div>
                                 <div class="metric-name">PSNR</div>
                                 <div class="metric-value" id="psnrValue">-</div>
                                 <div class="metric-description">Signal Quality (dB)</div>
@@ -1468,7 +1431,7 @@
                 
                 <div class="download-section" id="downloadSection">
                     <a href="#" id="downloadLink" class="download-button">
-                        💾 Download Enhanced Image
+                         Download Enhanced Image
                     </a>
                 </div>
             </div>
@@ -1485,7 +1448,7 @@
                 <!-- Video Upload Area -->
                 <div class="video-upload-area" id="videoUploadArea">
                     <input type="file" id="videoFile" class="file-input" accept="video/*">
-                    <div class="video-icon">🎥</div>
+                    <div class="video-icon"></div>
                     <h3 style="color: #e0e7ff; margin-bottom: 10px;">Drop video here or click to browse</h3>
                     <p style="color: #a0aec0;">Supported formats: MP4, AVI, MOV, MKV (Max 500MB)</p>
                 </div>
@@ -1516,7 +1479,7 @@
                 </div>
 
                 <button class="process-button" id="processVideoButton" onclick="processVideo()" style="display: none;">
-                    🚀 Process Video
+                     Process Video
                 </button>
             </div>
 
@@ -1539,22 +1502,22 @@
                 <!-- Processing Stats -->
                 <div class="processing-stats">
                     <div class="stat-card">
-                        <div class="stat-icon">📊</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="statProgress">0%</div>
                         <div class="stat-label">Progress</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🎞️</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="statFrames">0/0</div>
                         <div class="stat-label">Frames</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">⚡</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="statFPS">0</div>
                         <div class="stat-label">FPS</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="statETA">--</div>
                         <div class="stat-label">ETA</div>
                     </div>
@@ -1585,22 +1548,22 @@
                 <!-- Video Stats -->
                 <div class="processing-stats" style="margin-top: 30px;">
                     <div class="stat-card">
-                        <div class="stat-icon">🎬</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="resultTotalFrames">0</div>
                         <div class="stat-label">Total Frames</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="resultProcessingTime">0s</div>
                         <div class="stat-label">Processing Time</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">⚡</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="resultAvgFPS">0</div>
                         <div class="stat-label">Average FPS</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📐</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-value" id="resultResolution">-</div>
                         <div class="stat-label">Resolution</div>
                     </div>
@@ -1608,7 +1571,7 @@
 
                 <div class="download-section" style="display: block; margin-top: 30px;">
                     <a href="#" id="downloadVideoLink" class="download-button">
-                        💾 Download Enhanced Video
+                         Download Enhanced Video
                     </a>
                 </div>
             </div>
@@ -1629,6 +1592,7 @@
                 document.getElementById('fileName').textContent = selectedFile.name;
                 document.getElementById('fileInfo').style.display = 'block';
                 document.getElementById('processButton').style.display = 'inline-block';
+                document.getElementById('processButton').disabled = false; // Enable the button
                 
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -1767,21 +1731,12 @@
             const formData = new FormData();
             formData.append('file', selectedFile);
             
-            const selectedModel = document.querySelector('input[name="model"]:checked').value;
-            formData.append('model_type', selectedModel);
+            // Always use UIEB model as default
+            formData.append('model_type', 'uieb');
             
-            // Check smart mode first (priority over adaptive)
-            const smartMode = document.getElementById('smartMode').checked;
-            formData.append('smart_mode', smartMode ? 'on' : 'off');
-            
-            if (smartMode) {
-                const aggressiveMode = document.getElementById('aggressiveMode').checked;
-                formData.append('aggressive', aggressiveMode ? 'on' : 'off');
-            } else {
-                // Add adaptive mode only if smart mode is off
-                const adaptiveMode = document.getElementById('adaptiveMode').value;
-                formData.append('adaptive_mode', adaptiveMode);
-            }
+            // Add adaptive mode
+            const adaptiveMode = document.getElementById('adaptiveMode').value;
+            formData.append('adaptive_mode', adaptiveMode);
             
             // Check if threat detection is enabled
             const enableThreatDetection = document.getElementById('enableThreatDetection').checked;
@@ -1820,9 +1775,60 @@
                 if (data.success) {
                     resultData = data;
                     
-                    document.getElementById('processedImage').src = `/result/${data.output_file}`;
-                    document.getElementById('downloadLink').href = `/result/${data.output_file}`;
-                    document.getElementById('downloadLink').download = `enhanced_${selectedFile.name}`;
+                    // Handle threat detection mode
+                    if (enableThreatDetection) {
+                        // Show all 4 images for threat detection
+                        // 1. Original Image
+                        document.getElementById('originalImage').src = `/input/${data.input_file}`;
+                        document.getElementById('originalImage').style.display = 'block';
+                        
+                        // 2. Clean Enhanced Image (no annotations)
+                        document.getElementById('processedImage').src = `/result/${data.enhanced_output_file}`;
+                        document.getElementById('processedImage').style.display = 'block';
+                        
+                        // 3. Threat Detection Image (with circles/boxes)
+                        if (data.threats_detected) {
+                            document.getElementById('threatImage').src = `/result/${data.threat_output_file}`;
+                            document.getElementById('threatImage').style.display = 'block';
+                            document.getElementById('noThreatMessage').style.display = 'none';
+                            
+                            // 4. Distance Measurement Image (camera-to-threat distances)
+                            document.getElementById('distanceImage').src = `/result/${data.distance_output_file}`;
+                            document.getElementById('distanceImage').style.display = 'block';
+                            document.getElementById('noDistanceMessage').style.display = 'none';
+                            
+                            // Display threat summary
+                            displayThreatSummary(data);
+                        } else {
+                            // No threats detected
+                            document.getElementById('threatImage').style.display = 'none';
+                            document.getElementById('noThreatMessage').style.display = 'block';
+                            document.getElementById('noThreatMessage').textContent = 'No threats detected';
+                            document.getElementById('distanceImage').style.display = 'none';
+                            document.getElementById('noDistanceMessage').style.display = 'block';
+                            document.getElementById('noDistanceMessage').textContent = 'No threats for distance measurement';
+                        }
+                        
+                        // Use enhanced file for download
+                        document.getElementById('downloadLink').href = `/result/${data.enhanced_output_file}`;
+                        document.getElementById('downloadLink').download = `enhanced_${selectedFile.name}`;
+                    } else {
+                        // Regular enhancement mode (no threat detection)
+                        // Use appropriate output file based on endpoint
+                        const outputFile = data.output_file;
+                        
+                        document.getElementById('processedImage').src = `/result/${outputFile}`;
+                        document.getElementById('downloadLink').href = `/result/${outputFile}`;
+                        document.getElementById('downloadLink').download = `enhanced_${selectedFile.name}`;
+                        
+                        // Show "not performed" messages for threat/distance
+                        document.getElementById('threatImage').style.display = 'none';
+                        document.getElementById('noThreatMessage').style.display = 'block';
+                        document.getElementById('noThreatMessage').textContent = 'Enable threat detection to see results';
+                        document.getElementById('distanceImage').style.display = 'none';
+                        document.getElementById('noDistanceMessage').style.display = 'block';
+                        document.getElementById('noDistanceMessage').textContent = 'Enable threat detection to see measurements';
+                    }
                     
                     document.getElementById('previewSection').style.display = 'block';
                     document.getElementById('downloadSection').style.display = 'block';
@@ -1837,11 +1843,6 @@
                         displayEnvironmentBadge(data.detected_environment);
                     }
                     
-                    // Display threat detection results if enabled
-                    if (enableThreatDetection && data.threats_detected) {
-                        displayThreatSummary(data);
-                    }
-                    
                     let statusMsg = `✅ Image processed successfully in ${data.processing_time}s`;
                     if (data.smart_mode) {
                         statusMsg += ` using SMART AI Enhancement`;
@@ -1854,15 +1855,15 @@
                     if (data.adaptive_mode) {
                         statusMsg += ` (${data.detected_environment} environment detected)`;
                     }
-                    if (enableThreatDetection) {
-                        statusMsg += ` - ${data.threat_count} threat(s) detected`;
-                    }
                     statusMsg += '!';
                     showStatus(statusMsg, 'success');
 
                     // Calculate and display metrics (always show metrics)
+                    // Use appropriate output file based on endpoint
+                    const metricsOutputFile = enableThreatDetection ? data.enhanced_output_file : data.output_file;
+                    const metricsInputFile = enableThreatDetection ? data.input_file : data.input_file;
                     setTimeout(() => {
-                        calculateAndDisplayMetrics(data.input_file, data.output_file);
+                        calculateAndDisplayMetrics(metricsInputFile, metricsOutputFile);
                     }, 500);
                 } else {
                     showStatus(`❌ Error: ${data.error}`, 'error');
@@ -1917,22 +1918,22 @@
             // Set content based on environment
             const envData = {
                 'CLEAR': {
-                    icon: '🌟',
+                    icon: '',
                     class: 'clear',
                     description: 'Tropical/clear water - High visibility, balanced color correction'
                 },
                 'TURBID': {
-                    icon: '🌿',
+                    icon: '',
                     class: 'turbid',
                     description: 'Coastal/turbid water - Enhanced green channel reduction, contrast boost'
                 },
                 'DEEP': {
-                    icon: '🌊',
+                    icon: '',
                     class: 'deep',
                     description: 'Deep ocean water - Blue channel correction, red spectrum enhancement'
                 },
                 'NIGHT': {
-                    icon: '🌙',
+                    icon: '',
                     class: 'night',
                     description: 'Low light/night - Gamma correction, brightness enhancement'
                 }
@@ -2181,46 +2182,75 @@
             document.getElementById('downloadVideoLink').href = `/download_video/${outputFile}`;
             document.getElementById('downloadVideoLink').download = `enhanced_${selectedVideoFile.name}`;
 
-            showStatus('✅ Video processing complete!', 'success');
+            showStatus(' Video processing complete!', 'success');
         }
 
         // ==================== END VIDEO FUNCTIONS ====================
 
-        // Smart Mode Toggle Handler
-        document.getElementById('smartMode').addEventListener('change', function() {
-            const isSmartMode = this.checked;
-            const aggressiveOption = document.getElementById('aggressiveOption');
-            const adaptiveModeSection = document.getElementById('adaptiveModeSection');
-            const adaptiveDropdown = document.getElementById('adaptiveMode');
-            
-            if (isSmartMode) {
-                // Show aggressive option
-                aggressiveOption.style.display = 'flex';
-                // Disable and gray out adaptive mode
-                adaptiveModeSection.style.opacity = '0.4';
-                adaptiveModeSection.style.pointerEvents = 'none';
-                adaptiveDropdown.disabled = true;
-            } else {
-                // Hide aggressive option
-                aggressiveOption.style.display = 'none';
-                // Enable adaptive mode
-                adaptiveModeSection.style.opacity = '1';
-                adaptiveModeSection.style.pointerEvents = 'auto';
-                adaptiveDropdown.disabled = false;
+        // ==================== THREAT DETECTION & DISTANCE MEASUREMENT ====================
+        
+        async function performThreatDetection(enhancedImageFile) {
+            try {
+                // Show loading state
+                document.getElementById('noThreatMessage').textContent = 'Detecting threats...';
+                document.getElementById('noDistanceMessage').textContent = 'Calculating distances...';
+                
+                // Create FormData with the enhanced image
+                const formData = new FormData();
+                formData.append('file', selectedFile); // Use original file
+                formData.append('enhanced_file', enhancedImageFile);
+                formData.append('enhance_first', 'true');
+                formData.append('exclude_marine_life', 'true');
+                
+                const response = await fetch('/detect_threats', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.threats_detected) {
+                    // Show threat detection image (circles/boxes)
+                    document.getElementById('threatImage').src = `/result/${data.threat_output_file}`;
+                    document.getElementById('threatImage').style.display = 'block';
+                    document.getElementById('noThreatMessage').style.display = 'none';
+                    
+                    // Show distance measurement image (distances only)
+                    document.getElementById('distanceImage').src = `/result/${data.distance_output_file}`;
+                    document.getElementById('distanceImage').style.display = 'block';
+                    document.getElementById('noDistanceMessage').style.display = 'none';
+                    
+                    // Display threat summary
+                    displayThreatSummary(data);
+                    
+                    showStatus(`🎯 ${data.threat_count} threat(s) detected with distances!`, 'success');
+                } else {
+                    // No threats detected
+                    document.getElementById('noThreatMessage').textContent = 'No threats detected';
+                    document.getElementById('noDistanceMessage').textContent = 'No threats for distance measurement';
+                    showStatus('✅ No threats detected in image', 'success');
+                }
+            } catch (error) {
+                console.error('Threat detection error:', error);
+                document.getElementById('noThreatMessage').textContent = 'Threat detection failed';
+                document.getElementById('noDistanceMessage').textContent = 'Distance calculation failed';
+                showStatus(`❌ Threat detection error: ${error.message}`, 'error');
             }
-        });
+        }
+        
+        // ==================== END THREAT DETECTION ====================
 
         fetch('/status')
             .then(response => response.json())
             .then(data => {
                 console.log('Server status:', data);
                 showStatus(
-                    `🚀 Server ready! ${data.models_loaded} models loaded on ${data.device}`, 
+                    ` Server ready! ${data.models_loaded} models loaded on ${data.device}`, 
                     'success'
                 );
             })
             .catch(error => {
-                showStatus('❌ Server not ready. Please check if the Flask app is running.', 'error');
+                showStatus(' Server not ready. Please check if the Flask app is running.', 'error');
             });
     </script>
 </body>

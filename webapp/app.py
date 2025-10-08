@@ -434,11 +434,16 @@ def detect_threats():
             filename = secure_filename(file.filename)
             file_ext = filename.rsplit('.', 1)[1].lower()
             
+            # Generate unique filenames for different outputs
             input_filename = f"{unique_id}_threat_input.{file_ext}"
-            output_filename = f"{unique_id}_threat_output.{file_ext}"
+            enhanced_output_filename = f"{unique_id}_enhanced_clean.{file_ext}"
+            threat_output_filename = f"{unique_id}_threat_detection.{file_ext}"
+            distance_output_filename = f"{unique_id}_distance_measurement.{file_ext}"
             
             input_path = os.path.join(app.config['UPLOAD_FOLDER'], input_filename)
-            output_path = os.path.join(app.config['RESULTS_FOLDER'], output_filename)
+            enhanced_output_path = os.path.join(app.config['RESULTS_FOLDER'], enhanced_output_filename)
+            threat_output_path = os.path.join(app.config['RESULTS_FOLDER'], threat_output_filename)
+            distance_output_path = os.path.join(app.config['RESULTS_FOLDER'], distance_output_filename)
             
             # Save uploaded file
             file.save(input_path)
@@ -457,12 +462,143 @@ def detect_threats():
                 
                 # Detect and highlight threats
                 start_time = time.time()
+                
+                # Generate threat detection image (circles/boxes only)
                 output_with_threats, threats, summary = processor.detect_and_highlight_threats(
                     input_path,
-                    output_path,
+                    threat_output_path,
                     enhance_first=enhance_first,
                     exclude_marine_life=exclude_marine_life
                 )
+                
+                # Save the CLEAN enhanced image (no annotations) - for 2nd quadrant
+                import cv2
+                import numpy as np
+                
+                # Get the clean enhanced image
+                if enhance_first:
+                    # Try to load the enhanced version that was created during threat detection
+                    enhanced_path_temp = input_path.replace(f'.{file_ext}', f'_enhanced.{file_ext}')
+                    if os.path.exists(enhanced_path_temp):
+                        enhanced_img = cv2.imread(enhanced_path_temp)
+                    else:
+                        # Fallback: enhance it here
+                        enhanced_img = processor.process_image(input_path, enhanced_output_path, 'uieb')
+                        enhanced_img = cv2.imread(enhanced_output_path)
+                else:
+                    # No enhancement, copy original
+                    enhanced_img = cv2.imread(input_path)
+                
+                # Save clean enhanced image
+                cv2.imwrite(enhanced_output_path, enhanced_img)
+                
+                # Generate distance measurement image (camera-to-threat distances)
+                # This shows distance FROM CAMERA to each detected threat
+                distance_img = enhanced_img.copy()
+                
+                if threats:
+                    print(f"🔍 Processing {len(threats)} threats for distance visualization...")
+                    threats_with_distance = 0
+                    
+                    for idx, threat in enumerate(threats):
+                        # Check if distance info exists and is valid
+                        has_distance = 'distance' in threat and threat['distance'] is not None and threat['distance'].get('distance_m') is not None
+                        
+                        if has_distance:
+                            threats_with_distance += 1
+                            center = threat['center']
+                            dist_info = threat['distance']
+                            
+                            print(f"  ✅ Threat {idx + 1}: {threat['threat_type']} at {dist_info['distance_display']}")
+                            
+                            # Draw a small circle at threat center
+                            cv2.circle(distance_img, tuple(center), 10, (0, 255, 159), -1)
+                            cv2.circle(distance_img, tuple(center), 12, (255, 255, 255), 2)
+                            
+                            # Prepare distance text
+                            dist_text = f"{dist_info['distance_display']}"
+                            threat_label = f"Threat #{idx + 1}"
+                            
+                            # Position for text (above the threat)
+                            text_x = center[0]
+                            text_y = center[1] - 40
+                            
+                            font = cv2.FONT_HERSHEY_SIMPLEX
+                            font_scale = 0.8
+                            thickness = 2
+                            
+                            # Draw threat label
+                            (tw1, th1), _ = cv2.getTextSize(threat_label, font, font_scale, thickness)
+                            cv2.rectangle(distance_img,
+                                        (text_x - tw1//2 - 8, text_y - th1 - 8),
+                                        (text_x + tw1//2 + 8, text_y + 8),
+                                        (0, 0, 0), -1)
+                            cv2.rectangle(distance_img,
+                                        (text_x - tw1//2 - 8, text_y - th1 - 8),
+                                        (text_x + tw1//2 + 8, text_y + 8),
+                                        (0, 255, 159), 2)
+                            cv2.putText(distance_img, threat_label,
+                                      (text_x - tw1//2, text_y),
+                                      font, font_scale, (255, 255, 255), thickness)
+                            
+                            # Draw distance text (below threat label)
+                            text_y2 = text_y + 35
+                            (tw2, th2), _ = cv2.getTextSize(dist_text, font, font_scale + 0.2, thickness + 1)
+                            cv2.rectangle(distance_img,
+                                        (text_x - tw2//2 - 8, text_y2 - th2 - 8),
+                                        (text_x + tw2//2 + 8, text_y2 + 8),
+                                        (0, 0, 0), -1)
+                            cv2.rectangle(distance_img,
+                                        (text_x - tw2//2 - 8, text_y2 - th2 - 8),
+                                        (text_x + tw2//2 + 8, text_y2 + 8),
+                                        (0, 255, 159), 2)
+                            cv2.putText(distance_img, dist_text,
+                                      (text_x - tw2//2, text_y2),
+                                      font, font_scale + 0.2, (0, 255, 159), thickness + 1)
+                            
+                            # Draw line from bottom center to threat (indicating direction from camera)
+                            img_height, img_width = distance_img.shape[:2]
+                            camera_point = (img_width // 2, img_height - 20)
+                            cv2.line(distance_img, camera_point, tuple(center), (0, 255, 159), 2)
+                            
+                            # Draw camera icon/indicator at bottom
+                            cv2.circle(distance_img, camera_point, 15, (139, 92, 246), -1)
+                            cv2.circle(distance_img, camera_point, 17, (255, 255, 255), 2)
+                            cv2.putText(distance_img, "CAM", (camera_point[0] - 20, camera_point[1] + 5),
+                                      font, 0.5, (255, 255, 255), 2)
+                        else:
+                            print(f"  ⚠️ Threat {idx + 1}: {threat['threat_type']} - No distance data available")
+                    
+                    print(f"📊 Distance visualization: {threats_with_distance}/{len(threats)} threats have distance data")
+                    
+                    # If no threats have distance, add a message on the image
+                    if threats_with_distance == 0:
+                        img_height, img_width = distance_img.shape[:2]
+                        message = "Distance estimation unavailable"
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        font_scale = 1.0
+                        thickness = 2
+                        (tw, th), _ = cv2.getTextSize(message, font, font_scale, thickness)
+                        text_x = (img_width - tw) // 2
+                        text_y = img_height // 2
+                        
+                        cv2.rectangle(distance_img,
+                                    (text_x - 10, text_y - th - 10),
+                                    (text_x + tw + 10, text_y + 10),
+                                    (0, 0, 0), -1)
+                        cv2.rectangle(distance_img,
+                                    (text_x - 10, text_y - th - 10),
+                                    (text_x + tw + 10, text_y + 10),
+                                    (255, 165, 0), 2)
+                        cv2.putText(distance_img, message,
+                                  (text_x, text_y),
+                                  font, font_scale, (255, 165, 0), thickness)
+                else:
+                    print(f"⚠️ No threats detected for distance visualization")
+                
+                cv2.imwrite(distance_output_path, distance_img)
+                print(f"💾 Distance measurement image saved to: {distance_output_path}")
+                
                 processing_time = time.time() - start_time
                 
                 # Format threat data for JSON response
@@ -491,7 +627,9 @@ def detect_threats():
                 return jsonify({
                     'success': True,
                     'input_file': input_filename,
-                    'output_file': output_filename,
+                    'enhanced_output_file': enhanced_output_filename,
+                    'threat_output_file': threat_output_filename,
+                    'distance_output_file': distance_output_filename,
                     'processing_time': round(processing_time, 2),
                     'threats_detected': len(threats) > 0,
                     'threat_count': summary['total'],
