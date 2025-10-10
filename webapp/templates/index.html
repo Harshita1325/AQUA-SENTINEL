@@ -80,6 +80,116 @@
             animation: fadeInDown 0.8s ease;
         }
 
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .hamburger-btn {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(16, 185, 129, 0.4);
+            transform: scale(1.05);
+        }
+
+        .hamburger-btn span {
+            width: 25px;
+            height: 3px;
+            background: #10b981;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .hamburger-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-dropdown {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(26, 35, 50, 0.98);
+            backdrop-filter: blur(20px);
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 10px;
+            min-width: 200px;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-dropdown.active {
+            display: block;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .menu-item:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: translateX(5px);
+        }
+
+        .menu-item .icon {
+            font-size: 1.3rem;
+        }
+
+        .menu-item.logout {
+            color: #ef4444;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 5px;
+        }
+
+        .menu-item.logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -1159,18 +1269,48 @@
 </head>
 <body>
     <div class="container">
+        <!-- Hamburger Menu -->
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="menu-dropdown" id="menuDropdown">
+                <div class="menu-item" onclick="navigateTo('dashboard')">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" onclick="navigateTo('profile')">
+                    <span class="icon">👤</span>
+                    <span>Profile</span>
+                </div>
+                <div class="menu-item" onclick="navigateTo('model')">
+                    <span class="icon">🤖</span>
+                    <span>Model</span>
+                </div>
+                <div class="menu-item" onclick="navigateTo('analytics')">
+                    <span class="icon">📈</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="menu-item logout" onclick="logout()">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Military Header -->
         <div class="header">
             <div class="header-left">
-                <img src="https://i.postimg.cc/HnHPSLvr/drdo-logo.png" alt="DRDO" class="military-emblem" onerror="this.style.display='none'">
+                <img src="/photos/gov logo.png" alt="Government Logo" class="military-emblem" onerror="this.style.display='none'">
                 <div class="header-content">
                     <h1>MARINE DEFENSE CYBER SHIELD</h1>
                     <p>Underwater Image Enhancement System</p>
                 </div>
             </div>
             <div class="header-right">
-                <button class="logout-btn" onclick="alert('Secure logout initiated')">LOGOUT</button>
-                <img src="https://i.postimg.cc/W4p8R8q9/india-emblem.png" alt="India" class="india-emblem" onerror="this.style.display='none'">
+                <img src="/photos/navy logo.png" alt="Navy Logo" class="india-emblem" onerror="this.style.display='none'">
             </div>
         </div>
 
@@ -2239,6 +2379,73 @@
         }
         
         // ==================== END THREAT DETECTION ====================
+
+        // ==================== HAMBURGER MENU FUNCTIONS ====================
+        
+        function toggleMenu() {
+            const btn = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('menuDropdown');
+            
+            btn.classList.toggle('active');
+            menu.classList.toggle('active');
+        }
+
+        function navigateTo(page) {
+            // Close menu
+            toggleMenu();
+            
+            // Handle navigation
+            switch(page) {
+                case 'dashboard':
+                    showStatus('📊 Navigating to Dashboard...', 'success');
+                    // Add dashboard navigation logic here
+                    break;
+                case 'profile':
+                    showStatus('👤 Navigating to Profile...', 'success');
+                    // Add profile navigation logic here
+                    break;
+                case 'model':
+                    showStatus('🤖 Navigating to Model Settings...', 'success');
+                    // Add model settings navigation logic here
+                    break;
+                case 'analytics':
+                    showStatus('📈 Navigating to Analytics...', 'success');
+                    // Add analytics navigation logic here
+                    break;
+            }
+        }
+
+        function logout() {
+            // Close menu
+            const btn = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('menuDropdown');
+            btn.classList.remove('active');
+            menu.classList.remove('active');
+            
+            // Show logout confirmation
+            if (confirm('🚪 Are you sure you want to logout?')) {
+                showStatus('🔒 Secure logout initiated...', 'success');
+                // Add actual logout logic here
+                setTimeout(() => {
+                    alert('Logged out successfully!');
+                    // window.location.href = '/logout'; // Uncomment for actual logout
+                }, 1000);
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuDropdown');
+            const btn = document.getElementById('hamburgerBtn');
+            
+            if (menu.classList.contains('active') && 
+                !menu.contains(event.target) && 
+                !btn.contains(event.target)) {
+                toggleMenu();
+            }
+        });
+
+        // ==================== END HAMBURGER MENU ====================
 
         fetch('/status')
             .then(response => response.json())

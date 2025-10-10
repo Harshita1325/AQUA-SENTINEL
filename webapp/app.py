@@ -147,6 +147,10 @@ def result_file(filename):
 def input_file(filename):
     return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+@app.route('/photos/<filename>')
+def photo_file(filename):
+    return send_file(os.path.join('photos', filename))
+
 @app.route('/status')
 def status():
     global processor
