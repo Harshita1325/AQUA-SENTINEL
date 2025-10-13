@@ -363,16 +363,25 @@
         }
 
         .file-info {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.5);
             border-radius: 20px;
-            padding: 20px 30px;
-            margin: 20px auto;
+            padding: 25px 35px;
+            margin: 25px auto;
             display: none;
             color: #e0e7ff;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 1.05rem;
             max-width: 600px;
             backdrop-filter: blur(10px);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .model-selector {
@@ -465,8 +474,12 @@
 
         /* Adaptive Mode Dropdown */
         .adaptive-mode-selector {
-            margin: 30px auto;
+            margin: 40px auto;
             max-width: 600px;
+            padding: 25px;
+            background: rgba(139, 92, 246, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
         }
 
         .adaptive-mode-dropdown {
@@ -551,16 +564,20 @@
 
         /* Threat Detection Toggle */
         .threat-detection-toggle {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(239, 68, 68, 0.05);
             border: 2px solid rgba(239, 68, 68, 0.4);
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 30px 25px;
             transition: all 0.3s;
+            max-width: 600px;
+            margin: 35px auto;
         }
 
         .threat-detection-toggle:hover {
             border-color: rgba(239, 68, 68, 0.7);
-            background: rgba(239, 68, 68, 0.05);
+            background: rgba(239, 68, 68, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.2);
         }
 
         .threat-toggle-container {
@@ -1102,31 +1119,56 @@
 
         /* Video Processing Styles */
         .video-upload-area {
-            border: 3px dashed rgba(139, 92, 246, 0.4);
+            border: 3px dashed rgba(139, 92, 246, 0.5);
             border-radius: 25px;
-            padding: 60px 40px;
-            margin: 30px 0;
+            padding: 70px 40px;
+            margin: 35px 0;
             text-align: center;
             cursor: pointer;
             transition: all 0.4s;
-            background: rgba(139, 92, 246, 0.05);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(102, 126, 234, 0.08) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .video-upload-area:hover::before {
+            left: 100%;
         }
 
         .video-upload-area:hover {
-            border-color: rgba(139, 92, 246, 0.8);
-            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 1);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
             transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.3);
         }
 
         .video-upload-area.dragover {
             border-color: #667eea;
-            background: rgba(102, 126, 234, 0.2);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
             transform: scale(1.05);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
         }
 
         .video-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .video-players {
@@ -1277,26 +1319,11 @@
                 <span></span>
             </button>
             <div class="menu-dropdown" id="menuDropdown">
-                <div class="menu-item" onclick="navigateTo('dashboard')">
-                    <span class="icon">📊</span>
-                    <span>Dashboard</span>
-                </div>
-                <div class="menu-item" onclick="navigateTo('profile')">
-                    <span class="icon">👤</span>
-                    <span>Profile</span>
-                </div>
-                <div class="menu-item" onclick="navigateTo('model')">
-                    <span class="icon">🤖</span>
-                    <span>Model</span>
-                </div>
-                <div class="menu-item" onclick="navigateTo('analytics')">
-                    <span class="icon">📈</span>
-                    <span>Analytics</span>
-                </div>
-                <div class="menu-item logout" onclick="logout()">
-                    <span class="icon">🚪</span>
-                    <span>Logout</span>
-                </div>
+                <div class="menu-item" onclick="navigateTo('analytics')"> Analytics</div>
+                <div class="menu-item" onclick="navigateTo('profile')"> Profile</div>
+                <div class="menu-item" onclick="navigateTo('model')"> Model</div>
+                <div class="menu-item" onclick="navigateTo('history')"> History</div>
+                <div class="menu-item" onclick="logout()"> Logout</div>
             </div>
         </div>
 
@@ -1305,7 +1332,7 @@
             <div class="header-left">
                 <img src="/photos/gov logo.png" alt="Government Logo" class="military-emblem" onerror="this.style.display='none'">
                 <div class="header-content">
-                    <h1>MARINE DEFENSE CYBER SHIELD</h1>
+                    <h1>    UNDERWATER DEFENSE SHIELD</h1>
                     <p>Underwater Image Enhancement System</p>
                 </div>
             </div>
@@ -1343,8 +1370,8 @@
                 </div>
 
                 <!-- Adaptive Enhancement Mode -->
-                <div class="adaptive-mode-selector" style="margin-top: 30px;" id="adaptiveModeSection">
-                    <label style="display: block; margin-bottom: 15px; color: #fff; font-weight: 600;">
+                <div class="adaptive-mode-selector" style="margin-top: 40px; margin-bottom: 35px;" id="adaptiveModeSection">
+                    <label style="display: block; margin-bottom: 20px; color: #fff; font-weight: 600; font-size: 1.1rem; text-align: center;">
                         Adaptive Enhancement Mode
                     </label>
                     <select id="adaptiveMode" class="adaptive-mode-dropdown">
@@ -1355,19 +1382,19 @@
                         <option value="deep"> Deep Water (Ocean)</option>
                         <option value="night"> Night / Low Light</option>
                     </select>
-                    <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 10px; text-align: center;">
+                    <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 15px; text-align: center; line-height: 1.5;">
                         Automatically adjusts enhancement based on water conditions
                     </p>
                 </div>
 
                 <!-- Threat Detection Toggle -->
-                <div class="threat-detection-toggle" style="margin-top: 25px; text-align: center;">
+                <div class="threat-detection-toggle" style="margin-top: 35px; margin-bottom: 35px; text-align: center;">
                     <label class="threat-toggle-container">
                         <input type="checkbox" id="enableThreatDetection" class="threat-checkbox">
                         <span class="threat-toggle-slider"></span>
                         <span class="threat-toggle-label">
                              <strong>Enable AI Threat Detection</strong>
-                            <small style="display: block; color: #a0aec0; margin-top: 5px;">
+                            <small style="display: block; color: #a0aec0; margin-top: 8px; line-height: 1.4;">
                                 Detect submarines, mines, divers, and underwater objects
                             </small>
                         </span>
@@ -1375,7 +1402,7 @@
                 </div>
 
                 <button class="process-btn" id="processButton" onclick="processImage()" disabled>
-                    ANALYZE IMAGE
+                    ▶ ANALYZE IMAGE
                 </button>
             </div>
             </div>
@@ -1582,44 +1609,46 @@
         <div id="videoTab" class="tab-content">
         <div class="main-card">
             <div class="upload-section">
-                <h2>Upload Your Underwater Video</h2>
-                <p>Real-time frame-by-frame enhancement with AI processing</p>
+                <h2 style="margin-bottom: 15px;">🎥 Upload Your Underwater Video</h2>
+                <p style="color: #a0aec0; margin-bottom: 35px; font-size: 1.05rem;">Real-time frame-by-frame enhancement with AI processing</p>
                 
                 <!-- Video Upload Area -->
                 <div class="video-upload-area" id="videoUploadArea">
                     <input type="file" id="videoFile" class="file-input" accept="video/*">
-                    <div class="video-icon"></div>
-                    <h3 style="color: #e0e7ff; margin-bottom: 10px;">Drop video here or click to browse</h3>
-                    <p style="color: #a0aec0;">Supported formats: MP4, AVI, MOV, MKV (Max 500MB)</p>
+                    <div class="video-icon">🎬</div>
+                    <h3 style="color: #e0e7ff; margin-bottom: 15px; font-size: 1.3rem;">Drop video here or click to browse</h3>
+                    <p style="color: #a0aec0; font-size: 1rem; line-height: 1.6;">Supported formats: MP4, AVI, MOV, MKV<br><span style="color: #8b5cf6; font-weight: 600;">(Max 500MB)</span></p>
                 </div>
 
                 <div class="file-info" id="videoFileInfo" style="display: none;">
-                    <strong>Selected:</strong> <span id="videoFileName"></span>
+                    <strong>📹 Selected:</strong> <span id="videoFileName"></span>
                 </div>
 
                 <!-- Model Selector for Video -->
-                <div class="model-selector">
-                    <label>Select Processing Model:</label>
-                    <div class="model-options">
+                <div class="model-selector" style="margin-top: 40px; margin-bottom: 40px;">
+                    <label style="display: block; margin-bottom: 25px; color: #fff; font-size: 1.15rem; font-weight: 600; text-align: center;">Select Processing Model:</label>
+                    <div class="model-options" style="gap: 25px;">
                         <div class="model-option">
                             <input type="radio" id="video-uieb" name="videoModel" value="uieb" checked>
                             <label for="video-uieb">
-                                <strong>Enhancement</strong><br>
-                                <small>UIEB Model</small>
+                                <div style="font-size: 2rem; margin-bottom: 10px;">✨</div>
+                                <strong style="font-size: 1.1rem;">ENHANCEMENT</strong><br>
+                                <small style="color: #a0aec0; margin-top: 8px; display: block;">UIEB Model</small>
                             </label>
                         </div>
                         <div class="model-option">
                             <input type="radio" id="video-comparison" name="videoComparison" value="true" checked style="display: none;">
-                            <label for="video-comparison" style="padding: 20px;">
-                                <strong>Side-by-Side</strong><br>
-                                <small>Comparison View</small>
+                            <label for="video-comparison" style="padding: 30px 25px;">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">↔️</div>
+                                <strong style="font-size: 1.1rem;">SIDE-BY-SIDE</strong><br>
+                                <small style="color: #a0aec0; margin-top: 8px; display: block;">Comparison View</small>
                             </label>
                         </div>
                     </div>
                 </div>
 
                 <button class="process-button" id="processVideoButton" onclick="processVideo()" style="display: none;">
-                     Process Video
+                    ▶ Process Video
                 </button>
             </div>
 
@@ -2398,19 +2427,23 @@
             switch(page) {
                 case 'dashboard':
                     showStatus('📊 Navigating to Dashboard...', 'success');
-                    // Add dashboard navigation logic here
+                    window.location.href = '/';
                     break;
                 case 'profile':
                     showStatus('👤 Navigating to Profile...', 'success');
-                    // Add profile navigation logic here
+                    window.location.href = '/profile';
                     break;
                 case 'model':
                     showStatus('🤖 Navigating to Model Settings...', 'success');
-                    // Add model settings navigation logic here
+                    window.location.href = '/model';
                     break;
                 case 'analytics':
                     showStatus('📈 Navigating to Analytics...', 'success');
-                    // Add analytics navigation logic here
+                    window.location.href = '/analytics';
+                    break;
+                case 'history':
+                    showStatus('📜 Navigating to History...', 'success');
+                    window.location.href = '/history';
                     break;
             }
         }

@@ -151,6 +151,91 @@ def input_file(filename):
 def photo_file(filename):
     return send_file(os.path.join('photos', filename))
 
+@app.route('/analytics')
+def analytics():
+    return render_template('analytics.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+@app.route('/model')
+def model():
+    return render_template('model.html')
+
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+@app.route('/api/history')
+def api_history():
+    import glob
+    from datetime import datetime
+    
+    filter_type = request.args.get('filter', 'all')
+    history_data = []
+    
+    # Get all processed images from results folder
+    results_folder = app.config['RESULTS_FOLDER']
+    uploads_folder = app.config['UPLOAD_FOLDER']
+    
+    # Get all output files
+    output_files = []
+    if filter_type == 'all' or filter_type == 'enhanced':
+        output_files += glob.glob(os.path.join(results_folder, '*_output.*'))
+        output_files += glob.glob(os.path.join(results_folder, '*_enhanced_clean.*'))
+    if filter_type == 'all' or filter_type == 'threat':
+        output_files += glob.glob(os.path.join(results_folder, '*_threat_detection.*'))
+        output_files += glob.glob(os.path.join(results_folder, '*_threat_output.*'))
+    if filter_type == 'all' or filter_type == 'distance':
+        output_files += glob.glob(os.path.join(results_folder, '*_distance_measurement.*'))
+    
+    # Sort by modification time (newest first) and limit to 15
+    output_files = sorted(output_files, key=os.path.getmtime, reverse=True)[:15]
+    
+    for output_path in output_files:
+        filename = os.path.basename(output_path)
+        # Extract UUID and determine type
+        uuid_part = filename.split('_')[0]
+        
+        # Determine processing type and input suffix
+        if 'threat_detection' in filename or 'threat_output' in filename:
+            proc_type = 'Threat Detection'
+            input_patterns = [f'{uuid_part}_threat_input.*', f'{uuid_part}_input.*']
+        elif 'distance_measurement' in filename:
+            proc_type = 'Distance Measurement'
+            input_patterns = [f'{uuid_part}_threat_input.*', f'{uuid_part}_input.*']
+        elif 'enhanced_clean' in filename:
+            proc_type = 'Enhancement (Clean)'
+            input_patterns = [f'{uuid_part}_threat_input.*', f'{uuid_part}_input.*']
+        else:  # _output files
+            proc_type = 'Enhancement'
+            input_patterns = [f'{uuid_part}_input.*', f'{uuid_part}_threat_input.*']
+        
+        # Find corresponding input file (try multiple patterns)
+        input_file = None
+        for pattern in input_patterns:
+            input_files = glob.glob(os.path.join(uploads_folder, pattern))
+            if input_files:
+                input_file = os.path.basename(input_files[0])
+                break
+        
+        if input_file:
+            # Get file modification time
+            mod_time = datetime.fromtimestamp(os.path.getmtime(output_path))
+            
+            history_data.append({
+                'filename': filename[:40] + '...' if len(filename) > 40 else filename,
+                'type': proc_type,
+                'original': f'/input/{input_file}',
+                'processed': f'/result/{filename}',
+                'date': mod_time.strftime('%b %d, %Y'),
+                'time': mod_time.strftime('%I:%M %p'),
+                'status': 'Completed'
+            })
+    
+    return jsonify(history_data)
+
 @app.route('/status')
 def status():
     global processor

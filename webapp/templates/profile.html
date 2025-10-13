@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Officer Profile - Marine Defense Cyber Shield</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 159, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .header {
+            background: rgba(10, 14, 39, 0.95);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00FF9F;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 255, 159, 0.2);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00FF9F 0%, #8A2BE2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hamburger {
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger:hover {
+            transform: scale(1.1);
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: translateY(11px) rotate(45deg);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: translateY(-11px) rotate(-45deg);
+        }
+
+        .hamburger span {
+            width: 100%;
+            height: 3px;
+            background: #00FF9F;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* Menu Dropdown */
+        .menu-dropdown {
+            position: fixed;
+            top: 90px;
+            right: 40px;
+            min-width: 220px;
+            background: rgba(10, 14, 39, 0.98);
+            border: 2px solid #00FF9F;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 255, 159, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .menu-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 25px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 255, 159, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:first-child {
+            border-radius: 13px 13px 0 0;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 13px 13px;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 255, 159, 0.15);
+            padding-left: 35px;
+            color: #00FF9F;
+        }
+
+        .menu-item.active-page {
+            background: rgba(0, 255, 159, 0.2);
+            border-left: 4px solid #00FF9F;
+            color: #00FF9F;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00FF9F 0%, #8A2BE2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        /* Profile Layout */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(0, 255, 159, 0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #00FF9F, #8A2BE2);
+        }
+
+        .profile-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px solid #00FF9F;
+            margin: 0 auto 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 255, 159, 0.3);
+            background: linear-gradient(135deg, #00FF9F 0%, #8A2BE2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #00FF9F 0%, #00CED1 100%);
+            color: #0a0e27;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .officer-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #00FF9F;
+        }
+
+        .officer-id {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 159, 0.1);
+            border: 1px solid #00FF9F;
+            border-radius: 25px;
+            color: #00FF9F;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #00FF9F;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00FF9F;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        /* Info Sections */
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00FF9F;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            font-size: 24px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s;
+        }
+
+        .info-item:hover {
+            background: rgba(0, 255, 159, 0.05);
+            border-color: rgba(0, 255, 159, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Clearance Levels */
+        .clearance-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .clearance-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .clearance-name {
+            font-weight: 600;
+        }
+
+        .clearance-badge {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .clearance-granted {
+            background: rgba(0, 255, 159, 0.2);
+            color: #00FF9F;
+            border: 1px solid #00FF9F;
+        }
+
+        .clearance-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+            border: 1px solid #FFC107;
+        }
+
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border-left: 3px solid #00FF9F;
+            transition: all 0.3s;
+        }
+
+        .activity-item:hover {
+            background: rgba(0, 255, 159, 0.05);
+            transform: translateX(5px);
+        }
+
+        .activity-icon {
+            font-size: 24px;
+            min-width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 159, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .activity-time {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Edit Button */
+        .edit-profile-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00FF9F 0%, #00CED1 100%);
+            border: none;
+            border-radius: 12px;
+            color: #0a0e27;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .edit-profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 159, 0.4);
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00FF9F 0%, #00CED1 100%);
+            border: none;
+            border-radius: 8px;
+            color: #0a0e27;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-top: 30px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 159, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-section">
+            <img src="/photos/gov logo.png" alt="Government Logo" class="logo" onerror="this.style.display='none'">
+            <div class="title"> UNDERWATER DEFENSE SHIEL</div>
+            <img src="/photos/navy logo.png" alt="Navy Logo" class="logo" onerror="this.style.display='none'">
+        </div>
+        <div class="hamburger" onclick="toggleMenu()" id="hamburgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Menu Dropdown -->
+    <div class="menu-dropdown" id="menuDropdown">
+        <div class="menu-item" onclick="navigateTo('dashboard')"> Dashboard</div>
+        <div class="menu-item" onclick="navigateTo('analytics')"> Analytics</div>
+        <div class="menu-item active-page"> Profile</div>
+        <div class="menu-item" onclick="navigateTo('model')"> Model</div>
+        <div class="menu-item" onclick="navigateTo('history')"> History</div>
+        <div class="menu-item" onclick="logout()"> Logout</div>
+    </div>
+
+    <!-- Container -->
+    <div class="container">
+        <div class="page-title">👤 Officer Profile</div>
+        <div class="page-subtitle">Indian Naval Service - Cyber Defense Division</div>
+
+        <!-- Profile Grid -->
+        <div class="profile-grid">
+            <!-- Left Column - Profile Card -->
+            <div class="profile-card">
+                <div class="profile-image">👨‍✈️</div>
+                <div class="rank-badge"> Commander</div>
+                <div class="officer-name">Cdr. Rajesh Kumar</div>
+                <div class="officer-id">Service No: IN-23456 | Division: Cyber Defense</div>
+                
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>Active Duty</span>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Years Service</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">487</div>
+                        <div class="stat-label">Operations</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">2,543</div>
+                        <div class="stat-label">Images Analyzed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">98.5%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+
+                <button class="edit-profile-btn"> Edit Profile</button>
+            </div>
+
+            <!-- Right Column - Information Sections -->
+            <div>
+                <!-- Personal Information -->
+                <div class="info-section">
+                    <div class="section-title">
+                        <span class="section-icon"></span>
+                        Personal Information
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">Rajesh Kumar Singh</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">15 August 1985</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Blood Group</div>
+                            <div class="info-value">O+ Positive</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Contact Number</div>
+                            <div class="info-value">+91 98XXX-XXXXX</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value">rajesh.k@indiannavy.in</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Emergency Contact</div>
+                            <div class="info-value">+91 97XXX-XXXXX</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Details -->
+                <div class="info-section">
+                    <div class="section-title">
+                        <span class="section-icon"></span>
+                        Service Details
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Rank</div>
+                            <div class="info-value">Commander (Cdr.)</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Branch</div>
+                            <div class="info-value">Cyber Defense Division</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Service Number</div>
+                            <div class="info-value">IN-23456</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Date of Commission</div>
+                            <div class="info-value">01 June 2011</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Current Posting</div>
+                            <div class="info-value">INS Vikrant, Mumbai</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Specialization</div>
+                            <div class="info-value">AI & Underwater Imaging</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clearance Levels -->
+                <div class="info-section">
+                    <div class="section-title">
+                        <span class="section-icon"></span>
+                        Security Clearance
+                    </div>
+                    <div class="clearance-levels">
+                        <div class="clearance-item">
+                            <span class="clearance-name">🔴 Top Secret Clearance</span>
+                            <span class="clearance-badge clearance-granted">✓ Granted</span>
+                        </div>
+                        <div class="clearance-item">
+                            <span class="clearance-name">🟠 AI Systems Access</span>
+                            <span class="clearance-badge clearance-granted">✓ Granted</span>
+                        </div>
+                        <div class="clearance-item">
+                            <span class="clearance-name">🔵 Tactical Operations</span>
+                            <span class="clearance-badge clearance-granted">✓ Granted</span>
+                        </div>
+                        <div class="clearance-item">
+                            <span class="clearance-name">🟡 Nuclear Submarine Access</span>
+                            <span class="clearance-badge clearance-pending">⏳ Pending Review</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="info-section">
+                    <div class="section-title">
+                        <span class="section-icon"></span>
+                        Recent Activity
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon"></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Threat Detection Analysis Completed</div>
+                                <div class="activity-time">2 hours ago • 45 threats identified</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Underwater Image Enhancement</div>
+                                <div class="activity-time">5 hours ago • 127 images processed</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Video Surveillance Analysis</div>
+                                <div class="activity-time">Yesterday • 45 min video enhanced</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon"></div>
+                            <div class="activity-content">
+                                <div class="activity-title">Mission Brief - Operation Neptune</div>
+                                <div class="activity-time">2 days ago • Status: Completed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <a href="/" class="back-button">
+            <span>⬅</span>
+            <span>Back to Dashboard</span>
+        </a>
+    </div>
+
+    <script>
+        // Toggle Menu
+        function toggleMenu() {
+            const btn = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('menuDropdown');
+            btn.classList.toggle('active');
+            menu.classList.toggle('active');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuDropdown');
+            const hamburger = document.getElementById('hamburgerBtn');
+            
+            if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
+                menu.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+
+        // Navigation
+        function navigateTo(page) {
+            toggleMenu();
+            switch(page) {
+                case 'dashboard':
+                    window.location.href = '/';
+                    break;
+                case 'analytics':
+                    window.location.href = '/analytics';
+                    break;
+                case 'model':
+                    window.location.href = '/model';
+                    break;
+                case 'history':
+                    window.location.href = '/history';
+                    break;
+            }
+        }
+
+        // Logout
+        function logout() {
+            toggleMenu();
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Management - Marine Defense Cyber Shield</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 159, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+        }
+
+        /* Header */
+        .header {
+            background: rgba(10, 14, 39, 0.95);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00FF9F;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 255, 159, 0.2);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00FF9F 0%, #8A2BE2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hamburger {
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger:hover {
+            transform: scale(1.1);
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: translateY(11px) rotate(45deg);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: translateY(-11px) rotate(-45deg);
+        }
+
+        .hamburger span {
+            width: 100%;
+            height: 3px;
+            background: #00FF9F;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* Menu Dropdown */
+        .menu-dropdown {
+            position: fixed;
+            top: 90px;
+            right: 40px;
+            min-width: 220px;
+            background: rgba(10, 14, 39, 0.98);
+            border: 2px solid #00FF9F;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 255, 159, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .menu-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 25px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 255, 159, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:first-child {
+            border-radius: 13px 13px 0 0;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 13px 13px;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 255, 159, 0.15);
+            padding-left: 35px;
+            color: #00FF9F;
+        }
+
+        .menu-item.active-page {
+            background: rgba(0, 255, 159, 0.2);
+            border-left: 4px solid #00FF9F;
+            color: #00FF9F;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Page Title */
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00FF9F 0%, #8A2BE2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        /* Model Cards Grid */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--card-color), transparent);
+        }
+
+        .model-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--card-color);
+            box-shadow: 0 20px 40px rgba(0, 255, 159, 0.3);
+        }
+
+        .model-card.active {
+            border-color: #00FF9F;
+            background: rgba(0, 255, 159, 0.08);
+        }
+
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .model-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .model-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-active {
+            background: rgba(0, 255, 159, 0.2);
+            color: #00FF9F;
+            border: 1px solid #00FF9F;
+        }
+
+        .badge-available {
+            background: rgba(138, 43, 226, 0.2);
+            color: #8A2BE2;
+            border: 1px solid #8A2BE2;
+        }
+
+        .model-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00FF9F;
+            margin-bottom: 8px;
+        }
+
+        .model-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .model-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .spec-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .spec-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .spec-value {
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .model-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-select {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #00FF9F 0%, #00CED1 100%);
+            border: none;
+            border-radius: 8px;
+            color: #0a0e27;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 159, 0.4);
+        }
+
+        .btn-details {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-details:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00FF9F;
+        }
+
+        /* Configuration Section */
+        .config-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 40px;
+        }
+
+        .config-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00FF9F;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .config-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .config-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .config-select, .config-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .config-select:focus, .config-input:focus {
+            outline: none;
+            border-color: #00FF9F;
+            background: rgba(0, 255, 159, 0.05);
+        }
+
+        .config-description {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Save Button */
+        .save-config-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #00FF9F 0%, #00CED1 100%);
+            border: none;
+            border-radius: 12px;
+            color: #0a0e27;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .save-config-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 159, 0.4);
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00FF9F 0%, #00CED1 100%);
+            border: none;
+            border-radius: 8px;
+            color: #0a0e27;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-top: 30px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 159, 0.4);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .toggle-switch.active {
+            background: #00FF9F;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 34px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-section">
+            <img src="/photos/gov logo.png" alt="Government Logo" class="logo" onerror="this.style.display='none'">
+            <div class="title"> UNDERWATER DEFENSE SHIELD</div>
+            <img src="/photos/navy logo.png" alt="Navy Logo" class="logo" onerror="this.style.display='none'">
+        </div>
+        <div class="hamburger" onclick="toggleMenu()" id="hamburgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Menu Dropdown -->
+    <div class="menu-dropdown" id="menuDropdown">
+        <div class="menu-item" onclick="navigateTo('dashboard')"> Dashboard</div>
+        <div class="menu-item" onclick="navigateTo('analytics')"> Analytics</div>
+        <div class="menu-item" onclick="navigateTo('profile')"> Profile</div>
+        <div class="menu-item active-page"> Model</div>
+        <div class="menu-item" onclick="navigateTo('history')"> History</div>
+        <div class="menu-item" onclick="logout()"> Logout</div>
+    </div>
+
+    <!-- Container -->
+    <div class="container">
+        <div class="page-title"> AI Model Management</div>
+        <div class="page-subtitle">Configure and manage underwater image enhancement models</div>
+
+        <!-- Available Models -->
+        <h3 style="color: #00FF9F; font-size: 18px; margin-bottom: 20px; font-weight: 600;">Available AI Models</h3>
+        <div class="models-grid">
+            <!-- UIEB Model -->
+            <div class="model-card active" style="--card-color: #00FF9F;">
+                <div class="model-header"
+                    <div class="model-icon"></div>
+                    <div class="model-badge badge-active">● Active</div>
+                </div>
+                <div class="model-name">UIEB Model</div>
+                <div class="model-description">
+                    Advanced underwater image enhancement using deep learning. Best for general-purpose enhancement with superior color correction and clarity.
+                </div>
+                <div class="model-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">Accuracy</div>
+                        <div class="spec-value">95.2%</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Speed</div>
+                        <div class="spec-value">2.5s/image</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Model Size</div>
+                        <div class="spec-value">145 MB</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Version</div>
+                        <div class="spec-value">v2.95</div>
+                    </div>
+                </div>
+                <div class="model-actions">
+                    <button class="btn-select">Selected</button>
+                    <button class="btn-details">ℹ Details</button>
+                </div>
+            </div>
+
+            <!-- EUVP Model -->
+            <div class="model-card" style="--card-color: #8A2BE2;">
+                <div class="model-header">
+                    <div class="model-icon"></div>
+                    <div class="model-badge badge-available">Available</div>
+                </div>
+                <div class="model-name">EUVP Model</div>
+                <div class="model-description">
+                    Enhanced underwater video processing model. Optimized for real-time video enhancement with excellent temporal consistency.
+                </div>
+                <div class="model-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">Accuracy</div>
+                        <div class="spec-value">92.8%</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Speed</div>
+                        <div class="spec-value">3.2s/image</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Model Size</div>
+                        <div class="spec-value">128 MB</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Version</div>
+                        <div class="spec-value">v1.17</div>
+                    </div>
+                </div>
+                <div class="model-actions">
+                    <button class="btn-select">Select Model</button>
+                    <button class="btn-details">ℹ Details</button>
+                </div>
+            </div>
+
+            <!-- YOLOv8 Threat Detection -->
+            <div class="model-card" style="--card-color: #FF1493;">
+                <div class="model-header">
+                    <div class="model-icon"></div>
+                    <div class="model-badge badge-available">Available</div>
+                </div>
+                <div class="model-name">YOLOv8 Detection</div>
+                <div class="model-description">
+                    Real-time object detection for threat identification. Detects submarines, divers, mines, drones, and suspicious objects.
+                </div>
+                <div class="model-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">Accuracy</div>
+                        <div class="spec-value">94.7%</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Speed</div>
+                        <div class="spec-value">1.8s/image</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Model Size</div>
+                        <div class="spec-value">6 MB</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Version</div>
+                        <div class="spec-value">v8.0n</div>
+                    </div>
+                </div>
+                <div class="model-actions">
+                    <button class="btn-select">Select Model</button>
+                    <button class="btn-details">ℹ Details</button>
+                </div>
+            </div>
+
+            <!-- Super Resolution -->
+            <div class="model-card" style="--card-color: #FFC107;">
+                <div class="model-header">
+                    <div class="model-icon"></div>
+                    <div class="model-badge badge-available">Available</div>
+                </div>
+                <div class="model-name">Super Resolution</div>
+                <div class="model-description">
+                    Image upscaling with AI. Supports 2X, 3X, and 4X resolution enhancement while preserving underwater details and textures.
+                </div>
+                <div class="model-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">Max Scale</div>
+                        <div class="spec-value">4X</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Speed</div>
+                        <div class="spec-value">4.5s/image</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Model Size</div>
+                        <div class="spec-value">89 MB</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Version</div>
+                        <div class="spec-value">v3.2</div>
+                    </div>
+                </div>
+                <div class="model-actions">
+                    <button class="btn-select">Select Model</button>
+                    <button class="btn-details">ℹ Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Configuration -->
+        <div class="config-section">
+            <div class="config-title">
+                <span></span>
+                Advanced Configuration
+            </div>
+            <div class="config-grid">
+                <!-- Processing Mode -->
+                <div class="config-item">
+                    <label class="config-label">Processing Mode</label>
+                    <select class="config-select">
+                        <option value="standard">Standard Quality</option>
+                        <option value="high">High Quality (Slower)</option>
+                        <option value="fast">Fast Processing (Lower Quality)</option>
+                        <option value="balanced" selected>Balanced (Recommended)</option>
+                    </select>
+                    <p class="config-description">
+                        Adjust the trade-off between processing speed and output quality
+                    </p>
+                </div>
+
+                <!-- Batch Size -->
+                <div class="config-item">
+                    <label class="config-label">Batch Size</label>
+                    <select class="config-select">
+                        <option value="1">1 (Lowest Memory)</option>
+                        <option value="4" selected>4 (Recommended)</option>
+                        <option value="8">8 (Faster)</option>
+                        <option value="16">16 (Requires High RAM)</option>
+                    </select>
+                    <p class="config-description">
+                        Number of images processed simultaneously. Higher values require more memory
+                    </p>
+                </div>
+
+                <!-- Enhancement Strength -->
+                <div class="config-item">
+                    <label class="config-label">Enhancement Strength</label>
+                    <input type="range" class="config-input" min="1" max="10" value="7" 
+                           style="padding: 0; height: 8px; background: linear-gradient(to right, #00FF9F 70%, rgba(255,255,255,0.2) 70%);">
+                    <p class="config-description">
+                        Control the intensity of image enhancement (1=Subtle, 10=Maximum)
+                    </p>
+                </div>
+
+                <!-- GPU Acceleration -->
+                <div class="config-item">
+                    <label class="config-label">GPU Acceleration</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>Enable CUDA Processing</span>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <p class="config-description">
+                        Use GPU for faster processing (requires NVIDIA GPU with CUDA support)
+                    </p>
+                </div>
+
+                <!-- Output Format -->
+                <div class="config-item">
+                    <label class="config-label">Output Format</label>
+                    <select class="config-select">
+                        <option value="png">PNG (Lossless)</option>
+                        <option value="jpg" selected>JPEG (Compressed)</option>
+                        <option value="tiff">TIFF (Uncompressed)</option>
+                        <option value="webp">WebP (Modern)</option>
+                    </select>
+                    <p class="config-description">
+                        Image format for processed outputs
+                    </p>
+                </div>
+
+                <!-- Confidence Threshold -->
+                <div class="config-item">
+                    <label class="config-label">Threat Detection Confidence</label>
+                    <select class="config-select">
+                        <option value="0.1">10% (High Sensitivity)</option>
+                        <option value="0.25" selected>25% (Balanced)</option>
+                        <option value="0.5">50% (High Confidence)</option>
+                        <option value="0.75">75% (Very High Confidence)</option>
+                    </select>
+                    <p class="config-description">
+                        Minimum confidence level for threat detection
+                    </p>
+                </div>
+
+                <!-- Auto Enhancement -->
+                <div class="config-item">
+                    <label class="config-label">Auto Environment Detection</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>Enable Adaptive Mode</span>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <p class="config-description">
+                        Automatically detect water conditions and adjust enhancement parameters
+                    </p>
+                </div>
+
+                <!-- Distance Estimation -->
+                <div class="config-item">
+                    <label class="config-label">Distance Estimation</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>Enable Camera-to-Threat Measurement</span>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <p class="config-description">
+                        Calculate distances to detected threats using pinhole camera model
+                    </p>
+                </div>
+
+                <!-- Cache Settings -->
+                <div class="config-item">
+                    <label class="config-label">Cache Management</label>
+                    <select class="config-select">
+                        <option value="none">No Caching</option>
+                        <option value="memory" selected>Memory Cache (Recommended)</option>
+                        <option value="disk">Disk Cache</option>
+                        <option value="both">Memory + Disk Cache</option>
+                    </select>
+                    <p class="config-description">
+                        Store processed results for faster repeated access
+                    </p>
+                </div>
+            </div>
+
+            <button class="save-config-btn"> Save Configuration</button>
+        </div>
+
+        <!-- Back Button -->
+        <a href="/" class="back-button">
+            <span>⬅</span>
+            <span>Back to Dashboard</span>
+        </a>
+    </div>
+
+    <script>
+        // Toggle Menu
+        function toggleMenu() {
+            const btn = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('menuDropdown');
+            btn.classList.toggle('active');
+            menu.classList.toggle('active');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuDropdown');
+            const hamburger = document.getElementById('hamburgerBtn');
+            
+            if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
+                menu.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+
+        // Navigation
+        function navigateTo(page) {
+            toggleMenu();
+            switch(page) {
+                case 'dashboard':
+                    window.location.href = '/';
+                    break;
+                case 'analytics':
+                    window.location.href = '/analytics';
+                    break;
+                case 'profile':
+                    window.location.href = '/profile';
+                    break;
+                case 'history':
+                    window.location.href = '/history';
+                    break;
+            }
+        }
+
+        // Logout
+        function logout() {
+            toggleMenu();
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/';
+            }
+        }
+
+        // Toggle Switch
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // Model Selection
+        document.querySelectorAll('.btn-select').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all cards
+                document.querySelectorAll('.model-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                // Add active class to parent card
+                this.closest('.model-card').classList.add('active');
+                
+                // Update button text
+                document.querySelectorAll('.btn-select').forEach(btn => {
+                    btn.textContent = 'Select Model';
+                });
+                this.textContent = '✓ Selected';
+            });
+        });
+
+        // Save Configuration
+        document.querySelector('.save-config-btn').addEventListener('click', function() {
+            alert(' Configuration saved successfully!');
+        });
+    </script>
+</body>
+</html>
