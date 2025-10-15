@@ -2,8 +2,6 @@
 
 A modern web interface for Deep WaveNet underwater image restoration, featuring AI-powered image enhancement and super-resolution capabilities.
 
-![Web Application Preview](https://img.shields.io/badge/Status-Active-green) ![Python](https://img.shields.io/badge/Python-3.8+-blue) ![Flask](https://img.shields.io/badge/Flask-Web%20App-lightgrey) ![PyTorch](https://img.shields.io/badge/PyTorch-AI%20Models-orange)
-
 ##  Features
 
 - **Beautiful Web Interface**: Modern, responsive design with drag-and-drop file upload
