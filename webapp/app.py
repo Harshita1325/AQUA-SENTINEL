@@ -7,8 +7,13 @@ from werkzeug.utils import secure_filename
 from model_processor import get_processor
 from metrics_calculator import get_metrics_calculator
 from video_processor import get_video_processor
+from database_config import SecureImageDatabase
+from dotenv import load_dotenv
 import json
 from threading import Thread
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -26,6 +31,14 @@ metrics_calc = None
 video_processor = None
 video_progress = {}
 
+# Initialize database
+try:
+    db = SecureImageDatabase()
+    print("✅ Database connected successfully!")
+except Exception as e:
+    print(f"⚠️ Database connection failed: {e}")
+    db = None
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -35,6 +48,12 @@ def allowed_video_file(filename):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/gallery')
+def gallery():
+    """Display image gallery page"""
+    return render_template('gallery.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -84,6 +103,16 @@ def upload_file():
                 )
                 processing_time = time.time() - start_time
                 
+                # Save to database if available
+                db_image_id = None
+                if db is not None:
+                    try:
+                        raw_id = db.store_image(input_path, user_id=1, image_type='raw')
+                        db_image_id = db.store_image(output_path, user_id=1, image_type='enhanced')
+                        print(f"✅ Images saved to database: raw={raw_id}, enhanced={db_image_id}")
+                    except Exception as db_error:
+                        print(f"⚠️ Database save failed: {db_error}")
+                
                 return jsonify({
                     'success': True,
                     'input_file': input_filename,
@@ -96,7 +125,9 @@ def upload_file():
                     'output_quality': enhancement_results['output_quality'],
                     'improvement': enhancement_results['improvement'],
                     'preprocessing_log': enhancement_results['preprocessing_log'],
-                    'postprocessing_log': enhancement_results['postprocessing_log']
+                    'postprocessing_log': enhancement_results['postprocessing_log'],
+                    'db_saved': db_image_id is not None,
+                    'db_image_id': db_image_id
                 })
                 
             elif adaptive_mode != 'off':
@@ -107,20 +138,15 @@ def upload_file():
                 )
                 processing_time = time.time() - start_time
                 
-                return jsonify({
-                    'success': True,
-                    'input_file': input_filename,
-                    'output_file': output_filename,
-                    'processing_time': round(processing_time, 2),
-                    'model_used': model_type,
-                    'adaptive_mode': True,
-                    'detected_environment': detected_env.upper()
-                })
-            else:
-                # Standard processing
-                start_time = time.time()
-                processor.process_image(input_path, output_path, model_type)
-                processing_time = time.time() - start_time
+                # Save to database if available
+                db_image_id = None
+                if db is not None:
+                    try:
+                        raw_id = db.store_image(input_path, user_id=1, image_type='raw')
+                        db_image_id = db.store_image(output_path, user_id=1, image_type='enhanced')
+                        print(f"✅ Images saved to database: raw={raw_id}, enhanced={db_image_id}")
+                    except Exception as db_error:
+                        print(f"⚠️ Database save failed: {db_error}")
                 
                 return jsonify({
                     'success': True,
@@ -128,7 +154,37 @@ def upload_file():
                     'output_file': output_filename,
                     'processing_time': round(processing_time, 2),
                     'model_used': model_type,
-                    'adaptive_mode': False
+                    'adaptive_mode': True,
+                    'detected_environment': detected_env.upper(),
+                    'db_saved': db_image_id is not None,
+                    'db_image_id': db_image_id
+                })
+            else:
+                # Standard processing
+                start_time = time.time()
+                processor.process_image(input_path, output_path, model_type)
+                processing_time = time.time() - start_time
+                
+                # Save to database if available
+                db_image_id = None
+                if db is not None:
+                    try:
+                        # Save raw image
+                        raw_id = db.store_image(input_path, user_id=1, image_type='raw')
+                        # Save enhanced image
+                        db_image_id = db.store_image(output_path, user_id=1, image_type='enhanced')
+                    except Exception as db_error:
+                        print(f"⚠️ Database save failed: {db_error}")
+                
+                return jsonify({
+                    'success': True,
+                    'input_file': input_filename,
+                    'output_file': output_filename,
+                    'processing_time': round(processing_time, 2),
+                    'model_used': model_type,
+                    'adaptive_mode': False,
+                    'db_saved': db_image_id is not None,
+                    'db_image_id': db_image_id
                 })
             
         except Exception as e:
@@ -913,6 +969,26 @@ def detect_threats():
                 if enhancement_analysis_filename:
                     response_data['enhancement_analysis'] = enhancement_analysis_filename
                 
+                # Save to database if available
+                db_image_id = None
+                if db is not None:
+                    try:
+                        # Save raw input image
+                        raw_id = db.store_image(input_path, user_id=1, image_type='raw', classification='RESTRICTED')
+                        # Save enhanced image
+                        enhanced_id = db.store_image(os.path.join(app.config['RESULTS_FOLDER'], enhanced_output_filename), 
+                                                     user_id=1, image_type='enhanced', classification='RESTRICTED')
+                        # Save threat detection image
+                        db_image_id = db.store_image(os.path.join(app.config['RESULTS_FOLDER'], threat_output_filename), 
+                                                     user_id=1, image_type='enhanced', classification='RESTRICTED')
+                        
+                        response_data['db_saved'] = True
+                        response_data['db_image_id'] = db_image_id
+                        print(f"✅ Images saved to database: raw={raw_id}, enhanced={enhanced_id}, threat={db_image_id}")
+                    except Exception as db_error:
+                        print(f"⚠️ Database save failed: {db_error}")
+                        response_data['db_saved'] = False
+                
                 return jsonify(response_data)
                 
             except Exception as e:
@@ -925,6 +1001,190 @@ def detect_threats():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# Database-related routes
+@app.route('/api/gallery')
+def get_gallery():
+    """Get all stored images from database"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        conn = db.pg_pool.getconn()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT image_id, original_filename, image_type, 
+                       file_size_bytes, upload_timestamp, classification_level
+                FROM images 
+                ORDER BY upload_timestamp DESC 
+                LIMIT 100
+            """)
+            
+            images = []
+            for row in cursor.fetchall():
+                images.append({
+                    'id': row[0],
+                    'filename': row[1],
+                    'type': row[2],
+                    'size': row[3],
+                    'uploaded': row[4].strftime('%Y-%m-%d %H:%M:%S'),
+                    'classification': row[5]
+                })
+            
+            return jsonify({'images': images, 'count': len(images)})
+        finally:
+            cursor.close()
+            db.pg_pool.putconn(conn)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/image/<int:image_id>')
+def get_image(image_id):
+    """Retrieve image from database"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        # Create temp file
+        temp_path = os.path.join(app.config['RESULTS_FOLDER'], f'temp_{image_id}.jpg')
+        
+        # Retrieve from database
+        success = db.retrieve_image(image_id, user_id=1, output_path=temp_path)
+        
+        if success:
+            return send_file(temp_path, mimetype='image/jpeg')
+        else:
+            return jsonify({'error': 'Image not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/stats')
+def get_stats():
+    """Get database statistics"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        stats = db.get_statistics()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/save-to-db', methods=['POST'])
+def save_to_database():
+    """Save processed image to database"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        data = request.json
+        image_path = os.path.join(app.config['RESULTS_FOLDER'], data.get('filename'))
+        image_type = data.get('type', 'enhanced')
+        
+        if not os.path.exists(image_path):
+            return jsonify({'error': 'File not found'}), 404
+        
+        # Store in database (user_id=1 for demo)
+        image_id = db.store_image(image_path, user_id=1, image_type=image_type)
+        
+        if image_id:
+            return jsonify({
+                'success': True, 
+                'image_id': image_id,
+                'message': 'Image saved to database successfully'
+            })
+        else:
+            return jsonify({'error': 'Failed to save image'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/stats')
+def api_stats():
+    """Get database statistics"""
+    if db is None:
+        return jsonify({'error': 'Database not connected'}), 500
+    
+    try:
+        stats = db.get_statistics()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/gallery')
+def api_gallery():
+    """Get list of all images from database"""
+    if db is None:
+        return jsonify({'error': 'Database not connected'}), 500
+    
+    try:
+        conn = db.pg_pool.getconn()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+                image_id,
+                original_filename,
+                file_size_bytes,
+                image_type,
+                upload_timestamp,
+                classification_level
+            FROM images
+            ORDER BY upload_timestamp DESC
+            LIMIT 100
+        """)
+        
+        images = []
+        for row in cursor.fetchall():
+            images.append({
+                'id': row[0],
+                'filename': row[1],
+                'size': row[2],
+                'type': row[3],
+                'uploaded': row[4].strftime('%Y-%m-%d %H:%M:%S'),
+                'classification': row[5]
+            })
+        
+        cursor.close()
+        db.pg_pool.putconn(conn)
+        
+        return jsonify({'images': images, 'count': len(images)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/image/<int:image_id>')
+def api_image(image_id):
+    """Retrieve and serve image from database"""
+    if db is None:
+        return jsonify({'error': 'Database not connected'}), 500
+    
+    try:
+        import tempfile
+        
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+        temp_path = temp_file.name
+        temp_file.close()
+        
+        # Retrieve image from database
+        success = db.retrieve_image(image_id, user_id=1, output_path=temp_path)
+        
+        if success:
+            return send_file(temp_path, mimetype='image/jpeg')
+        else:
+            return jsonify({'error': 'Image not found'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     print("🌊 Deep WaveNet Web Application")

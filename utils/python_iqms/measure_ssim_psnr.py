@@ -1,9 +1,4 @@
-"""
-# > Script for measuring quantitative performances in terms of
-#    - Structural Similarity Metric (SSIM) 
-#    - Peak Signal to Noise Ratio (PSNR)
-# > Maintainer: https://github.com/xahidbuffon
-"""
+
 ## python libs
 import numpy as np
 from PIL import Image

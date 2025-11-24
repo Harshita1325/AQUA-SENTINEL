@@ -1,9 +1,4 @@
-"""
-# > Implementation of the classic paper by Zhou Wang et. al.: 
-#     - Image quality assessment: from error visibility to structural similarity
-#     - https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=1284395
-# > Maintainer: https://github.com/xahidbuffon
-"""
+
 from __future__ import division
 import numpy as np
 import math
