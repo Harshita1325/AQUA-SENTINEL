@@ -7,41 +7,113 @@ import math
 import numpy as np
 
 # Known object sizes in meters (real-world dimensions)
+# Maps both YOLO class names and threat types to real-world dimensions
 KNOWN_OBJECT_SIZES = {
-    'submarine': {
-        'length': 50.0,    # meters (average submarine length)
-        'width': 10.0,     # meters (average submarine width)
-        'height': 8.0      # meters (average submarine height)
-    },
-    'diver': {
-        'height': 1.75,    # meters (average human height with gear)
-        'width': 0.6,      # meters (average human width)
-        'depth': 0.3       # meters (human depth front-to-back)
-    },
-    'mine': {
-        'diameter': 1.5,   # meters (typical naval mine diameter)
-        'radius': 0.75     # meters
-    },
-    'underwater_vehicle': {
-        'length': 3.0,     # meters (ROV/AUV average)
-        'width': 1.5,      # meters
-        'height': 1.2      # meters
-    },
-    'underwater_drone': {
-        'length': 1.5,     # meters (small underwater drone)
-        'width': 0.8,      # meters
-        'height': 0.5      # meters
-    },
-    'drone': {
-        'length': 1.0,     # meters (aerial drone)
-        'width': 1.0,      # meters (wingspan/diagonal)
-        'height': 0.3      # meters
-    },
-    'suspicious_object': {
-        'length': 0.8,     # meters (average suspicious package)
-        'width': 0.5,      # meters
-        'height': 0.4      # meters
-    }
+    # YOLO Original Classes
+    'person': {'height': 1.75, 'width': 0.6, 'depth': 0.3},
+    'boat': {'length': 50.0, 'width': 10.0, 'height': 8.0},
+    'ship': {'length': 150.0, 'width': 25.0, 'height': 40.0},
+    'car': {'length': 4.5, 'width': 1.8, 'height': 1.5},
+    'bus': {'length': 12.0, 'width': 2.5, 'height': 3.0},
+    'truck': {'length': 8.0, 'width': 2.5, 'height': 3.5},
+    'motorcycle': {'length': 2.0, 'width': 0.8, 'height': 1.2},
+    'bicycle': {'length': 1.8, 'width': 0.6, 'height': 1.1},
+    'airplane': {'length': 15.0, 'width': 12.0, 'height': 4.0},
+    'train': {'length': 25.0, 'width': 3.0, 'height': 4.0},
+    
+    # Sports & Weapons
+    'sports ball': {'diameter': 1.5, 'radius': 0.75},
+    'frisbee': {'diameter': 0.8, 'radius': 0.4},
+    'kite': {'length': 1.2, 'width': 1.2, 'height': 0.1},
+    'baseball bat': {'length': 1.0, 'width': 0.07, 'height': 0.07},
+    'tennis racket': {'length': 0.7, 'width': 0.3, 'height': 0.05},
+    'knife': {'length': 0.3, 'width': 0.03, 'height': 0.02},
+    'scissors': {'length': 0.2, 'width': 0.08, 'height': 0.02},
+    'fork': {'length': 0.2, 'width': 0.03, 'height': 0.01},
+    'spoon': {'length': 0.18, 'width': 0.04, 'height': 0.01},
+    
+    # Containers & Packages
+    'backpack': {'length': 0.5, 'width': 0.35, 'height': 0.2},
+    'suitcase': {'length': 0.7, 'width': 0.5, 'height': 0.25},
+    'handbag': {'length': 0.4, 'width': 0.3, 'height': 0.15},
+    'bottle': {'height': 0.3, 'width': 0.08, 'depth': 0.08},
+    'cup': {'height': 0.15, 'width': 0.08, 'depth': 0.08},
+    'bowl': {'height': 0.1, 'width': 0.2, 'depth': 0.2},
+    'vase': {'height': 0.3, 'width': 0.15, 'depth': 0.15},
+    
+    # Electronics
+    'cell phone': {'length': 0.15, 'width': 0.075, 'height': 0.01},
+    'laptop': {'length': 0.35, 'width': 0.25, 'height': 0.025},
+    'keyboard': {'length': 0.45, 'width': 0.15, 'height': 0.03},
+    'mouse': {'length': 0.1, 'width': 0.06, 'height': 0.04},
+    'remote': {'length': 0.2, 'width': 0.05, 'height': 0.025},
+    'tv': {'length': 1.2, 'width': 0.7, 'height': 0.1},
+    'microwave': {'length': 0.5, 'width': 0.4, 'height': 0.3},
+    'oven': {'length': 0.6, 'width': 0.6, 'height': 0.6},
+    'toaster': {'length': 0.3, 'width': 0.2, 'height': 0.2},
+    'refrigerator': {'length': 0.7, 'width': 0.7, 'height': 1.8},
+    
+    # Furniture & Structures
+    'chair': {'length': 0.5, 'width': 0.5, 'height': 0.9},
+    'couch': {'length': 2.0, 'width': 0.9, 'height': 0.85},
+    'bed': {'length': 2.0, 'width': 1.5, 'height': 0.5},
+    'dining table': {'length': 1.8, 'width': 0.9, 'height': 0.75},
+    'bench': {'length': 1.5, 'width': 0.5, 'height': 0.5},
+    
+    # Outdoor Objects
+    'traffic light': {'height': 0.8, 'width': 0.3, 'depth': 0.3},
+    'fire hydrant': {'height': 0.7, 'width': 0.3, 'depth': 0.3},
+    'stop sign': {'height': 0.75, 'width': 0.75, 'depth': 0.05},
+    'parking meter': {'height': 1.5, 'width': 0.3, 'depth': 0.3},
+    'umbrella': {'diameter': 1.0, 'radius': 0.5},
+    
+    # Boards & Platforms
+    'skateboard': {'length': 0.8, 'width': 0.2, 'height': 0.15},
+    'surfboard': {'length': 2.0, 'width': 0.5, 'height': 0.08},
+    'snowboard': {'length': 1.5, 'width': 0.25, 'height': 0.05},
+    
+    # Other Items
+    'book': {'length': 0.25, 'width': 0.18, 'height': 0.03},
+    'clock': {'diameter': 0.3, 'radius': 0.15},
+    'potted plant': {'height': 0.5, 'width': 0.3, 'depth': 0.3},
+    'tie': {'length': 1.4, 'width': 0.1, 'height': 0.005},
+    'sink': {'length': 0.6, 'width': 0.5, 'height': 0.2},
+    
+    # Animals (for reference)
+    'bird': {'length': 0.3, 'width': 0.4, 'height': 0.15},
+    'cat': {'length': 0.5, 'width': 0.25, 'height': 0.25},
+    'dog': {'length': 0.8, 'width': 0.4, 'height': 0.6},
+    'horse': {'length': 2.4, 'width': 0.6, 'height': 1.6},
+    'sheep': {'length': 1.5, 'width': 0.5, 'height': 1.0},
+    'cow': {'length': 2.5, 'width': 0.8, 'height': 1.5},
+    'elephant': {'length': 6.0, 'width': 3.0, 'height': 3.5},
+    'bear': {'length': 2.0, 'width': 1.0, 'height': 1.5},
+    'zebra': {'length': 2.5, 'width': 0.6, 'height': 1.4},
+    'giraffe': {'length': 2.5, 'width': 0.8, 'height': 5.0},
+    
+    # Mapped Threat Types (for backward compatibility)
+    'hostile_diver': {'height': 1.75, 'width': 0.6, 'depth': 0.3},
+    'hostile_submarine': {'length': 50.0, 'width': 10.0, 'height': 8.0},
+    'enemy_warship': {'length': 150.0, 'width': 25.0, 'height': 40.0},
+    'midget_submarine': {'length': 4.5, 'width': 1.8, 'height': 1.5},
+    'submersible': {'length': 12.0, 'width': 2.5, 'height': 3.0},
+    'autonomous_underwater_vehicle': {'length': 8.0, 'width': 2.5, 'height': 3.5},
+    'underwater_scooter': {'length': 2.0, 'width': 0.8, 'height': 1.2},
+    'small_underwater_vehicle': {'length': 1.8, 'width': 0.6, 'height': 1.1},
+    'aerial_drone': {'length': 15.0, 'width': 12.0, 'height': 4.0},
+    'torpedo': {'length': 25.0, 'width': 3.0, 'height': 4.0},
+    'naval_mine': {'diameter': 1.5, 'radius': 0.75},
+    'limpet_mine': {'diameter': 0.8, 'radius': 0.4},
+    'floating_mine': {'diameter': 1.2, 'radius': 0.6},
+    'ied_device': {'length': 0.5, 'width': 0.35, 'height': 0.2},
+    'explosive_package': {'length': 0.7, 'width': 0.5, 'height': 0.25},
+    'suspicious_container': {'length': 0.4, 'width': 0.3, 'height': 0.15},
+    'spear_gun': {'length': 1.0, 'width': 0.07, 'height': 0.07},
+    'underwater_weapon': {'length': 0.7, 'width': 0.3, 'height': 0.05},
+    'combat_knife': {'length': 0.3, 'width': 0.03, 'height': 0.02},
+    'communication_device': {'length': 0.15, 'width': 0.075, 'height': 0.01},
+    'electronic_equipment': {'length': 0.35, 'width': 0.25, 'height': 0.025},
+    'control_device': {'length': 0.2, 'width': 0.05, 'height': 0.025},
 }
 
 
@@ -117,23 +189,25 @@ class DistanceEstimator:
         """
         # Check if object size is known
         if threat_type not in KNOWN_OBJECT_SIZES:
-            print(f"  ⚠️ Distance estimation failed: Unknown threat type '{threat_type}'")
-            print(f"     Known types: {list(KNOWN_OBJECT_SIZES.keys())}")
-            return {
-                'distance_m': None,
-                'distance_display': 'Unknown',
-                'confidence': 'unknown',
-                'error_margin': 'N/A',
-                'method': 'object_size_unknown'
-            }
+            # Try with underscores replaced
+            threat_type_normalized = threat_type.replace('-', '_').replace(' ', '_').lower()
+            if threat_type_normalized not in KNOWN_OBJECT_SIZES:
+                print(f"  ⚠️ Distance estimation: Unknown object type '{threat_type}'")
+                print(f"     Using default estimation (1.0m reference)")
+                # Use a default generic object size
+                obj_dims = {'length': 1.0, 'width': 0.5, 'height': 0.5}
+                use_default = True
+            else:
+                obj_dims = KNOWN_OBJECT_SIZES[threat_type_normalized]
+                use_default = False
+        else:
+            obj_dims = KNOWN_OBJECT_SIZES[threat_type]
+            use_default = False
         
         # Extract bounding box dimensions
         x1, y1, x2, y2 = bbox
         bbox_width_px = x2 - x1
         bbox_height_px = y2 - y1
-        
-        # Get known object dimensions
-        obj_dims = KNOWN_OBJECT_SIZES[threat_type]
         
         # Update image width and calculate focal length if needed
         img_height, img_width = image_shape[:2]
@@ -175,6 +249,14 @@ class DistanceEstimator:
         confidence, error_margin = self._calculate_confidence(
             bbox_width_px, bbox_height_px, img_width, img_height, distance_m
         )
+        
+        # Reduce confidence if using default object size
+        if use_default:
+            if confidence == 'high':
+                confidence = 'medium'
+            elif confidence == 'medium':
+                confidence = 'low'
+            error_margin = '±50%'
         
         # Format display string
         distance_display = self._format_distance(distance_m, confidence)

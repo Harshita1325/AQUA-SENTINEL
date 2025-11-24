@@ -500,6 +500,28 @@ def download_video(filename):
         return send_file(video_path, as_attachment=True, download_name=f"enhanced_{filename}")
     return jsonify({'error': 'Video not found'}), 404
 
+@app.route('/download_report/<filename>')
+def download_report(filename):
+    """
+    Download detailed threat intelligence report
+    """
+    report_path = os.path.join(app.config['RESULTS_FOLDER'], filename)
+    if os.path.exists(report_path):
+        return send_file(report_path, as_attachment=True, download_name=filename, mimetype='text/plain')
+    return jsonify({'error': 'Report not found'}), 404
+
+@app.route('/view_report/<filename>')
+def view_report(filename):
+    """
+    View threat intelligence report in browser
+    """
+    report_path = os.path.join(app.config['RESULTS_FOLDER'], filename)
+    if os.path.exists(report_path):
+        with open(report_path, 'r', encoding='utf-8') as f:
+            report_content = f.read()
+        return Response(report_content, mimetype='text/plain')
+    return jsonify({'error': 'Report not found'}), 404
+
 @app.route('/detect_threats', methods=['POST'])
 def detect_threats():
     """
@@ -549,8 +571,12 @@ def detect_threats():
                 enhance_first = request.form.get('enhance_first', 'true').lower() == 'true'
                 exclude_marine_life = request.form.get('exclude_marine_life', 'true').lower() == 'true'
                 
-                # Detect and highlight threats
+                # Detect and highlight threats with ADVANCED SYSTEM
                 start_time = time.time()
+                
+                print(f"\n🛡️ Initiating ADVANCED threat detection...")
+                print(f"   Enhancement: {'ENABLED' if enhance_first else 'DISABLED'}")
+                print(f"   Marine life filtering: {'ON' if exclude_marine_life else 'OFF - Maximum Detection'}")
                 
                 # Generate threat detection image (circles/boxes only)
                 output_with_threats, threats, summary = processor.detect_and_highlight_threats(
@@ -559,6 +585,22 @@ def detect_threats():
                     enhance_first=enhance_first,
                     exclude_marine_life=exclude_marine_life
                 )
+                
+                # Generate detailed threat intelligence report
+                report_filename = None
+                if threats and hasattr(processor.threat_detector, 'generate_detailed_report'):
+                    report_filename = f"{unique_id}_threat_report.txt"
+                    report_path = os.path.join(app.config['RESULTS_FOLDER'], report_filename)
+                    try:
+                        detailed_report = processor.threat_detector.generate_detailed_report(
+                            threats, 
+                            input_path,
+                            report_path
+                        )
+                        print(f"📄 Comprehensive threat report generated: {report_filename}")
+                    except Exception as e:
+                        print(f"⚠️ Could not generate report: {str(e)}")
+                        report_filename = None
                 
                 # Save the CLEAN enhanced image (no annotations) - for 2nd quadrant
                 import cv2
@@ -688,9 +730,94 @@ def detect_threats():
                 cv2.imwrite(distance_output_path, distance_img)
                 print(f"💾 Distance measurement image saved to: {distance_output_path}")
                 
+                # Generate HEATMAPS for explainability
+                heatmap_filename = None
+                enhancement_analysis_filename = None
+                
+                try:
+                    print(f"\n🔬 Generating explainability heatmaps...")
+                    
+                    # Import explainability module
+                    import sys
+                    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                    from threat_detection.explainability import GradCAMExplainer, EnhancementExplainer
+                    
+                    # 1. Generate Grad-CAM heatmap for threats
+                    if threats:
+                        print(f"   🎯 Generating Grad-CAM heatmaps for {len(threats)} threats...")
+                        explainer = GradCAMExplainer(processor.threat_detector.model if processor.threat_detector else None)
+                        
+                        # Generate multi-threat heatmap
+                        heatmap_filename = f"{unique_id}_gradcam_heatmap.{file_ext}"
+                        heatmap_path = os.path.join(app.config['RESULTS_FOLDER'], heatmap_filename)
+                        
+                        multi_heatmap = explainer.generate_multi_threat_heatmap(input_path, threats)
+                        
+                        if multi_heatmap is not None:
+                            # Load original image
+                            original_img = cv2.imread(input_path)
+                            original_rgb = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
+                            
+                            # Overlay heatmap
+                            overlayed = explainer.overlay_heatmap(original_rgb, multi_heatmap, alpha=0.5)
+                            
+                            # Add title
+                            font = cv2.FONT_HERSHEY_SIMPLEX
+                            cv2.putText(overlayed, "Grad-CAM: Why YOLO Detected These Threats", 
+                                       (20, 40), font, 1.0, (255, 255, 255), 2, cv2.LINE_AA)
+                            cv2.putText(overlayed, "Red = High Detection Confidence | Blue = Low", 
+                                       (20, 75), font, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+                            
+                            # Draw threat boxes on heatmap
+                            for idx, threat in enumerate(threats):
+                                bbox = threat['bbox']
+                                x1, y1, x2, y2 = bbox
+                                cv2.rectangle(overlayed, (x1, y1), (x2, y2), (255, 255, 255), 2)
+                                threat_label = f"#{idx+1}: {threat['threat_type'].replace('_', ' ').title()}"
+                                cv2.putText(overlayed, threat_label, (x1, y1-10), 
+                                           font, 0.5, (255, 255, 255), 2)
+                            
+                            # Save heatmap
+                            overlayed_bgr = cv2.cvtColor(overlayed, cv2.COLOR_RGB2BGR)
+                            cv2.imwrite(heatmap_path, overlayed_bgr)
+                            print(f"   ✅ Grad-CAM heatmap saved: {heatmap_filename}")
+                        else:
+                            print(f"   ⚠️ Could not generate Grad-CAM heatmap")
+                    
+                    # 2. Generate ADVANCED attention flow map
+                    if threats:
+                        print(f"   🌊 Generating advanced attention flow visualization...")
+                        attention_flow_filename = f"{unique_id}_attention_flow.png"
+                        attention_flow_path = os.path.join(app.config['RESULTS_FOLDER'], attention_flow_filename)
+                        
+                        explainer.generate_attention_flow_map(input_path, threats, attention_flow_path)
+                        print(f"   ✅ Attention flow map saved: {attention_flow_filename}")
+                    
+                    # 3. Generate ADVANCED enhancement explanation heatmap (12-panel grid)
+                    if enhance_first and os.path.exists(enhanced_output_path):
+                        print(f"   🎨 Generating ADVANCED enhancement explainability (12-panel)...")
+                        enhancement_explainer = EnhancementExplainer()
+                        
+                        enhancement_analysis_filename = f"{unique_id}_enhancement_analysis.png"
+                        enhancement_analysis_path = os.path.join(app.config['RESULTS_FOLDER'], enhancement_analysis_filename)
+                        
+                        enhancement_explainer.generate_comparison_grid(
+                            input_path,
+                            enhanced_output_path,
+                            enhancement_analysis_path
+                        )
+                        print(f"   ✅ ADVANCED 12-panel enhancement analysis saved: {enhancement_analysis_filename}")
+                    
+                    print(f"✅ ADVANCED explainability heatmaps generated successfully!")
+                    
+                except Exception as e:
+                    print(f"⚠️ Could not generate all heatmaps: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                
                 processing_time = time.time() - start_time
                 
-                # Format threat data for JSON response
+                # Format threat data for JSON response with DETAILED ANALYSIS
                 threat_list = []
                 for threat in threats:
                     threat_data = {
@@ -700,6 +827,32 @@ def detect_threats():
                         'bbox': threat['bbox'],
                         'center': threat['center']
                     }
+                    
+                    # Add advanced analysis data
+                    if 'severity' in threat:
+                        threat_data['severity'] = threat['severity']
+                    
+                    if 'threat_score' in threat:
+                        threat_data['threat_score'] = threat['threat_score']
+                    
+                    if 'characteristics' in threat:
+                        char = threat['characteristics']
+                        threat_data['characteristics'] = {
+                            'size_class': char['size_analysis']['size_class'],
+                            'proximity': char['size_analysis']['proximity_alert'],
+                            'position': f"{char['position_analysis']['depth_zone']}, {char['position_analysis']['lateral_zone']}",
+                            'shape': char['shape_profile'],
+                            'screen_coverage': char['size_analysis']['screen_coverage']
+                        }
+                    
+                    if 'behavior' in threat:
+                        threat_data['behavior'] = {
+                            'assessment': threat['behavior']['assessment'],
+                            'indicators': threat['behavior']['additional_indicators'][:3]
+                        }
+                    
+                    if 'tactical_response' in threat:
+                        threat_data['tactical_response'] = threat['tactical_response']
                     
                     # Add distance information if available
                     if 'distance' in threat and threat['distance'].get('distance_m'):
@@ -713,7 +866,8 @@ def detect_threats():
                     
                     threat_list.append(threat_data)
                 
-                return jsonify({
+                # Prepare comprehensive response with detailed analysis
+                response_data = {
                     'success': True,
                     'input_file': input_filename,
                     'enhanced_output_file': enhanced_output_filename,
@@ -725,12 +879,41 @@ def detect_threats():
                     'threats': threat_list,
                     'summary': {
                         'total': summary['total'],
+                        'critical': summary.get('critical', 0),
                         'high_risk': summary['high_risk'],
                         'medium_risk': summary['medium_risk'],
                         'low_risk': summary['low_risk'],
+                        'unknown_risk': summary.get('unknown_risk', 0),
+                        'status': summary.get('status', 'UNKNOWN'),
+                        'average_threat_score': summary.get('average_threat_score', 0),
+                        'max_threat_score': summary.get('max_threat_score', 0),
+                        'immediate_threats': summary.get('immediate_threats', 0),
                         'types': summary['types']
+                    },
+                    'advanced_analysis': {
+                        'severity_breakdown': summary.get('severity_breakdown', {}),
+                        'proximity_alerts': summary.get('proximity_alerts', {}),
+                        'behavior_patterns': summary.get('behavior_patterns', {}),
+                        'distance_range': summary.get('distance_range', {}),
+                        'tactical_alerts': summary.get('tactical_alerts', [])
                     }
-                })
+                }
+                
+                # Add report file if generated
+                if report_filename:
+                    response_data['report_file'] = report_filename
+                
+                # Add ADVANCED explainability files if generated
+                if heatmap_filename:
+                    response_data['gradcam_heatmap'] = heatmap_filename
+                
+                if attention_flow_filename:
+                    response_data['attention_flow'] = attention_flow_filename
+                
+                if enhancement_analysis_filename:
+                    response_data['enhancement_analysis'] = enhancement_analysis_filename
+                
+                return jsonify(response_data)
                 
             except Exception as e:
                 # Clean up files on error
