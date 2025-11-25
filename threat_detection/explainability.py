@@ -568,64 +568,47 @@ class EnhancementExplainer:
     
     def generate_comparison_grid(self, original_path, enhanced_path, output_path):
         """
-        Generate a comprehensive comparison grid with all explanations
+        Generate a 2-panel comparison: Original image and Intensity Enhancement Heatmap
         
         Args:
             original_path: Path to original image
             enhanced_path: Path to enhanced image
             output_path: Path to save comparison grid
         """
-        analysis = self.analyze_color_correction(original_path, enhanced_path)
-        
-        if analysis is None:
-            return None
-        
         # Load original and enhanced
         original = cv2.imread(original_path)
         enhanced = cv2.imread(enhanced_path)
+        
+        if original is None or enhanced is None:
+            return None
+        
         original_rgb = cv2.cvtColor(original, cv2.COLOR_BGR2RGB)
         enhanced_rgb = cv2.cvtColor(enhanced, cv2.COLOR_BGR2RGB)
         
-        # Resize for grid
-        target_size = (400, 300)
+        # Ensure same size
+        if original.shape != enhanced.shape:
+            enhanced_rgb = cv2.resize(enhanced_rgb, (original.shape[1], original.shape[0]))
+        
+        # Calculate intensity change heatmap
+        diff_rgb = enhanced_rgb.astype(np.float32) - original_rgb.astype(np.float32)
+        intensity_change = np.mean(np.abs(diff_rgb), axis=2)
+        
+        # Normalize to [0, 1]
+        intensity_normalized = (intensity_change - intensity_change.min()) / (intensity_change.max() - intensity_change.min() + 1e-8)
+        
+        # Apply jet colormap for heatmap
+        heatmap = cm.jet(intensity_normalized)[:, :, :3]
+        heatmap = (heatmap * 255).astype(np.uint8)
+        
+        # Resize both for side-by-side display
+        target_size = (600, 450)
         original_resized = cv2.resize(original_rgb, target_size)
-        enhanced_resized = cv2.resize(enhanced_rgb, target_size)
+        heatmap_resized = cv2.resize(heatmap, target_size)
         
-        heatmaps = analysis['heatmaps']
-        
-        # === ADVANCED UNDERWATER-SPECIFIC ANALYSIS ===
-        underwater_metrics = self._analyze_underwater_quality(original_rgb, enhanced_rgb)
-        
-        # Texture enhancement map
-        texture_map = self._analyze_texture_enhancement(original_rgb, enhanced_rgb)
-        
-        # Edge enhancement map
-        edge_map = self._analyze_edge_enhancement(original_rgb, enhanced_rgb)
-        
-        # Create UPGRADED grid: 4 rows x 3 columns (12 panels)
-        grid_images = [
-            ('Original Image', original_resized),
-            ('Enhanced Image', enhanced_resized),
-            ('Intensity Change', cv2.resize(heatmaps['intensity'], target_size)),
-            
-            ('Red Channel Correction', cv2.resize(heatmaps['red_correction'], target_size)),
-            ('Green Channel Correction', cv2.resize(heatmaps['green_correction'], target_size)),
-            ('Blue Channel Correction', cv2.resize(heatmaps['blue_correction'], target_size)),
-            
-            ('Color Balance Map', cv2.resize(heatmaps['color_balance'], target_size)),
-            ('Contrast Enhancement', cv2.resize(heatmaps['contrast'], target_size)),
-            ('Brightness Enhancement', cv2.resize(heatmaps['brightness'], target_size)),
-            
-            ('Texture Enhancement', cv2.resize(texture_map, target_size)),
-            ('Edge Enhancement', cv2.resize(edge_map, target_size)),
-            ('Underwater Quality\n' + self._format_metrics(underwater_metrics), 
-             self._create_metrics_panel(underwater_metrics, target_size))
-        ]
-        
-        # Create matplotlib figure with LARGER grid
-        fig, axes = plt.subplots(4, 3, figsize=(18, 18))
-        fig.suptitle('🌊 ADVANCED Enhancement Explainability - Underwater Image Analysis', 
-                     fontsize=18, fontweight='bold', color='#00ff9f')
+        # Create matplotlib figure with 2 panels
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+        fig.suptitle('🎨 Enhancement Explainability Analysis', 
+                     fontsize=16, fontweight='bold', color='#00ff9f')
         
         # Calculate quality metrics
         ssim_score = ssim(cv2.cvtColor(original, cv2.COLOR_BGR2GRAY), 
@@ -634,41 +617,32 @@ class EnhancementExplainer:
         psnr_score = psnr(original, enhanced, data_range=255)
         
         # Add subtitle with metrics
-        fig.text(0.5, 0.96, 
-                f'SSIM: {ssim_score:.4f} | PSNR: {psnr_score:.2f} dB | ' +
-                f'Turbidity Reduction: {underwater_metrics["turbidity_reduction"]:.1f}%',
-                ha='center', fontsize=12, color='#38bdf8')
+        fig.text(0.5, 0.92, 
+                f'SSIM: {ssim_score:.4f} | PSNR: {psnr_score:.2f} dB | Avg Intensity Change: {np.mean(intensity_change):.2f}',
+                ha='center', fontsize=11, color='#38bdf8')
         
-        for idx, (title, img) in enumerate(grid_images):
-            row = idx // 3
-            col = idx % 3
-            axes[row, col].imshow(img)
-            axes[row, col].set_title(title, fontsize=11, fontweight='bold', pad=10)
-            axes[row, col].axis('off')
-            
-            # Add colored borders for different categories
-            if idx < 3:  # Original/Enhanced/Intensity
-                for spine in axes[row, col].spines.values():
-                    spine.set_edgecolor('#00ff9f')
-                    spine.set_linewidth(2)
-            elif idx < 6:  # Color channels
-                for spine in axes[row, col].spines.values():
-                    spine.set_edgecolor('#667eea')
-                    spine.set_linewidth(2)
-            elif idx < 9:  # Balance/Contrast/Brightness
-                for spine in axes[row, col].spines.values():
-                    spine.set_edgecolor('#f59e0b')
-                    spine.set_linewidth(2)
-            else:  # Texture/Edge/Metrics
-                for spine in axes[row, col].spines.values():
-                    spine.set_edgecolor('#ef4444')
-                    spine.set_linewidth(2)
+        # Left panel: Original Image
+        axes[0].imshow(original_resized)
+        axes[0].set_title('Original Image', fontsize=13, fontweight='bold', pad=10, color='#00ff9f')
+        axes[0].axis('off')
+        for spine in axes[0].spines.values():
+            spine.set_edgecolor('#00ff9f')
+            spine.set_linewidth(3)
         
-        plt.tight_layout(rect=[0, 0, 1, 0.95])
-        plt.savefig(output_path, dpi=200, bbox_inches='tight', facecolor='#0a0e27')
+        # Right panel: Intensity Enhancement Heatmap
+        axes[1].imshow(heatmap_resized)
+        axes[1].set_title('Enhancement Intensity Heatmap\n(Red = High Enhancement, Blue = Low Enhancement)', 
+                         fontsize=13, fontweight='bold', pad=10, color='#fbbf24')
+        axes[1].axis('off')
+        for spine in axes[1].spines.values():
+            spine.set_edgecolor('#fbbf24')
+            spine.set_linewidth(3)
+        
+        plt.tight_layout(rect=[0, 0, 1, 0.90])
+        plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='#0a0e27')
         plt.close()
         
-        print(f"✅ Advanced 12-panel comparison grid saved to: {output_path}")
+        print(f"✅ 2-panel enhancement analysis saved to: {output_path}")
         
         return output_path
     

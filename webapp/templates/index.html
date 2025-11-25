@@ -1330,7 +1330,7 @@
         <!-- Military Header -->
         <div class="header">
             <div class="header-left">
-                <img src="/photos/government-of-india.jpg" alt="Government Logo" class="military-emblem" onerror="this.style.display='none'">
+                <img src="/photos/gov logo.png" alt="Government Logo" class="military-emblem" onerror="this.style.display='none'">
                 <div class="header-content">
                     <h1>    UNDERWATER DEFENSE SHIELD</h1>
                     <p>Underwater Image Enhancement System</p>
@@ -1455,47 +1455,50 @@
                         <h4 style="color: #fff; margin-bottom: 10px;">Detected Threat Types:</h4>
                         <div id="threatTypesContent"></div>
                     </div>
+                    
+                    <!-- 2x2 Image Grid: Original, Enhanced, Threat Detection, Distance Measurement -->
+                    <div class="images-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                        <!-- Top Left: Original Image -->
+                        <div class="image-card">
+                            <h3>[ORIGINAL IMAGE]</h3>
+                            <div class="image-container">
+                                <img id="originalImage" src="" alt="Original">
+                            </div>
+                        </div>
+                        
+                        <!-- Top Right: Enhanced Image -->
+                        <div class="image-card">
+                            <h3>[ENHANCED IMAGE]</h3>
+                            <div class="image-container">
+                                <img id="processedImage" src="" alt="Enhanced">
+                            </div>
+                        </div>
+                        
+                        <!-- Bottom Left: Threat Detection -->
+                        <div class="image-card">
+                            <h3>[THREAT DETECTION]</h3>
+                            <div class="image-container">
+                                <img id="threatImage" src="" alt="Threat Detection" style="display: none;">
+                                <p id="noThreatMessage" style="color: #10b981;">No threat detection performed</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bottom Right: Distance Measurement -->
+                        <div class="image-card">
+                            <h3>[DISTANCE MEASUREMENT]</h3>
+                            <div class="image-container">
+                                <img id="distanceImage" src="" alt="Distance Measurement" style="display: none;">
+                                <p id="noDistanceMessage" style="color: #10b981;">No distance measurement performed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Analysis Section (Attention Flow, Enhancement, etc.) -->
+                    <div id="additionalAnalysis" style="margin-top: 30px;"></div>
                 </div>
 
-                <!-- 2x2 Image Grid: Original, Enhanced, Threat Detection, Distance Measurement -->
-                <div class="images-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
-                    <!-- Top Left: Original Image -->
-                    <div class="image-card">
-                        <h3>[ORIGINAL IMAGE]</h3>
-                        <div class="image-container">
-                            <img id="originalImage" src="" alt="Original">
-                        </div>
-                    </div>
-                    
-                    <!-- Top Right: Enhanced Image -->
-                    <div class="image-card">
-                        <h3>[ENHANCED IMAGE]</h3>
-                        <div class="image-container">
-                            <img id="processedImage" src="" alt="Enhanced">
-                        </div>
-                    </div>
-                    
-                    <!-- Bottom Left: Threat Detection -->
-                    <div class="image-card">
-                        <h3>[THREAT DETECTION]</h3>
-                        <div class="image-container">
-                            <img id="threatImage" src="" alt="Threat Detection" style="display: none;">
-                            <p id="noThreatMessage" style="color: #10b981;">No threat detection performed</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Bottom Right: Distance Measurement -->
-                    <div class="image-card">
-                        <h3>[DISTANCE MEASUREMENT]</h3>
-                        <div class="image-container">
-                            <img id="distanceImage" src="" alt="Distance Measurement" style="display: none;">
-                            <p id="noDistanceMessage" style="color: #10b981;">No distance measurement performed</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Metrics Section -->
-                <div class="metrics-section" id="metricsSection" style="display: none;">
+                <!-- Metrics Section (moved outside threat summary) -->
+                <div class="metrics-section" id="metricsSection" style="display: none; margin-top: 40px;">
                     <h2 style="text-align: center; margin: 40px 0 30px 0; color: #10b981; font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">[QUALITY METRICS]</h2>
                     
                     <div class="metrics-loading" id="metricsLoading" style="display: none; text-align: center; padding: 20px;">
@@ -2331,27 +2334,10 @@
                 typesContent.innerHTML = '<p style="color: #a0aec0;">No specific threat types identified</p>';
             }
             
-            // Add HEATMAPS at the end of threat summary
-            if (data.gradcam_heatmap) {
-                console.log('📊 Grad-CAM heatmap available:', data.gradcam_heatmap);
-                const heatmapDiv = document.createElement('div');
-                heatmapDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 2px solid #00ff9f;';
-                heatmapDiv.innerHTML = `
-                    <h3 style="color: #00ff9f; margin-bottom: 10px; font-size: 1.2em;">
-                        🔬 Grad-CAM Explainability Heatmap
-                    </h3>
-                    <p style="color: #a0aec0; margin-bottom: 10px; font-size: 0.9em;">
-                        Shows <strong>WHY</strong> YOLO detected these threats. Red areas = high detection confidence.
-                    </p>
-                    <img src="/result/${data.gradcam_heatmap}" 
-                         style="width: 100%; border-radius: 8px; cursor: pointer;"
-                         onclick="window.open('/result/${data.gradcam_heatmap}', '_blank')"
-                         alt="Grad-CAM Heatmap">
-                    <p style="color: #38bdf8; margin-top: 10px; font-size: 0.85em;">
-                        💡 Click image to view full size
-                    </p>
-                `;
-                typesContent.appendChild(heatmapDiv);
+            // Get additional analysis container for attention flow, enhancement analysis, etc.
+            const additionalAnalysis = document.getElementById('additionalAnalysis');
+            if (additionalAnalysis) {
+                additionalAnalysis.innerHTML = ''; // Clear previous content
             }
             
             if (data.attention_flow) {
@@ -2373,7 +2359,7 @@
                         💡 Click to view full size | Multi-scale analysis with directional vectors
                     </p>
                 `;
-                typesContent.appendChild(flowDiv);
+                if (additionalAnalysis) additionalAnalysis.appendChild(flowDiv);
             }
             
             if (data.enhancement_analysis) {
@@ -2382,20 +2368,20 @@
                 analysisDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 2px solid #667eea;';
                 analysisDiv.innerHTML = `
                     <h3 style="color: #667eea; margin-bottom: 10px; font-size: 1.2em;">
-                        🎨 Advanced Enhancement Explainability (12-Panel)
+                        🎨 Advanced Enhancement Explainability
                     </h3>
                     <p style="color: #a0aec0; margin-bottom: 10px; font-size: 0.9em;">
-                        Shows <strong>HOW</strong> the Deep WaveNet model enhanced the image with underwater-specific analysis.
+                        Side-by-side comparison showing the original image and enhancement intensity heatmap. Red areas indicate high enhancement, blue areas indicate low enhancement.
                     </p>
                     <img src="/result/${data.enhancement_analysis}" 
                          style="width: 100%; border-radius: 8px; cursor: pointer;"
                          onclick="window.open('/result/${data.enhancement_analysis}', '_blank')"
                          alt="Enhancement Analysis">
                     <p style="color: #38bdf8; margin-top: 10px; font-size: 0.85em;">
-                        💡 Click to view full size | Includes SSIM/PSNR, turbidity, texture, edge, and underwater metrics
+                        💡 Click to view full size | Includes SSIM/PSNR quality metrics
                     </p>
                 `;
-                typesContent.appendChild(analysisDiv);
+                if (additionalAnalysis) additionalAnalysis.appendChild(analysisDiv);
             }
             
             // Show the summary panel

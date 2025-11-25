@@ -849,9 +849,9 @@ def detect_threats():
                         explainer.generate_attention_flow_map(input_path, threats, attention_flow_path)
                         print(f"   ✅ Attention flow map saved: {attention_flow_filename}")
                     
-                    # 3. Generate ADVANCED enhancement explanation heatmap (12-panel grid)
+                    # 3. Generate 2-panel enhancement explanation (original + heatmap)
                     if enhance_first and os.path.exists(enhanced_output_path):
-                        print(f"   🎨 Generating ADVANCED enhancement explainability (12-panel)...")
+                        print(f"   🎨 Generating 2-panel enhancement explainability...")
                         enhancement_explainer = EnhancementExplainer()
                         
                         enhancement_analysis_filename = f"{unique_id}_enhancement_analysis.png"
@@ -862,7 +862,7 @@ def detect_threats():
                             enhanced_output_path,
                             enhancement_analysis_path
                         )
-                        print(f"   ✅ ADVANCED 12-panel enhancement analysis saved: {enhancement_analysis_filename}")
+                        print(f"   ✅ 2-panel enhancement analysis saved: {enhancement_analysis_filename}")
                     
                     print(f"✅ ADVANCED explainability heatmaps generated successfully!")
                     
