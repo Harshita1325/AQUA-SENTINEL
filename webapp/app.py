@@ -8,9 +8,12 @@ from model_processor import get_processor
 from metrics_calculator import get_metrics_calculator
 from video_processor import get_video_processor
 from database_config import SecureImageDatabase
+from pdf_report_generator import FormalPDFReportGenerator
 from dotenv import load_dotenv
 import json
 from threading import Thread
+from datetime import datetime
+import random
 
 # Load environment variables
 load_dotenv()
@@ -578,6 +581,123 @@ def view_report(filename):
         return Response(report_content, mimetype='text/plain')
     return jsonify({'error': 'Report not found'}), 404
 
+@app.route('/generate_pdf_report', methods=['POST'])
+def generate_pdf_report():
+    """
+    Generate comprehensive PDF report for DRDO with all explainability visualizations
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract data from request
+        unique_id = data.get('unique_id')
+        threats = data.get('threats', [])
+        metrics = data.get('metrics', {})
+        
+        if not unique_id:
+            return jsonify({'error': 'Missing unique_id'}), 400
+        
+        # Simulate metadata (in production, this would come from sensors)
+        metadata = {
+            'report_id': unique_id,
+            'timestamp': datetime.now().strftime("%d %B %Y, %H:%M:%S IST"),
+            'gps_coords': f"{random.uniform(8.0, 37.0):.4f}°N, {random.uniform(68.0, 97.0):.4f}°E",
+            'depth_m': random.randint(10, 150),
+            'turbidity_score': round(random.uniform(3.5, 8.5), 1),
+            'visibility': random.choice(['Poor', 'Moderate', 'Good']),
+            'water_temp': round(random.uniform(18.0, 28.0), 1),
+            'current_speed': round(random.uniform(0.5, 3.2), 1)
+        }
+        
+        # Collect image paths
+        results_folder = app.config['RESULTS_FOLDER']
+        file_ext = 'jpg'  # Default extension
+        
+        images = {
+            'before_after': os.path.join(results_folder, f"{unique_id}_quad_comparison.{file_ext}"),
+            'threat_detection': os.path.join(results_folder, f"{unique_id}_distance_visualization.{file_ext}"),
+            'gradcam': os.path.join(results_folder, f"{unique_id}_gradcam_heatmap.{file_ext}"),
+            'attention_flow': os.path.join(results_folder, f"{unique_id}_attention_flow.png"),
+            'enhancement_grid': os.path.join(results_folder, f"{unique_id}_enhancement_analysis.png")
+        }
+        
+        # Calculate threat severity
+        threat_count = len(threats)
+        if threat_count == 0:
+            severity = 'LOW'
+        elif threat_count <= 2:
+            severity = 'MEDIUM'
+        elif threat_count <= 5:
+            severity = 'HIGH'
+        else:
+            severity = 'CRITICAL'
+        
+        # Generate summary
+        summary = {
+            'mission_summary': (
+                f"Underwater surveillance operation conducted at depth {metadata['depth_m']} meters. "
+                f"AI-enhanced image processing detected {threat_count} potential threat(s) in the operational area. "
+                f"Advanced deep learning models (YOLOv8-X) were deployed for threat detection with multi-scale "
+                f"Grad-CAM explainability analysis. Image enhancement using Deep WaveNet architecture improved "
+                f"visibility by correcting color attenuation and removing scattering artifacts."
+            ),
+            'recommended_actions': [
+                'Maintain continuous surveillance of detected threat locations',
+                'Verify threat classification with secondary sensors',
+                'Report findings to naval operations command center',
+                'Consider deployment of unmanned underwater vehicle (UUV) for closer inspection',
+                'Update threat database with current detection parameters'
+            ] if threat_count > 0 else [
+                'Area classified as CLEAR - no hostile threats detected',
+                'Continue routine surveillance protocol',
+                'Maintain operational readiness',
+                'Log mission completion in operational database'
+            ],
+            'severity_rating': severity
+        }
+        
+        # Prepare report data
+        report_data = {
+            'metadata': metadata,
+            'threats': threats,
+            'images': images,
+            'metrics': metrics,
+            'summary': summary
+        }
+        
+        # Generate PDF
+        pdf_filename = f"{unique_id}_DRDO_ThreatReport.pdf"
+        pdf_path = os.path.join(results_folder, pdf_filename)
+        
+        logo_folder = os.path.join(os.path.dirname(__file__), 'photos')
+        pdf_generator = FormalPDFReportGenerator(logo_folder_path=logo_folder)
+        
+        pdf_generator.generate_report(pdf_path, report_data)
+        
+        print(f"PDF Report generated successfully: {pdf_filename}")
+        
+        return jsonify({
+            'success': True,
+            'pdf_filename': pdf_filename,
+            'message': 'PDF report generated successfully'
+        })
+        
+    except Exception as e:
+        print(f"Error generating PDF report: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/download_pdf_report/<filename>')
+def download_pdf_report(filename):
+    """
+    Download generated PDF report
+    """
+    report_path = os.path.join(app.config['RESULTS_FOLDER'], filename)
+    if os.path.exists(report_path):
+        return send_file(report_path, as_attachment=True, download_name=filename, mimetype='application/pdf')
+    return jsonify({'error': 'PDF report not found'}), 404
+
 @app.route('/detect_threats', methods=['POST'])
 def detect_threats():
     """
@@ -849,9 +969,9 @@ def detect_threats():
                         explainer.generate_attention_flow_map(input_path, threats, attention_flow_path)
                         print(f"   ✅ Attention flow map saved: {attention_flow_filename}")
                     
-                    # 3. Generate 2-panel enhancement explanation (original + heatmap)
+                    # 3. Generate ADVANCED 12-panel enhancement explanation
                     if enhance_first and os.path.exists(enhanced_output_path):
-                        print(f"   🎨 Generating 2-panel enhancement explainability...")
+                        print(f"   🎨 Generating ADVANCED 12-panel enhancement explainability...")
                         enhancement_explainer = EnhancementExplainer()
                         
                         enhancement_analysis_filename = f"{unique_id}_enhancement_analysis.png"
@@ -862,7 +982,7 @@ def detect_threats():
                             enhanced_output_path,
                             enhancement_analysis_path
                         )
-                        print(f"   ✅ 2-panel enhancement analysis saved: {enhancement_analysis_filename}")
+                        print(f"   ✅ ADVANCED 12-panel enhancement analysis saved: {enhancement_analysis_filename}")
                     
                     print(f"✅ ADVANCED explainability heatmaps generated successfully!")
                     
@@ -872,6 +992,103 @@ def detect_threats():
                     traceback.print_exc()
                 
                 processing_time = time.time() - start_time
+                
+                # Calculate quality metrics if enhancement was performed
+                calculated_metrics = {
+                    'psnr': 0,
+                    'ssim': 0,
+                    'uiqm': 0,
+                    'turbidity_reduction': 0,
+                    'entropy_gain': 0
+                }
+                
+                if enhance_first and os.path.exists(enhanced_output_path):
+                    try:
+                        print(f"\n📊 Calculating image quality metrics...")
+                        if metrics_calc is None:
+                            metrics_calc = get_metrics_calculator()
+                        
+                        # Load original and enhanced images
+                        original_img = cv2.imread(input_path)
+                        enhanced_img = cv2.imread(enhanced_output_path)
+                        
+                        # Calculate all metrics
+                        metrics_result = metrics_calc.calculate_all_metrics(
+                            cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB),
+                            cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
+                        )
+                        
+                        calculated_metrics['psnr'] = round(metrics_result['psnr'], 2)
+                        calculated_metrics['ssim'] = round(metrics_result['ssim'], 3)
+                        calculated_metrics['uiqm'] = round(metrics_result['uiqm_enhanced'], 3)
+                        
+                        # Calculate turbidity reduction
+                        orig_turbidity = 100 - (metrics_result['uiqm_original'] * 25)  # Approximate
+                        enh_turbidity = 100 - (metrics_result['uiqm_enhanced'] * 25)
+                        calculated_metrics['turbidity_reduction'] = round(max(0, orig_turbidity - enh_turbidity), 1)
+                        
+                        # Calculate entropy gain
+                        orig_gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+                        enh_gray = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2GRAY)
+                        orig_entropy = -np.sum(np.histogram(orig_gray, bins=256, range=(0, 256))[0] / orig_gray.size * 
+                                              np.log2(np.histogram(orig_gray, bins=256, range=(0, 256))[0] / orig_gray.size + 1e-10))
+                        enh_entropy = -np.sum(np.histogram(enh_gray, bins=256, range=(0, 256))[0] / enh_gray.size * 
+                                            np.log2(np.histogram(enh_gray, bins=256, range=(0, 256))[0] / enh_gray.size + 1e-10))
+                        calculated_metrics['entropy_gain'] = round(enh_entropy - orig_entropy, 3)
+                        
+                        print(f"   ✅ Metrics calculated: PSNR={calculated_metrics['psnr']} dB, SSIM={calculated_metrics['ssim']}, UIQM={calculated_metrics['uiqm']}")
+                        
+                    except Exception as e:
+                        print(f"   ⚠️ Metrics calculation failed: {str(e)}")
+                
+                # Generate quad comparison image (Original | Enhanced | Threats | Distance)
+                quad_comparison_filename = f"{unique_id}_quad_comparison.{file_ext}"
+                quad_comparison_path = os.path.join(app.config['RESULTS_FOLDER'], quad_comparison_filename)
+                
+                try:
+                    print(f"\n🖼️ Generating quad comparison image...")
+                    original_img = cv2.imread(input_path)
+                    enhanced_img = cv2.imread(enhanced_output_path)
+                    threat_img = cv2.imread(threat_output_path)
+                    distance_img = cv2.imread(distance_output_path)
+                    
+                    # Resize all to same dimensions
+                    target_height = 400
+                    aspect = original_img.shape[1] / original_img.shape[0]
+                    target_width = int(target_height * aspect)
+                    
+                    orig_resized = cv2.resize(original_img, (target_width, target_height))
+                    enh_resized = cv2.resize(enhanced_img, (target_width, target_height))
+                    threat_resized = cv2.resize(threat_img, (target_width, target_height))
+                    dist_resized = cv2.resize(distance_img, (target_width, target_height))
+                    
+                    # Add labels
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    label_color = (255, 255, 255)
+                    bg_color = (0, 0, 0)
+                    
+                    def add_label(img, text):
+                        img_copy = img.copy()
+                        (tw, th), _ = cv2.getTextSize(text, font, 0.8, 2)
+                        cv2.rectangle(img_copy, (10, 10), (tw + 20, th + 20), bg_color, -1)
+                        cv2.putText(img_copy, text, (15, th + 15), font, 0.8, label_color, 2)
+                        return img_copy
+                    
+                    orig_labeled = add_label(orig_resized, "Original")
+                    enh_labeled = add_label(enh_resized, "Enhanced")
+                    threat_labeled = add_label(threat_resized, "Threat Detection")
+                    dist_labeled = add_label(dist_resized, "Distance Measurement")
+                    
+                    # Create 2x2 grid
+                    top_row = np.hstack([orig_labeled, enh_labeled])
+                    bottom_row = np.hstack([threat_labeled, dist_labeled])
+                    quad_image = np.vstack([top_row, bottom_row])
+                    
+                    cv2.imwrite(quad_comparison_path, quad_image)
+                    print(f"   ✅ Quad comparison saved: {quad_comparison_filename}")
+                    
+                except Exception as e:
+                    print(f"   ⚠️ Quad comparison generation failed: {str(e)}")
                 
                 # Format threat data for JSON response with DETAILED ANALYSIS
                 threat_list = []
@@ -925,6 +1142,7 @@ def detect_threats():
                 # Prepare comprehensive response with detailed analysis
                 response_data = {
                     'success': True,
+                    'unique_id': unique_id,  # Add unique_id for PDF generation
                     'input_file': input_filename,
                     'enhanced_output_file': enhanced_output_filename,
                     'threat_output_file': threat_output_filename,
@@ -933,6 +1151,7 @@ def detect_threats():
                     'threats_detected': len(threats) > 0,
                     'threat_count': summary['total'],
                     'threats': threat_list,
+                    'metrics': calculated_metrics,  # Use calculated metrics
                     'summary': {
                         'total': summary['total'],
                         'critical': summary.get('critical', 0),

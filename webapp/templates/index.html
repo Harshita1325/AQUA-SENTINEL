@@ -2166,6 +2166,42 @@
                 typesContent.appendChild(reportButton);
             }
             
+            // Add DRDO PDF Report Generation Button
+            const pdfButton = document.createElement('button');
+            pdfButton.id = 'generatePdfButton';
+            pdfButton.style.cssText = `
+                display: inline-block;
+                padding: 12px 24px;
+                margin: 10px 10px;
+                background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+                color: white;
+                border: 2px solid #1e40af;
+                border-radius: 6px;
+                font-weight: 700;
+                font-size: 14px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            `;
+            pdfButton.innerHTML = '🛡️ Generate DRDO PDF Report';
+            pdfButton.onclick = function() {
+                generateDRDOPDFReport(data.unique_id, data.threats, data.metrics);
+            };
+            pdfButton.onmouseover = function() {
+                this.style.background = 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)';
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 6px 12px rgba(37, 99, 235, 0.4)';
+            };
+            pdfButton.onmouseout = function() {
+                this.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)';
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 8px rgba(30, 58, 138, 0.3)';
+            };
+            typesContent.appendChild(pdfButton);
+            
             // Add overall status badge
             if (summary.status) {
                 const statusBadge = document.createElement('div');
@@ -2368,17 +2404,23 @@
                 analysisDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 2px solid #667eea;';
                 analysisDiv.innerHTML = `
                     <h3 style="color: #667eea; margin-bottom: 10px; font-size: 1.2em;">
-                        🎨 Advanced Enhancement Explainability
+                        🎨 ADVANCED 12-Panel Enhancement Explainability
                     </h3>
                     <p style="color: #a0aec0; margin-bottom: 10px; font-size: 0.9em;">
-                        Side-by-side comparison showing the original image and enhancement intensity heatmap. Red areas indicate high enhancement, blue areas indicate low enhancement.
+                        Comprehensive 4×3 grid analysis showing <strong>HOW</strong> the Deep WaveNet enhanced the image:
                     </p>
+                    <ul style="color: #a0aec0; font-size: 0.85em; margin-left: 20px; margin-bottom: 10px;">
+                        <li>🟢 <strong>Row 1:</strong> Original & Enhanced comparison with intensity map</li>
+                        <li>🟣 <strong>Row 2:</strong> Per-channel corrections (Red, Green, Blue)</li>
+                        <li>🟡 <strong>Row 3:</strong> Color balance, contrast & brightness analysis</li>
+                        <li>🔴 <strong>Row 4:</strong> Texture & edge enhancement + underwater quality metrics</li>
+                    </ul>
                     <img src="/result/${data.enhancement_analysis}" 
-                         style="width: 100%; border-radius: 8px; cursor: pointer;"
+                         style="width: 100%; border-radius: 8px; cursor: pointer; border: 1px solid #667eea;"
                          onclick="window.open('/result/${data.enhancement_analysis}', '_blank')"
-                         alt="Enhancement Analysis">
+                         alt="12-Panel Enhancement Analysis">
                     <p style="color: #38bdf8; margin-top: 10px; font-size: 0.85em;">
-                        💡 Click to view full size | Includes SSIM/PSNR quality metrics
+                        💡 Click to view full-size HD image | Includes SSIM, PSNR, turbidity reduction, entropy gain & more
                     </p>
                 `;
                 if (additionalAnalysis) additionalAnalysis.appendChild(analysisDiv);
@@ -2611,6 +2653,98 @@
         }
         
         // ==================== END THREAT DETECTION ====================
+
+        // ==================== DRDO PDF REPORT GENERATION ====================
+        
+        async function generateDRDOPDFReport(uniqueId, threats, metrics) {
+            try {
+                showStatus('Generating formal DRDO PDF report...', 'info');
+                
+                const pdfButton = document.getElementById('generatePdfButton');
+                if (pdfButton) {
+                    pdfButton.disabled = true;
+                    pdfButton.innerHTML = 'Generating Report...';
+                    pdfButton.style.opacity = '0.6';
+                }
+                
+                const response = await fetch('/generate_pdf_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        unique_id: uniqueId,
+                        threats: threats,
+                        metrics: metrics
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('PDF report generated successfully!', 'success');
+                    
+                    // Create download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = `/download_pdf_report/${data.pdf_filename}`;
+                    downloadLink.download = data.pdf_filename;
+                    downloadLink.style.cssText = `
+                        display: inline-block;
+                        padding: 12px 24px;
+                        margin: 10px;
+                        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        font-weight: 700;
+                        font-size: 14px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+                        text-transform: uppercase;
+                    `;
+                    downloadLink.innerHTML = 'Download DRDO PDF Report';
+                    downloadLink.onmouseover = function() {
+                        this.style.background = 'linear-gradient(135deg, #10b981 0%, #34d399 100%)';
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.boxShadow = '0 6px 12px rgba(16, 185, 129, 0.4)';
+                    };
+                    downloadLink.onmouseout = function() {
+                        this.style.background = 'linear-gradient(135deg, #059669 0%, #10b981 100%)';
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 4px 8px rgba(5, 150, 105, 0.3)';
+                    };
+                    
+                    // Replace PDF button with download link
+                    const typesContent = document.getElementById('threatTypesContent');
+                    if (pdfButton && typesContent.contains(pdfButton)) {
+                        typesContent.replaceChild(downloadLink, pdfButton);
+                    } else {
+                        typesContent.appendChild(downloadLink);
+                    }
+                    
+                    // Auto-download
+                    downloadLink.click();
+                    
+                } else {
+                    throw new Error(data.error || 'Failed to generate PDF');
+                }
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showStatus(`Failed to generate PDF report: ${error.message}`, 'error');
+                
+                // Re-enable button
+                const pdfButton = document.getElementById('generatePdfButton');
+                if (pdfButton) {
+                    pdfButton.disabled = false;
+                    pdfButton.innerHTML = '🛡️ Generate DRDO PDF Report';
+                    pdfButton.style.opacity = '1';
+                }
+            }
+        }
+        
+        // ==================== END DRDO PDF REPORT ====================
 
         // ==================== HAMBURGER MENU FUNCTIONS ====================
         

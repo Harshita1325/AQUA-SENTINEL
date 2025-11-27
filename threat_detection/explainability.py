@@ -169,18 +169,28 @@ class GradCAMExplainer:
         # === 4. SALIENCY MAP ===
         saliency = self._compute_saliency(image)
         
-        # === 5. FUSION OF ALL COMPONENTS ===
+        # === 5. COLOR-BASED ATTENTION (NEW) ===
+        # Objects often have distinctive colors
+        color_attention = self._compute_color_distinctiveness(image, detection_box)
+        
+        # === 6. TEXTURE RICHNESS (NEW) ===
+        # High-texture regions are often important
+        texture_map = self._compute_texture_richness(gray)
+        
+        # === 7. ENHANCED FUSION OF ALL COMPONENTS ===
         heatmap = (
-            multi_scale_attention * 0.40 +  # Multi-scale Gaussian
-            edge_importance * 0.25 +        # Edge features
-            superpixel_mask * 0.20 +        # Superpixel importance
-            saliency * 0.15                 # Visual saliency
+            multi_scale_attention * 0.35 +  # Multi-scale Gaussian
+            edge_importance * 0.20 +        # Edge features
+            superpixel_mask * 0.15 +        # Superpixel importance
+            saliency * 0.12 +               # Visual saliency
+            color_attention * 0.10 +        # Color distinctiveness (NEW)
+            texture_map * 0.08              # Texture richness (NEW)
         )
         
-        # === 6. ADAPTIVE REGION ENHANCEMENT ===
+        # === 8. ADAPTIVE REGION ENHANCEMENT ===
         # Create soft mask for detection region
         mask = np.zeros_like(heatmap)
-        padding = 10  # Soft boundary
+        padding = 15  # Increased soft boundary
         y1_pad = max(0, y1 - padding)
         y2_pad = min(height, y2 + padding)
         x1_pad = max(0, x1 - padding)
@@ -270,6 +280,57 @@ class GradCAMExplainer:
         saliency = gaussian_filter(saliency, sigma=5)
         
         return saliency
+    
+    def _compute_color_distinctiveness(self, image, detection_box):
+        """
+        Compute color distinctiveness map
+        Highlights regions with colors different from surroundings
+        """
+        height, width = image.shape[:2]
+        x1, y1, x2, y2 = detection_box
+        
+        # Extract detection region colors
+        detection_region = image[y1:y2, x1:x2]
+        if detection_region.size == 0:
+            return np.zeros((height, width), dtype=np.float32)
+        
+        # Mean color of detection
+        mean_color = np.mean(detection_region, axis=(0, 1))
+        
+        # Color distance map (Euclidean distance in RGB space)
+        color_diff = np.sqrt(np.sum((image - mean_color) ** 2, axis=2))
+        
+        # Invert: similar colors get high attention
+        color_attention = 1.0 / (1.0 + color_diff / 100.0)
+        
+        # Normalize
+        color_attention = (color_attention - color_attention.min()) / (color_attention.max() - color_attention.min() + 1e-8)
+        
+        return color_attention
+    
+    def _compute_texture_richness(self, gray_image):
+        """
+        Compute texture richness using local standard deviation
+        High-texture regions often contain important features
+        """
+        # Apply Laplacian for texture
+        laplacian = cv2.Laplacian(gray_image, cv2.CV_64F)
+        texture = np.abs(laplacian)
+        
+        # Local standard deviation using box filter
+        kernel_size = 15
+        mean = cv2.blur(gray_image.astype(np.float32), (kernel_size, kernel_size))
+        mean_sq = cv2.blur(gray_image.astype(np.float32) ** 2, (kernel_size, kernel_size))
+        variance = mean_sq - mean ** 2
+        std_dev = np.sqrt(np.abs(variance))
+        
+        # Combine Laplacian and std dev
+        texture_combined = texture * 0.6 + std_dev * 0.4
+        
+        # Normalize
+        texture_norm = (texture_combined - texture_combined.min()) / (texture_combined.max() - texture_combined.min() + 1e-8)
+        
+        return texture_norm
     
     def overlay_heatmap(self, image, heatmap, alpha=0.5):
         """
@@ -568,7 +629,12 @@ class EnhancementExplainer:
     
     def generate_comparison_grid(self, original_path, enhanced_path, output_path):
         """
-        Generate a 2-panel comparison: Original image and Intensity Enhancement Heatmap
+        Generate ADVANCED 12-panel comparison grid with comprehensive analysis:
+        - Original & Enhanced images
+        - Per-channel corrections (R, G, B)
+        - Intensity, color balance, contrast, brightness
+        - Texture, edge enhancement
+        - Underwater quality metrics panel
         
         Args:
             original_path: Path to original image
@@ -589,26 +655,69 @@ class EnhancementExplainer:
         if original.shape != enhanced.shape:
             enhanced_rgb = cv2.resize(enhanced_rgb, (original.shape[1], original.shape[0]))
         
-        # Calculate intensity change heatmap
+        # Calculate comprehensive analysis
         diff_rgb = enhanced_rgb.astype(np.float32) - original_rgb.astype(np.float32)
         intensity_change = np.mean(np.abs(diff_rgb), axis=2)
         
-        # Normalize to [0, 1]
-        intensity_normalized = (intensity_change - intensity_change.min()) / (intensity_change.max() - intensity_change.min() + 1e-8)
+        # Generate all heatmaps
+        heatmaps = {}
         
-        # Apply jet colormap for heatmap
-        heatmap = cm.jet(intensity_normalized)[:, :, :3]
-        heatmap = (heatmap * 255).astype(np.uint8)
+        # 1. Intensity change heatmap
+        heatmaps['intensity'] = self._create_heatmap(intensity_change, 'Intensity Change')
         
-        # Resize both for side-by-side display
-        target_size = (600, 450)
+        # 2-4. Per-channel corrections
+        for i, channel_name in enumerate(['red', 'green', 'blue']):
+            channel_diff = np.abs(diff_rgb[:, :, i])
+            heatmaps[f'{channel_name}_correction'] = self._create_heatmap(
+                channel_diff, f'{channel_name.capitalize()} Channel Correction'
+            )
+        
+        # 5. Color balance analysis
+        heatmaps['color_balance'] = self._analyze_color_balance(original_rgb, enhanced_rgb)
+        
+        # 6. Contrast enhancement
+        heatmaps['contrast'] = self._analyze_contrast_enhancement(original_rgb, enhanced_rgb)
+        
+        # 7. Brightness enhancement
+        heatmaps['brightness'] = self._analyze_brightness_enhancement(original_rgb, enhanced_rgb)
+        
+        # 8. Texture enhancement
+        heatmaps['texture'] = self._analyze_texture_enhancement(original_rgb, enhanced_rgb)
+        
+        # 9. Edge enhancement
+        heatmaps['edge'] = self._analyze_edge_enhancement(original_rgb, enhanced_rgb)
+        
+        # 10. Underwater quality metrics
+        underwater_metrics = self._analyze_underwater_quality(original_rgb, enhanced_rgb)
+        
+        # Resize for grid display
+        target_size = (400, 300)
         original_resized = cv2.resize(original_rgb, target_size)
-        heatmap_resized = cv2.resize(heatmap, target_size)
+        enhanced_resized = cv2.resize(enhanced_rgb, target_size)
         
-        # Create matplotlib figure with 2 panels
-        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-        fig.suptitle('🎨 Enhancement Explainability Analysis', 
-                     fontsize=16, fontweight='bold', color='#00ff9f')
+        # Create 12-panel grid (4 rows x 3 columns)
+        grid_images = [
+            ('Original Image', original_resized),
+            ('Enhanced Image', enhanced_resized),
+            ('Intensity Change', cv2.resize(heatmaps['intensity'], target_size)),
+            
+            ('Red Channel Correction', cv2.resize(heatmaps['red_correction'], target_size)),
+            ('Green Channel Correction', cv2.resize(heatmaps['green_correction'], target_size)),
+            ('Blue Channel Correction', cv2.resize(heatmaps['blue_correction'], target_size)),
+            
+            ('Color Balance Map', cv2.resize(heatmaps['color_balance'], target_size)),
+            ('Contrast Enhancement', cv2.resize(heatmaps['contrast'], target_size)),
+            ('Brightness Enhancement', cv2.resize(heatmaps['brightness'], target_size)),
+            
+            ('Texture Enhancement', cv2.resize(heatmaps['texture'], target_size)),
+            ('Edge Enhancement', cv2.resize(heatmaps['edge'], target_size)),
+            ('Underwater Quality Metrics', self._create_metrics_panel(underwater_metrics, target_size))
+        ]
+        
+        # Create matplotlib figure (4x3 grid) with WHITE background
+        fig, axes = plt.subplots(4, 3, figsize=(18, 20), facecolor='white')
+        fig.suptitle('🌊 ADVANCED Enhancement Explainability - 12-Panel Analysis', 
+                     fontsize=18, fontweight='bold', color='#1a1a1a')
         
         # Calculate quality metrics
         ssim_score = ssim(cv2.cvtColor(original, cv2.COLOR_BGR2GRAY), 
@@ -616,33 +725,44 @@ class EnhancementExplainer:
                          data_range=255)
         psnr_score = psnr(original, enhanced, data_range=255)
         
-        # Add subtitle with metrics
-        fig.text(0.5, 0.92, 
-                f'SSIM: {ssim_score:.4f} | PSNR: {psnr_score:.2f} dB | Avg Intensity Change: {np.mean(intensity_change):.2f}',
-                ha='center', fontsize=11, color='#38bdf8')
+        # Add comprehensive subtitle with metrics (dark text on white)
+        fig.text(0.5, 0.97, 
+                f'SSIM: {ssim_score:.4f} | PSNR: {psnr_score:.2f} dB | ' +
+                f'Turbidity Reduction: {underwater_metrics["turbidity_reduction"]:.1f}% | ' +
+                f'Entropy Gain: {underwater_metrics["entropy_gain"]:.3f} bits',
+                ha='center', fontsize=12, color='#2563eb', weight='bold')
         
-        # Left panel: Original Image
-        axes[0].imshow(original_resized)
-        axes[0].set_title('Original Image', fontsize=13, fontweight='bold', pad=10, color='#00ff9f')
-        axes[0].axis('off')
-        for spine in axes[0].spines.values():
-            spine.set_edgecolor('#00ff9f')
-            spine.set_linewidth(3)
+        # Plot all panels with color-coded borders
+        for idx, (title, img) in enumerate(grid_images):
+            row = idx // 3
+            col = idx % 3
+            axes[row, col].imshow(img)
+            axes[row, col].set_title(title, fontsize=11, fontweight='bold', pad=10)
+            axes[row, col].axis('off')
+            
+            # Color-coded borders for different categories
+            if idx < 3:  # Row 1: Original/Enhanced/Intensity
+                border_color = '#00ff9f'  # Green
+            elif idx < 6:  # Row 2: RGB channels
+                border_color = '#667eea'  # Purple
+            elif idx < 9:  # Row 3: Color/Contrast/Brightness
+                border_color = '#f59e0b'  # Orange
+            else:  # Row 4: Texture/Edge/Metrics
+                border_color = '#ef4444'  # Red
+            
+            for spine in axes[row, col].spines.values():
+                spine.set_visible(True)
+                spine.set_edgecolor(border_color)
+                spine.set_linewidth(3)
         
-        # Right panel: Intensity Enhancement Heatmap
-        axes[1].imshow(heatmap_resized)
-        axes[1].set_title('Enhancement Intensity Heatmap\n(Red = High Enhancement, Blue = Low Enhancement)', 
-                         fontsize=13, fontweight='bold', pad=10, color='#fbbf24')
-        axes[1].axis('off')
-        for spine in axes[1].spines.values():
-            spine.set_edgecolor('#fbbf24')
-            spine.set_linewidth(3)
-        
-        plt.tight_layout(rect=[0, 0, 1, 0.90])
-        plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='#0a0e27')
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        plt.savefig(output_path, dpi=200, bbox_inches='tight', facecolor='white')
         plt.close()
         
-        print(f"✅ 2-panel enhancement analysis saved to: {output_path}")
+        print(f"✅ ADVANCED 12-panel enhancement analysis saved to: {output_path}")
+        print(f"   📊 SSIM: {ssim_score:.4f} | PSNR: {psnr_score:.2f} dB")
+        print(f"   🌊 Turbidity Reduction: {underwater_metrics['turbidity_reduction']:.1f}%")
+        print(f"   📈 Entropy Gain: {underwater_metrics['entropy_gain']:.3f} bits")
         
         return output_path
     
@@ -735,8 +855,8 @@ class EnhancementExplainer:
                 f"Entropy Gain: {metrics['entropy_gain']:.3f}")
     
     def _create_metrics_panel(self, metrics, size):
-        """Create visual metrics panel"""
-        panel = np.ones((size[1], size[0], 3), dtype=np.uint8) * 20  # Dark background
+        """Create visual metrics panel with WHITE background"""
+        panel = np.ones((size[1], size[0], 3), dtype=np.uint8) * 255  # White background
         
         # Add text overlays using PIL for better text rendering
         from PIL import Image, ImageDraw, ImageFont
@@ -753,7 +873,7 @@ class EnhancementExplainer:
             font_small = ImageFont.load_default()
         
         y_offset = 30
-        draw.text((20, y_offset), "📊 Underwater Metrics", fill=(0, 255, 159), font=font_large)
+        draw.text((20, y_offset), "📊 Underwater Metrics", fill=(37, 99, 235), font=font_large)  # Blue text
         
         y_offset += 50
         metrics_text = [
@@ -768,7 +888,7 @@ class EnhancementExplainer:
         ]
         
         for line in metrics_text:
-            draw.text((20, y_offset), line, fill=(224, 231, 255), font=font_small)
+            draw.text((20, y_offset), line, fill=(31, 41, 55), font=font_small)  # Dark gray text
             y_offset += 28
         
         panel = np.array(pil_img)
