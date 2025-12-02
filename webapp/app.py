@@ -584,7 +584,7 @@ def view_report(filename):
 @app.route('/generate_pdf_report', methods=['POST'])
 def generate_pdf_report():
     """
-    Generate comprehensive PDF report for DRDO with all explainability visualizations
+    Generate comprehensive PDF report for DRDO with threat detection and enhancement analysis
     """
     try:
         data = request.get_json()
@@ -616,7 +616,7 @@ def generate_pdf_report():
         images = {
             'before_after': os.path.join(results_folder, f"{unique_id}_quad_comparison.{file_ext}"),
             'threat_detection': os.path.join(results_folder, f"{unique_id}_distance_visualization.{file_ext}"),
-            'gradcam': os.path.join(results_folder, f"{unique_id}_gradcam_heatmap.{file_ext}"),
+
             'attention_flow': os.path.join(results_folder, f"{unique_id}_attention_flow.png"),
             'enhancement_grid': os.path.join(results_folder, f"{unique_id}_enhancement_analysis.png")
         }
@@ -638,7 +638,7 @@ def generate_pdf_report():
                 f"Underwater surveillance operation conducted at depth {metadata['depth_m']} meters. "
                 f"AI-enhanced image processing detected {threat_count} potential threat(s) in the operational area. "
                 f"Advanced deep learning models (YOLOv8-X) were deployed for threat detection with multi-scale "
-                f"Grad-CAM explainability analysis. Image enhancement using Deep WaveNet architecture improved "
+                f"Image enhancement using Deep WaveNet architecture improved "
                 f"visibility by correcting color attenuation and removing scattering artifacts."
             ),
             'recommended_actions': [
@@ -901,95 +901,47 @@ def detect_threats():
                                   (text_x, text_y),
                                   font, font_scale, (255, 165, 0), thickness)
                 else:
-                    print(f"⚠️ No threats detected for distance visualization")
+                    # NO THREATS DETECTED - Add message overlay
+                    print(f"✅ No threats detected - clean scan")
+                    img_height, img_width = distance_img.shape[:2]
+                    message = "NO THREATS DETECTED"
+                    sub_message = "Area Clear - Safe Zone"
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = 1.2
+                    thickness = 3
+                    
+                    # Main message
+                    (tw, th), _ = cv2.getTextSize(message, font, font_scale, thickness)
+                    text_x = (img_width - tw) // 2
+                    text_y = img_height // 2 - 30
+                    
+                    cv2.rectangle(distance_img,
+                                (text_x - 20, text_y - th - 20),
+                                (text_x + tw + 20, text_y + 20),
+                                (0, 0, 0), -1)
+                    cv2.rectangle(distance_img,
+                                (text_x - 20, text_y - th - 20),
+                                (text_x + tw + 20, text_y + 20),
+                                (0, 255, 0), 3)
+                    cv2.putText(distance_img, message,
+                              (text_x, text_y),
+                              font, font_scale, (0, 255, 0), thickness)
+                    
+                    # Sub message
+                    (tw2, th2), _ = cv2.getTextSize(sub_message, font, 0.8, 2)
+                    text_x2 = (img_width - tw2) // 2
+                    text_y2 = text_y + 50
+                    cv2.putText(distance_img, sub_message,
+                              (text_x2, text_y2),
+                              font, 0.8, (0, 255, 0), 2)
                 
                 cv2.imwrite(distance_output_path, distance_img)
                 print(f"💾 Distance measurement image saved to: {distance_output_path}")
                 
-                # Generate HEATMAPS for explainability
+                # Heatmap generation disabled for performance
                 heatmap_filename = None
                 enhancement_analysis_filename = None
-                
-                try:
-                    print(f"\n🔬 Generating explainability heatmaps...")
-                    
-                    # Import explainability module
-                    import sys
-                    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-                    from threat_detection.explainability import GradCAMExplainer, EnhancementExplainer
-                    
-                    # 1. Generate Grad-CAM heatmap for threats
-                    if threats:
-                        print(f"   🎯 Generating Grad-CAM heatmaps for {len(threats)} threats...")
-                        explainer = GradCAMExplainer(processor.threat_detector.model if processor.threat_detector else None)
-                        
-                        # Generate multi-threat heatmap
-                        heatmap_filename = f"{unique_id}_gradcam_heatmap.{file_ext}"
-                        heatmap_path = os.path.join(app.config['RESULTS_FOLDER'], heatmap_filename)
-                        
-                        multi_heatmap = explainer.generate_multi_threat_heatmap(input_path, threats)
-                        
-                        if multi_heatmap is not None:
-                            # Load original image
-                            original_img = cv2.imread(input_path)
-                            original_rgb = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
-                            
-                            # Overlay heatmap
-                            overlayed = explainer.overlay_heatmap(original_rgb, multi_heatmap, alpha=0.5)
-                            
-                            # Add title
-                            font = cv2.FONT_HERSHEY_SIMPLEX
-                            cv2.putText(overlayed, "Grad-CAM: Why YOLO Detected These Threats", 
-                                       (20, 40), font, 1.0, (255, 255, 255), 2, cv2.LINE_AA)
-                            cv2.putText(overlayed, "Red = High Detection Confidence | Blue = Low", 
-                                       (20, 75), font, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-                            
-                            # Draw threat boxes on heatmap
-                            for idx, threat in enumerate(threats):
-                                bbox = threat['bbox']
-                                x1, y1, x2, y2 = bbox
-                                cv2.rectangle(overlayed, (x1, y1), (x2, y2), (255, 255, 255), 2)
-                                threat_label = f"#{idx+1}: {threat['threat_type'].replace('_', ' ').title()}"
-                                cv2.putText(overlayed, threat_label, (x1, y1-10), 
-                                           font, 0.5, (255, 255, 255), 2)
-                            
-                            # Save heatmap
-                            overlayed_bgr = cv2.cvtColor(overlayed, cv2.COLOR_RGB2BGR)
-                            cv2.imwrite(heatmap_path, overlayed_bgr)
-                            print(f"   ✅ Grad-CAM heatmap saved: {heatmap_filename}")
-                        else:
-                            print(f"   ⚠️ Could not generate Grad-CAM heatmap")
-                    
-                    # 2. Generate ADVANCED attention flow map
-                    if threats:
-                        print(f"   🌊 Generating advanced attention flow visualization...")
-                        attention_flow_filename = f"{unique_id}_attention_flow.png"
-                        attention_flow_path = os.path.join(app.config['RESULTS_FOLDER'], attention_flow_filename)
-                        
-                        explainer.generate_attention_flow_map(input_path, threats, attention_flow_path)
-                        print(f"   ✅ Attention flow map saved: {attention_flow_filename}")
-                    
-                    # 3. Generate ADVANCED 12-panel enhancement explanation
-                    if enhance_first and os.path.exists(enhanced_output_path):
-                        print(f"   🎨 Generating ADVANCED 12-panel enhancement explainability...")
-                        enhancement_explainer = EnhancementExplainer()
-                        
-                        enhancement_analysis_filename = f"{unique_id}_enhancement_analysis.png"
-                        enhancement_analysis_path = os.path.join(app.config['RESULTS_FOLDER'], enhancement_analysis_filename)
-                        
-                        enhancement_explainer.generate_comparison_grid(
-                            input_path,
-                            enhanced_output_path,
-                            enhancement_analysis_path
-                        )
-                        print(f"   ✅ ADVANCED 12-panel enhancement analysis saved: {enhancement_analysis_filename}")
-                    
-                    print(f"✅ ADVANCED explainability heatmaps generated successfully!")
-                    
-                except Exception as e:
-                    print(f"⚠️ Could not generate all heatmaps: {str(e)}")
-                    import traceback
-                    traceback.print_exc()
+                attention_flow_filename = None
                 
                 processing_time = time.time() - start_time
                 
@@ -1177,16 +1129,6 @@ def detect_threats():
                 # Add report file if generated
                 if report_filename:
                     response_data['report_file'] = report_filename
-                
-                # Add ADVANCED explainability files if generated
-                if heatmap_filename:
-                    response_data['gradcam_heatmap'] = heatmap_filename
-                
-                if attention_flow_filename:
-                    response_data['attention_flow'] = attention_flow_filename
-                
-                if enhancement_analysis_filename:
-                    response_data['enhancement_analysis'] = enhancement_analysis_filename
                 
                 # Save to database if available
                 db_image_id = None

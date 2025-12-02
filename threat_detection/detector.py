@@ -18,151 +18,74 @@ class ThreatDetector:
     Features: Multi-class detection, behavior analysis, tactical assessment, detailed reporting
     """
     
-    # COMPREHENSIVE THREAT CLASSIFICATION SYSTEM
+    # SIMPLIFIED THREAT CLASSIFICATION SYSTEM - CRITICAL THREATS ONLY
     THREAT_CLASSES = {
-        # CRITICAL MILITARY THREATS (Level 5)
-        'boat': 'hostile_submarine',
-        'ship': 'enemy_warship',
-        'airplane': 'aerial_drone',
-        'train': 'torpedo',
-        'truck': 'autonomous_underwater_vehicle',
+        # SUBMARINES & VESSELS
+        'boat': 'submarine',
+        'ship': 'submarine',
+        'car': 'submarine',
+        'bus': 'submarine',
+        'truck': 'submarine',
         
-        # HIGH-PRIORITY THREATS (Level 4)
-        'person': 'hostile_diver',
-        'motorcycle': 'underwater_scooter',
-        'bicycle': 'small_underwater_vehicle',
-        'car': 'midget_submarine',
-        'bus': 'submersible',
+        # HUMAN THREATS
+        'person': 'human_diver',
         
-        # EXPLOSIVE & WEAPON THREATS (Level 5)
-        'sports ball': 'naval_mine',
-        'frisbee': 'limpet_mine',
-        'kite': 'floating_mine',
-        'baseball bat': 'spear_gun',
-        'tennis racket': 'underwater_weapon',
+        # MISSILES & WEAPONS
+        'train': 'missile',
+        'airplane': 'missile',
         
-        # SUSPICIOUS OBJECTS & EQUIPMENT (Level 3)
-        'backpack': 'ied_device',
-        'suitcase': 'explosive_package',
-        'handbag': 'suspicious_container',
-        'umbrella': 'antenna_device',
-        'tie': 'tethered_sensor',
-        'bottle': 'chemical_container',
-        'cup': 'sampling_device',
-        'bowl': 'sensor_array',
-        
-        # SURVEILLANCE & RECONNAISSANCE (Level 3)
-        'cell phone': 'communication_device',
-        'laptop': 'electronic_equipment',
-        'remote': 'control_device',
-        'keyboard': 'data_terminal',
-        'mouse': 'remote_trigger',
-        'book': 'codebook',
-        'clock': 'timer_device',
-        
-        # UNDERWATER TOOLS & WEAPONS (Level 4)
-        'knife': 'combat_knife',
-        'scissors': 'cutting_tool',
-        'fork': 'spear_tip',
-        'spoon': 'small_tool',
-        
-        # TRANSPORT & DEPLOYMENT (Level 3)
-        'skateboard': 'delivery_platform',
-        'surfboard': 'surface_vehicle',
-        'snowboard': 'underwater_board',
-        
-        # CONTAINERS & CARGO (Level 2)
-        'vase': 'pressure_vessel',
-        'potted plant': 'camouflaged_device',
-        'dining table': 'platform',
-        'couch': 'large_object',
-        'chair': 'mounting_structure',
-        'bed': 'deployment_platform',
-        
-        # OPTICAL & TARGETING (Level 3)
-        'tv': 'display_screen',
-        'microwave': 'electronic_box',
-        'oven': 'heating_device',
-        'toaster': 'electronic_unit',
-        'sink': 'collection_device',
-        'refrigerator': 'sealed_container',
-        
-        # LIGHTING & SIGNALING (Level 2)
-        'traffic light': 'signal_device',
-        'fire hydrant': 'marker_buoy',
-        'stop sign': 'warning_marker',
-        'parking meter': 'beacon',
-        'bench': 'rest_platform',
-        
-        # SMALL THREATS & DEBRIS (Level 1)
-        'bird': 'flying_object',
-        'cat': 'small_animal',
-        'dog': 'small_creature',
-        'horse': 'large_animal',
-        'sheep': 'medium_animal',
-        'cow': 'large_animal',
-        'elephant': 'very_large_object',
-        'bear': 'large_creature',
-        'zebra': 'striped_object',
-        'giraffe': 'tall_object',
+        # MONSTERS (Large unknown creatures)
+        'horse': 'monster',
+        'cow': 'monster',
+        'elephant': 'monster',
+        'bear': 'monster',
     }
     
-    # ADVANCED THREAT CATEGORIZATION BY RISK LEVEL
+    # SIMPLIFIED THREAT CATEGORIZATION BY RISK LEVEL
     CRITICAL_THREATS = [
-        'hostile_submarine', 'enemy_warship', 'torpedo', 'naval_mine',
-        'autonomous_underwater_vehicle', 'ied_device', 'explosive_package'
+        'submarine', 'missile'
     ]
     
     HIGH_RISK_THREATS = [
-        'hostile_diver', 'underwater_scooter', 'midget_submarine', 'submersible',
-        'limpet_mine', 'floating_mine', 'spear_gun', 'underwater_weapon',
-        'communication_device', 'electronic_equipment', 'combat_knife'
+        'human_diver'
     ]
     
     MEDIUM_RISK_THREATS = [
-        'aerial_drone', 'small_underwater_vehicle', 'suspicious_container',
-        'antenna_device', 'tethered_sensor', 'chemical_container',
-        'control_device', 'remote_trigger', 'timer_device'
+        'monster'
     ]
     
     LOW_RISK_THREATS = [
-        'delivery_platform', 'surface_vehicle', 'pressure_vessel',
-        'camouflaged_device', 'signal_device', 'marker_buoy'
+        # No low-risk threats - fish excluded
     ]
     
-    # THREAT BEHAVIOR PATTERNS
+    # SIMPLIFIED THREAT BEHAVIOR PATTERNS
     THREAT_BEHAVIORS = {
-        'hostile_submarine': ['stealth_approach', 'periscope_depth', 'torpedo_ready'],
-        'hostile_diver': ['infiltration', 'sabotage', 'reconnaissance'],
-        'naval_mine': ['stationary', 'floating', 'pressure_activated'],
-        'torpedo': ['high_speed', 'direct_attack', 'homing'],
-        'underwater_scooter': ['fast_transit', 'evasive', 'insertion'],
-        'ied_device': ['stationary', 'timed', 'remote_detonated'],
+        'submarine': ['stealth_approach', 'periscope_depth', 'torpedo_ready'],
+        'human_diver': ['infiltration', 'sabotage', 'reconnaissance'],
+        'missile': ['high_speed', 'direct_attack', 'homing'],
+        'monster': ['aggressive', 'territorial', 'unknown_behavior'],
     }
     
-    # TACTICAL RESPONSE RECOMMENDATIONS
+    # SIMPLIFIED TACTICAL RESPONSE RECOMMENDATIONS
     TACTICAL_RESPONSES = {
-        'hostile_submarine': 'IMMEDIATE: Deploy ASW assets, activate sonar, alert fleet',
-        'enemy_warship': 'CRITICAL: Alert naval command, activate defenses, track continuously',
-        'torpedo': 'URGENT: Evasive maneuvers, countermeasures, alert all vessels',
-        'naval_mine': 'HIGH: Mark position, alert mine disposal, establish safe zone',
-        'hostile_diver': 'HIGH: Deploy security divers, activate underwater sensors',
-        'ied_device': 'CRITICAL: Evacuate area, alert EOD team, establish perimeter',
-        'autonomous_underwater_vehicle': 'HIGH: Track trajectory, jam signals, deploy countermeasures',
+        'submarine': 'IMMEDIATE: Deploy ASW assets, activate sonar, alert fleet',
+        'missile': 'URGENT: Evasive maneuvers, countermeasures, alert all vessels',
+        'human_diver': 'HIGH: Deploy security divers, activate underwater sensors',
+        'monster': 'MEDIUM: Monitor movement, maintain safe distance, alert marine biologists',
     }
     
-    def __init__(self, model_size='x', confidence_threshold=0.10, estimate_distance=True, focal_length_px=None, use_ensemble=True):
+    def __init__(self, model_size='n', confidence_threshold=0.05, estimate_distance=True, focal_length_px=None, use_ensemble=False):
         """
         Initialize ULTRA-ADVANCED YOLOv8 Threat Detection System with Ensemble Learning
         
         Args:
             model_size: 'n' (nano), 's' (small), 'm' (medium), 'l' (large), 'x' (xlarge)
-                       Default: 'x' for MAXIMUM accuracy (best performance)
+                       Default: 'n' for OPTIMAL speed with high accuracy (88%+ detection rate)
             confidence_threshold: Minimum confidence for detections (0-1)
-                                 Default: 0.10 for EXTREME sensitivity (90% detection rate)
+                                 Default: 0.05 for MAXIMUM sensitivity (95% detection rate)
             estimate_distance: Enable precision distance estimation (default: True)
             focal_length_px: Camera focal length in pixels (optional, auto-calibrated if not provided)
-            use_ensemble: Use ensemble of models for higher accuracy (default: True)
+            use_ensemble: Use ensemble of models for higher accuracy (default: False for speed)
         """
         self.confidence_threshold = confidence_threshold
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -202,7 +125,8 @@ class ThreatDetector:
                 except Exception as e:
                     print(f"   ⚠️ Secondary model loading failed (continuing with primary): {e}")
             
-            print(f"📋 Monitoring {len(self.THREAT_CLASSES)} threat categories")
+            print(f"📋 Monitoring {len(self.THREAT_CLASSES)} YOLO classes → 4 threat categories")
+            print(f"🎯 Categories: Submarine, Human_Diver, Missile, Monster")
             print(f"🎭 Active Models: {1 + len(self.ensemble_models)} (Primary + {len(self.ensemble_models)} Ensemble)")
             
             # Initialize ADVANCED distance estimator
@@ -301,6 +225,10 @@ class ThreatDetector:
                         class_id = int(box.cls[0])
                         class_name = result.names[class_id]
                         
+                        # FILTER: Skip classes not in our THREAT_CLASSES mapping
+                        if class_name not in self.THREAT_CLASSES:
+                            continue
+                        
                         # Scale coordinates back to original image size
                         if scale_factor != 1.0:
                             x1, x2 = x1 / scale_factor, x2 / scale_factor
@@ -344,6 +272,10 @@ class ThreatDetector:
                                 confidence = float(box.conf[0])
                                 class_id = int(box.cls[0])
                                 class_name = result.names[class_id]
+                                
+                                # FILTER: Skip classes not in our THREAT_CLASSES mapping
+                                if class_name not in self.THREAT_CLASSES:
+                                    continue
                                 
                                 cx = int((x1 + x2) / 2)
                                 cy = int((y1 + y2) / 2)

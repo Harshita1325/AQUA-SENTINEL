@@ -4,11 +4,11 @@ import os
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--data_path', default='../Paired/')
+parser.add_argument('--data_path', default='../datasets/euvp_dataset/EUVP/Paired/')
 
 parser.add_argument('--checkpoints_dir', default='./ckpts/')
-parser.add_argument('--batch_size', type=int, default=5)
-parser.add_argument('--num_images', type=int, default=0)
+parser.add_argument('--batch_size', type=int, default=8)  # 256x256 allows larger batch
+parser.add_argument('--num_images', type=int, default=0)  # Auto-calculated from dataset
 
 parser.add_argument('--learning_rate_g', type=float, default=2e-04)
 

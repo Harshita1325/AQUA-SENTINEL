@@ -4,12 +4,12 @@ import os
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--hazydir', default='../K5/train/hazy_train/')
-parser.add_argument('--cleandir', default='../K5/train/clean_train/')
+parser.add_argument('--hazydir', default='../datasets/uieb_dataset/raw-890/')
+parser.add_argument('--cleandir', default='../datasets/uieb_dataset/raw-890/')  # Self-supervised mode
 
 parser.add_argument('--checkpoints_dir', default='./ckpts/')
-parser.add_argument('--batch_size', type=int, default=5)
-parser.add_argument('--num_images', type=int, default=800)
+parser.add_argument('--batch_size', type=int, default=4)  # Reduced for 512x512 images
+parser.add_argument('--num_images', type=int, default=890)  # Total UIEB images
 
 parser.add_argument('--learning_rate_g', type=float, default=2e-04)
 

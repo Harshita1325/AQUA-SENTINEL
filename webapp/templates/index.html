@@ -1344,10 +1344,10 @@
         <!-- Tab Switcher -->
         <div class="tab-switcher">
             <button class="tab-button active" onclick="switchTab('image')">
-                📷 IMAGE ENHANCEMENT
+                 IMAGE ENHANCEMENT
             </button>
             <button class="tab-button" onclick="switchTab('video')">
-                🎬 VIDEO ENHANCEMENT
+                 VIDEO ENHANCEMENT
             </button>
         </div>
 
@@ -1427,8 +1427,46 @@
                     <p style="color: #a0aec0; font-size: 0.95rem; margin-top: 10px;" id="environmentDescription"></p>
                 </div>
                 
-                <!-- Threat Detection Summary -->
-                <div id="threatSummary" class="threat-summary-panel" style="display: none;">
+                <!-- 2x2 Image Grid: ALWAYS SHOW (moved outside threatSummary) -->
+                <!-- This ensures images are visible even when no threats detected -->
+                <div class="images-container" id="imagesGrid" style="display: none; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                    <!-- Top Left: Original Image -->
+                    <div class="image-card">
+                        <h3>[ORIGINAL IMAGE]</h3>
+                        <div class="image-container">
+                            <img id="originalImage" src="" alt="Original">
+                        </div>
+                    </div>
+                    
+                    <!-- Top Right: Enhanced Image -->
+                    <div class="image-card">
+                        <h3>[ENHANCED IMAGE]</h3>
+                        <div class="image-container">
+                            <img id="processedImage" src="" alt="Enhanced">
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Left: Threat Detection -->
+                    <div class="image-card">
+                        <h3>[THREAT DETECTION]</h3>
+                        <div class="image-container">
+                            <img id="threatImage" src="" alt="Threat Detection" style="display: none;">
+                            <p id="noThreatMessage" style="color: #10b981;">No threat detection performed</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Right: Distance Measurement -->
+                    <div class="image-card">
+                        <h3>[DISTANCE MEASUREMENT]</h3>
+                        <div class="image-container">
+                            <img id="distanceImage" src="" alt="Distance Measurement" style="display: none;">
+                            <p id="noDistanceMessage" style="color: #10b981;">No distance measurement performed</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Threat Detection Summary (only stats, moved after images) -->
+                <div id="threatSummary" class="threat-summary-panel" style="display: none; margin-top: 30px;">
                     <div class="threat-summary-title">
                         <span></span>
                         <span>THREAT DETECTION REPORT</span>
@@ -1454,43 +1492,6 @@
                     <div id="threatTypesList" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">
                         <h4 style="color: #fff; margin-bottom: 10px;">Detected Threat Types:</h4>
                         <div id="threatTypesContent"></div>
-                    </div>
-                    
-                    <!-- 2x2 Image Grid: Original, Enhanced, Threat Detection, Distance Measurement -->
-                    <div class="images-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
-                        <!-- Top Left: Original Image -->
-                        <div class="image-card">
-                            <h3>[ORIGINAL IMAGE]</h3>
-                            <div class="image-container">
-                                <img id="originalImage" src="" alt="Original">
-                            </div>
-                        </div>
-                        
-                        <!-- Top Right: Enhanced Image -->
-                        <div class="image-card">
-                            <h3>[ENHANCED IMAGE]</h3>
-                            <div class="image-container">
-                                <img id="processedImage" src="" alt="Enhanced">
-                            </div>
-                        </div>
-                        
-                        <!-- Bottom Left: Threat Detection -->
-                        <div class="image-card">
-                            <h3>[THREAT DETECTION]</h3>
-                            <div class="image-container">
-                                <img id="threatImage" src="" alt="Threat Detection" style="display: none;">
-                                <p id="noThreatMessage" style="color: #10b981;">No threat detection performed</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Bottom Right: Distance Measurement -->
-                        <div class="image-card">
-                            <h3>[DISTANCE MEASUREMENT]</h3>
-                            <div class="image-container">
-                                <img id="distanceImage" src="" alt="Distance Measurement" style="display: none;">
-                                <p id="noDistanceMessage" style="color: #10b981;">No distance measurement performed</p>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- Additional Analysis Section (Attention Flow, Enhancement, etc.) -->
@@ -1949,7 +1950,10 @@
                     
                     // Handle threat detection mode
                     if (enableThreatDetection) {
-                        // Show all 4 images for threat detection
+                        // Show the 4-image grid
+                        document.getElementById('imagesGrid').style.display = 'grid';
+                        
+                        // Show all 4 images for threat detection - ALWAYS
                         // 1. Original Image
                         document.getElementById('originalImage').src = `/input/${data.input_file}`;
                         document.getElementById('originalImage').style.display = 'block';
@@ -1958,27 +1962,25 @@
                         document.getElementById('processedImage').src = `/result/${data.enhanced_output_file}`;
                         document.getElementById('processedImage').style.display = 'block';
                         
-                        // 3. Threat Detection Image (with circles/boxes)
+                        // 3. Threat Detection Image (ALWAYS SHOW - backend adds "NO THREATS" message)
+                        document.getElementById('threatImage').src = `/result/${data.threat_output_file}`;
+                        document.getElementById('threatImage').style.display = 'block';
+                        document.getElementById('noThreatMessage').style.display = 'none';
+                        
+                        // 4. Distance Measurement Image (ALWAYS SHOW - backend adds appropriate message)
+                        document.getElementById('distanceImage').src = `/result/${data.distance_output_file}`;
+                        document.getElementById('distanceImage').style.display = 'block';
+                        document.getElementById('noDistanceMessage').style.display = 'none';
+                        
+                        // Display threat summary only if threats were detected
                         if (data.threats_detected) {
-                            document.getElementById('threatImage').src = `/result/${data.threat_output_file}`;
-                            document.getElementById('threatImage').style.display = 'block';
-                            document.getElementById('noThreatMessage').style.display = 'none';
-                            
-                            // 4. Distance Measurement Image (camera-to-threat distances)
-                            document.getElementById('distanceImage').src = `/result/${data.distance_output_file}`;
-                            document.getElementById('distanceImage').style.display = 'block';
-                            document.getElementById('noDistanceMessage').style.display = 'none';
-                            
-                            // Display threat summary
                             displayThreatSummary(data);
                         } else {
-                            // No threats detected
-                            document.getElementById('threatImage').style.display = 'none';
-                            document.getElementById('noThreatMessage').style.display = 'block';
-                            document.getElementById('noThreatMessage').textContent = 'No threats detected';
-                            document.getElementById('distanceImage').style.display = 'none';
-                            document.getElementById('noDistanceMessage').style.display = 'block';
-                            document.getElementById('noDistanceMessage').textContent = 'No threats for distance measurement';
+                            // Hide threat summary section when no threats
+                            const threatSummary = document.getElementById('threatSummary');
+                            if (threatSummary) {
+                                threatSummary.style.display = 'none';
+                            }
                         }
                         
                         // Use enhanced file for download
