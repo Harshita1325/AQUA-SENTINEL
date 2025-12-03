@@ -3,10 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> MARINE DEFENSE CYBER SHIELD - Underwater Image Enhancement</title>
+    <title>AQUA-SENTINEL - Underwater Image Enhancement</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='military_theme.css') }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;500;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --aqua-primary: #00D9FF;
+            --aqua-dark: #FFFFFF;
+            --aqua-bg: #000000;
+            --aqua-panel: #0F0F0F;
+            --aqua-border: #333333;
+            --aqua-accent: #00B8CC;
+        }
 
         * {
             margin: 0;
@@ -15,69 +24,305 @@
         }
 
         body {
-            font-family: 'Share Tech Mono', 'Courier New', monospace;
-            background: #1a2332;
-            background-image: 
-                radial-gradient(at 20% 80%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
-                radial-gradient(at 80% 20%, rgba(0, 96, 128, 0.1) 0px, transparent 50%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--aqua-bg);
+            color: var(--aqua-dark);
             min-height: 100vh;
-            color: #00ff9f;
-            position: relative;
             overflow-x: hidden;
         }
 
-        /* Animated grid background */
-        body::before {
-            content: '';
-            position: fixed;
+        /* DRDO-Style Header */
+        .drdo-header {
+            background: var(--aqua-panel);
+            border-bottom: 2px solid var(--aqua-border);
+            padding: 1rem 3rem;
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            z-index: 0;
-            pointer-events: none;
+            z-index: 100;
         }
 
-        @keyframes gridMove {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(50px); }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: nowrap;
         }
 
-        /* Floating particles */
-        .particle {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: rgba(139, 92, 246, 0.5);
+        .header-left {gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .gov-emblem {
+            height: 60px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--aqua-dark);
+            margin-bottom: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title .subtitle {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--aqua-primary);
+            letter-spacing: 0.3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+        }
+
+        .drdo-logo {
+            height: 70px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .gov-emblem {
+            height: 60px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle {
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid var(--aqua-primary);
             border-radius: 50%;
-            animation: float 20s infinite;
-            z-index: 0;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 0;
+            flex-shrink: 0;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        .theme-toggle:hover {
+            background: var(--aqua-primary);
+            transform: scale(1.1);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--aqua-primary);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover svg {
+            fill: #000000;
+        }
+
+        /* Light Mode Styles */
+        body.light-mode {
+            --aqua-bg: #FFFFFF;
+            --aqua-panel: #F5F5F5;
+            --aqua-dark: #1A1A1A;
+            --aqua-border: #D0D0D0;
+            background: #FFFFFF;
+            color: #1A1A1A;
+        }
+
+        body.light-mode .drdo-header {
+            background: #F5F5F5;
+            border-bottom-color: #D0D0D0;
+        }
+
+        body.light-mode .header-title h1,
+        body.light-mode .page-title,
+        body.light-mode .carousel-title {
+            color: #1A1A1A;
+        }
+
+        body.light-mode .upload-section,
+        body.light-mode .status-section,
+        body.light-mode .results-section {
+            background: #F9F9F9;
+            border-color: #D0D0D0;
+        }
+
+        body.light-mode .carousel-description,
+        body.light-mode p,
+        body.light-mode label {
+            color: #2A2A2A;
+        }
+
+        body.light-mode .theme-toggle svg {
+            fill: var(--aqua-primary);
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: var(--aqua-primary);
+            padding: 0;
+            border-radius: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li {
+            margin: 0;
+        }
+
+        .nav-links a {
+            display: block;
+            color: #000000;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.875rem 2rem;
+            transition: all 0.2s ease;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links li:last-child a {
+            border-right: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--aqua-accent);
+            color: var(--aqua-dark);
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 3rem 2.5rem;
             position: relative;
             z-index: 1;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 60px;
-            animation: fadeInDown 0.8s ease;
+        /* Carousel Styles */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            margin: 2rem auto;
+            overflow: hidden;
+            border-radius: 12px;
+            background: var(--aqua-panel);
+            border: 1px solid var(--aqua-border);
+        }
+
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            position: relative;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .carousel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 2rem;
+            color: var(--aqua-dark);
+        }
+
+        .carousel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--aqua-primary);
+        }
+
+        .carousel-description {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 217, 255, 0.2);
+            border: none;
+            color: var(--aqua-primary);
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .carousel-nav:hover {
+            background: var(--aqua-primary);
+            color: #000000;
+        }
+
+        .carousel-nav.prev {
+            left: 1rem;
+        }
+
+        .carousel-nav.next {
+            right: 1rem;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.75rem;
+            z-index: 10;
+        }
+
+        .carousel-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-indicator.active {
+            background: var(--aqua-primary);
+            width: 30px;
+            border-radius: 6px;
         }
 
         /* Hamburger Menu Styles */
@@ -230,40 +475,35 @@
             font-weight: 400;
         }
 
-        /* Tab Switcher Styles */
+        /* Tab Switcher Styles - Clean Aqua Design */
         .tab-switcher {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 40px 0 20px 0;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--aqua-border);
         }
 
         .tab-button {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            color: #a0aec0;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--aqua-primary);
+            font-size: 0.9875rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .tab-button:hover {
-            transform: translateY(-3px);
-            border-color: rgba(139, 92, 246, 0.5);
+            color: var(--aqua-dark);
         }
 
         .tab-button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #764ba2;
-            color: white;
-            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.5);
+            color: var(--aqua-dark);
+            border-bottom-color: var(--aqua-primary);
         }
 
         .tab-content {
@@ -274,109 +514,77 @@
             display: block;
         }
 
+        /* Main Panel - Dark Clean Style */
         .main-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-            animation: fadeInUp 0.8s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            background: var(--aqua-panel);
+            border: 1px solid var(--aqua-border);
+            border-radius: 12px;
+            padding: 2.5rem;
         }
 
         .upload-section {
-            padding: 60px 40px;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+            padding: 0;
         }
 
-        .upload-section h2 {
-            font-size: 2rem;
+        .panel-title {
+            font-size: 1.5rem;
             font-weight: 700;
-            color: #fff;
-            margin-bottom: 10px;
+            color: var(--aqua-dark);
+            margin-bottom: 0.5rem;
         }
 
-        .upload-section > p {
-            color: #a0aec0;
-            font-size: 1.1rem;
-            margin-bottom: 40px;
+        .panel-subtitle {
+            color: var(--aqua-primary);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
         }
 
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 30px;
+        .form-label {
+            font-weight: 600;
+            color: var(--aqua-dark);
+            margin-bottom: 0.75rem;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--aqua-accent);
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            background: rgba(0, 217, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--aqua-primary);
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .upload-text {
+            color: var(--aqua-dark);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--aqua-primary);
+            font-size: 0.875rem;
         }
 
         .file-input {
             display: none;
         }
 
-        .file-input-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 50px;
-            border-radius: 100px;
-            border: none;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .file-input-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .file-input-button:hover::before {
-            left: 100%;
-        }
-
-        .file-input-button:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
-        }
-
         .file-info {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border: 2px solid rgba(102, 126, 234, 0.5);
-            border-radius: 20px;
-            padding: 25px 35px;
-            margin: 25px auto;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--aqua-primary);
+            font-size: 0.9rem;
             display: none;
-            color: #e0e7ff;
-            font-weight: 600;
-            font-size: 1.05rem;
-            max-width: 600px;
-            backdrop-filter: blur(10px);
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-            animation: fadeIn 0.5s ease;
         }
 
         @keyframes fadeIn {
@@ -474,52 +682,55 @@
 
         /* Adaptive Mode Dropdown */
         .adaptive-mode-selector {
-            margin: 40px auto;
-            max-width: 600px;
-            padding: 25px;
-            background: rgba(139, 92, 246, 0.05);
-            border-radius: 20px;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-
-        .adaptive-mode-dropdown {
-            width: 100%;
-            padding: 18px 25px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(139, 92, 246, 0.4);
+            margin: 30px auto;
+            max-width: 650px;
+            padding: 25px 30px;
+            background: rgba(139, 92, 246, 0.03);
             border-radius: 15px;
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            transition: all 0.3s;
+        }
+
+        .adaptive-mode-selector:hover {
+            background: rgba(139, 92, 246, 0.06);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .adaptive-mode-dropdown,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #1A1A1A;
+            border: 1px solid var(--aqua-border);
+            border-radius: 6px;
+            color: var(--aqua-dark);
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.4s;
+            transition: all 0.2s ease;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%2300D9FF' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 20px;
-            padding-right: 50px;
+            background-position: right 1rem center;
+            padding-right: 3rem;
         }
 
-        .adaptive-mode-dropdown:hover {
-            border-color: rgba(139, 92, 246, 0.8);
-            background: rgba(139, 92, 246, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        .adaptive-mode-dropdown:hover,
+        .form-select:hover {
+            border-color: var(--aqua-primary);
+            background: #222222;
         }
 
-        .adaptive-mode-dropdown:focus {
+        .adaptive-mode-dropdown:focus,
+        .form-select:focus {
             outline: none;
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+            border-color: var(--aqua-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
         }
 
-        .adaptive-mode-dropdown option {
-            background: #1a1a2e;
-            color: #fff;
-            padding: 15px;
-            font-weight: 600;
+        .adaptive-mode-dropdown option,
+        .form-select option {
+            background: #1A1A1A;
+            color: var(--aqua-dark);
         }
 
         /* Environment Badge */
@@ -564,13 +775,13 @@
 
         /* Threat Detection Toggle */
         .threat-detection-toggle {
-            background: rgba(239, 68, 68, 0.05);
-            border: 2px solid rgba(239, 68, 68, 0.4);
-            border-radius: 20px;
-            padding: 30px 25px;
+            background: rgba(239, 68, 68, 0.03);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 15px;
+            padding: 25px 30px;
             transition: all 0.3s;
-            max-width: 600px;
-            margin: 35px auto;
+            max-width: 650px;
+            margin: 30px auto;
         }
 
         .threat-detection-toggle:hover {
@@ -583,8 +794,12 @@
         .threat-toggle-container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 20px;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--aqua-border);
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
             cursor: pointer;
             user-select: none;
         }
@@ -595,89 +810,86 @@
 
         .threat-toggle-slider {
             position: relative;
-            width: 60px;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            transition: all 0.3s;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 26px;
+            background: #333;
+            border-radius: 13px;
+            transition: all 0.3s ease;
         }
 
         .threat-toggle-slider::before {
             content: '';
             position: absolute;
-            width: 22px;
-            height: 22px;
-            left: 4px;
-            top: 2px;
-            background: #fff;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            background: #666;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
         }
 
         .threat-checkbox:checked + .threat-toggle-slider {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border-color: #ef4444;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+            background: var(--aqua-primary);
         }
 
         .threat-checkbox:checked + .threat-toggle-slider::before {
-            transform: translateX(30px);
-            background: #fff;
+            transform: translateX(24px);
+            background: white;
         }
 
         .threat-toggle-label {
-            color: #fff;
-            font-size: 1.1rem;
-            text-align: left;
+            color: var(--aqua-dark);
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .threat-toggle-label strong {
             display: block;
-            margin-bottom: 3px;
         }
 
         /* Threat Summary Panel */
         .threat-summary-panel {
-            background: rgba(239, 68, 68, 0.1);
-            border: 2px solid rgba(239, 68, 68, 0.5);
-            border-radius: 20px;
-            padding: 25px;
-            margin: 25px 0;
-            animation: fadeInUp 0.6s ease;
+            background: var(--aqua-panel);
+            border: 1px solid var(--aqua-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
         }
 
         .threat-summary-title {
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: #ef4444;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
             text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .threat-stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .threat-stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 15px;
+            background: #000000;
+            border: 1px solid var(--aqua-border);
+            border-radius: 8px;
+            padding: 1.5rem 1rem;
             text-align: center;
         }
 
         .threat-stat-number {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            color: var(--aqua-dark);
         }
 
         .threat-stat-number.high {
@@ -693,10 +905,178 @@
         }
 
         .threat-stat-label {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: #a0aec0;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Threat Report Buttons */
+        .threat-report-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .threat-btn {
+            background: var(--aqua-primary);
+            color: #000000;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .threat-btn:hover {
+            background: var(--aqua-accent);
+            transform: translateY(-2px);
+        }
+
+        .threat-btn.secondary {
+            background: #1A1A1A;
+            color: var(--aqua-primary);
+            border: 1px solid var(--aqua-border);
+        }
+
+        .threat-btn.secondary:hover {
+            border-color: var(--aqua-primary);
+            background: #222222;
+        }
+
+        /* Status Alert */
+        .status-alert {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .status-alert .status-text {
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        /* Threat Details */
+        .threat-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .threat-item {
+            background: #1A1A1A;
+            border: 1px solid var(--aqua-border);
+            border-left: 4px solid #ef4444;
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+
+        .threat-item.critical {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .threat-item.severe {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .threat-item.near {
+            border-left-color: #eab308;
+            background: rgba(234, 179, 8, 0.05);
+        }
+
+        .threat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .threat-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--aqua-dark);
+        }
+
+        .threat-severity {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .threat-severity.critical {
+            background: #ef4444;
+            color: #000000;
+        }
+
+        .threat-severity.severe {
+            background: #f59e0b;
+            color: #000000;
+        }
+
+        .threat-severity.near {
+            background: #eab308;
+            color: #000000;
+        }
+
+        .threat-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .threat-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .threat-info-label {
+            color: #a0aec0;
+        }
+
+        .threat-info-value {
+            color: var(--aqua-dark);
+            font-weight: 600;
+        }
+
+        .threat-response {
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--aqua-border);
+            border-radius: 4px;
+            padding: 0.75rem;
+        }
+
+        .threat-response-label {
+            color: var(--aqua-primary);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .threat-response-text {
+            color: var(--aqua-dark);
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
 
         .process-button {
@@ -800,56 +1180,55 @@
         }
 
         .preview-section {
-            padding: 60px 40px;
+            padding: 40px 35px;
             display: none;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.15);
         }
 
         .preview-section h2 {
             color: #fff;
-            font-size: 2rem;
+            font-size: 1.9rem;
             font-weight: 700;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
         }
 
         .images-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-top: 20px;
+            gap: 25px;
+            margin-top: 30px;
         }
 
         .image-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
+            background: var(--aqua-panel);
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--aqua-border);
+            transition: all 0.3s ease;
         }
 
         .image-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-            border-color: rgba(139, 92, 246, 0.5);
+            border-color: var(--aqua-primary);
         }
 
         .image-card h3 {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 20px;
+            background: rgba(0, 217, 255, 0.1);
+            color: var(--aqua-dark);
+            padding: 15px 20px;
             margin: 0;
             text-align: center;
             font-weight: 600;
-            font-size: 1.2rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--aqua-border);
         }
 
         .image-container {
-            padding: 30px;
+            padding: 25px;
             text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            min-height: 350px;
+            background: rgba(0, 0, 0, 0.2);
+            min-height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -870,25 +1249,26 @@
         }
 
         .download-button {
-            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-            color: white;
-            padding: 20px 50px;
+            background: var(--aqua-primary);
+            color: #000000;
+            padding: 14px 32px;
             border: none;
-            border-radius: 100px;
-            font-size: 1.2rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 30px rgba(25, 84, 123, 0.4);
+            transition: all 0.2s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            margin: 0 8px;
         }
 
         .download-button:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(25, 84, 123, 0.6);
+            background: var(--aqua-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
         }
 
         @media (max-width: 1024px) {
@@ -942,134 +1322,44 @@
 
         /* Metrics Section Styles */
         .metrics-section {
-            padding: 40px;
-            margin-top: 40px;
-        }
-
-        .overall-score-card {
-            background: rgba(16, 185, 129, 0.1);
-            backdrop-filter: blur(20px);
-            border: 2px solid #10b981;
-            border-radius: 0;
-            padding: 40px;
-            text-align: center;
-            margin-bottom: 40px;
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
-            animation: fadeInUp 0.6s ease;
-        }
-
-        .score-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .score-label {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #10b981;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .score-value {
-            font-size: 5rem;
-            font-weight: 800;
-            color: #00ff9f;
-            margin-bottom: 25px;
-            text-shadow: 0 0 20px rgba(0, 255, 159, 0.5);
-        }
-
-        .score-bar {
-            width: 100%;
-            height: 20px;
-            background: #000000;
-            border: 1px solid #10b981;
-            border-radius: 0;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .score-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981 0%, #00ff9f 100%);
-            border-radius: 0;
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+            padding: 2rem;
+            margin-top: 2rem;
         }
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
         }
 
         .metric-card {
-            background: rgba(16, 185, 129, 0.05);
-            backdrop-filter: blur(20px);
-            border: 2px solid #10b981;
-            border-radius: 0;
-            padding: 30px 25px;
+            background: var(--aqua-panel);
+            border: 1px solid var(--aqua-border);
+            border-radius: 8px;
+            padding: 1.5rem;
             text-align: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: fadeInUp 0.6s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(16, 185, 129, 0.1);
-            opacity: 0;
-            transition: opacity 0.4s;
-            z-index: -1;
+            transition: all 0.2s ease;
         }
 
         .metric-card:hover {
-            transform: translateY(-8px) scale(1.03);
-            border-color: #00ff9f;
-            box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
-        }
-
-        .metric-card:hover::before {
-            opacity: 1;
-        }
-
-        .metric-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+            border-color: var(--aqua-primary);
+            transform: translateY(-2px);
         }
 
         .metric-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #10b981;
-            margin-bottom: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--aqua-primary);
+            margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
         }
 
         .metric-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #00ff9f;
-            margin-bottom: 10px;
-            text-shadow: 0 0 15px rgba(0, 255, 159, 0.5);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--aqua-dark);
+            margin-bottom: 0.5rem;
         }
 
         .metric-description {
@@ -1206,9 +1496,9 @@
         }
 
         .progress-bar-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 100px;
-            height: 30px;
+            background: #1A1A1A;
+            border-radius: 8px;
+            height: 8px;
             margin: 20px 0;
             overflow: hidden;
             position: relative;
@@ -1216,15 +1506,15 @@
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            border-radius: 100px;
+            background: var(--aqua-primary);
+            border-radius: 8px;
             transition: width 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #000000;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
         }
 
         .processing-stats {
@@ -1310,36 +1600,75 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Hamburger Menu -->
-        <div class="hamburger-menu">
-            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <div class="menu-dropdown" id="menuDropdown">
-                <div class="menu-item" onclick="navigateTo('analytics')"> Analytics</div>
-                <div class="menu-item" onclick="navigateTo('profile')"> Profile</div>
-                <div class="menu-item" onclick="navigateTo('model')"> Model</div>
-                <div class="menu-item" onclick="navigateTo('history')"> History</div>
-                <div class="menu-item" onclick="logout()"> Logout</div>
-            </div>
-        </div>
-
-        <!-- Military Header -->
-        <div class="header">
+    <!-- DRDO-Style Header -->
+    <div class="drdo-header">
+        <div class="header-top">
             <div class="header-left">
-                <img src="/photos/gov logo.png" alt="Government Logo" class="military-emblem" onerror="this.style.display='none'">
-                <div class="header-content">
-                    <h1>    UNDERWATER DEFENSE SHIELD</h1>
-                    <p>Underwater Image Enhancement System</p>
+                <img src="/photos/gov logo.png" alt="Government of India" class="gov-emblem" onerror="this.style.display='none'">
+                <div class="header-title">
+                    <h1>Government of India</h1>
+                    <span class="subtitle">Underwater Defense Shield</span>
                 </div>
             </div>
             <div class="header-right">
-                <img src="/photos/navy logo.png" alt="Navy Logo" class="india-emblem" onerror="this.style.display='none'">
+                <img src="/photos/navy logo.png" alt="DRDO Logo" class="drdo-logo" onerror="this.style.display='none'">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
+        
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/analytics">Analytics</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/history">History</a></li>
+                <li><a href="/model">Models</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Carousel -->
+    <div class="carousel-container">
+        <div class="carousel-wrapper" id="carouselWrapper">
+            <div class="carousel-slide">
+                <img src="/photos/mines.jpg" alt="Underwater Mines Detection">
+                <div class="carousel-overlay">
+                    <div class="carousel-title">Underwater Mines Detection</div>
+                    <div class="carousel-description">Advanced AI-powered mine detection and classification system</div>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="/photos/robo.jpeg" alt="Autonomous Underwater Vehicle">
+                <div class="carousel-overlay">
+                    <div class="carousel-title">Autonomous Underwater Vehicles</div>
+                    <div class="carousel-description">Next-generation underwater robotics for defense operations</div>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="/photos/suba.jpg" alt="Submarine Detection">
+                <div class="carousel-overlay">
+                    <div class="carousel-title">Submarine Detection System</div>
+                    <div class="carousel-description">Real-time submarine tracking and threat assessment</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="carousel-nav prev" onclick="moveCarousel(-1)">‹</button>
+        <button class="carousel-nav next" onclick="moveCarousel(1)">›</button>
+        
+        <div class="carousel-indicators">
+            <button class="carousel-indicator active" onclick="goToSlide(0)"></button>
+            <button class="carousel-indicator" onclick="goToSlide(1)"></button>
+            <button class="carousel-indicator" onclick="goToSlide(2)"></button>
+        </div>
+    </div>
+
+    <div class="container">
 
         <!-- Tab Switcher -->
         <div class="tab-switcher">
@@ -1356,13 +1685,13 @@
         <div class="main-card">
             <div class="main-card-content">
             <div class="upload-section">
-                <h2 class="section-header">[ENTER THE IMAGE EVIDENCE]</h2>
+                <h2 class="panel-title">Upload Image</h2>
+                <p class="panel-subtitle">Select an underwater image for enhancement and analysis</p>
                 
-                <div class="file-input-wrapper">
+                <div class="upload-area" onclick="document.getElementById('imageFile').click()">
                     <input type="file" id="imageFile" class="file-input" accept="image/*">
-                    <button class="file-input-button" onclick="document.getElementById('imageFile').click()">
-                        CHOOSE FILE
-                    </button>
+                    <p class="upload-text">Click to upload or drag and drop</p>
+                    <p class="upload-subtext">PNG, JPG up to 10MB</p>
                 </div>
 
                 <div class="file-info" id="fileInfo">
@@ -1370,39 +1699,32 @@
                 </div>
 
                 <!-- Adaptive Enhancement Mode -->
-                <div class="adaptive-mode-selector" style="margin-top: 40px; margin-bottom: 35px;" id="adaptiveModeSection">
-                    <label style="display: block; margin-bottom: 20px; color: #fff; font-weight: 600; font-size: 1.1rem; text-align: center;">
-                        Adaptive Enhancement Mode
-                    </label>
+                <div style="margin-bottom: 1.5rem;" id="adaptiveModeSection">
+                    <label class="form-label">Enhancement Mode</label>
                     <select id="adaptiveMode" class="adaptive-mode-dropdown">
                         <option value="off">Standard Enhancement</option>
-                        <option value="auto" selected> Auto-Detect Environment</option>
-                        <option value="clear"> Clear Water (Tropical)</option>
-                        <option value="turbid"> Turbid Water (Coastal)</option>
-                        <option value="deep"> Deep Water (Ocean)</option>
-                        <option value="night"> Night / Low Light</option>
+                        <option value="auto" selected>Auto-Detect Environment</option>
+                        <option value="clear">Clear Water (Tropical)</option>
+                        <option value="turbid">Turbid Water (Coastal)</option>
+                        <option value="deep">Deep Water (Ocean)</option>
+                        <option value="night">Night / Low Light</option>
                     </select>
-                    <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 15px; text-align: center; line-height: 1.5;">
-                        Automatically adjusts enhancement based on water conditions
-                    </p>
                 </div>
 
                 <!-- Threat Detection Toggle -->
-                <div class="threat-detection-toggle" style="margin-top: 35px; margin-bottom: 35px; text-align: center;">
-                    <label class="threat-toggle-container">
-                        <input type="checkbox" id="enableThreatDetection" class="threat-checkbox">
-                        <span class="threat-toggle-slider"></span>
-                        <span class="threat-toggle-label">
-                             <strong>Enable AI Threat Detection</strong>
-                            <small style="display: block; color: #a0aec0; margin-top: 8px; line-height: 1.4;">
-                                Detect submarines, mines, divers, and underwater objects
-                            </small>
-                        </span>
-                    </label>
-                </div>
+                <label class="threat-toggle-container">
+                    <div class="threat-toggle-label">
+                        <strong>Enable AI Threat Detection</strong>
+                        <small style="display: block; color: var(--aqua-primary); margin-top: 4px; font-size: 0.85rem; font-weight: 400;">
+                            Detect submarines, mines, divers, and underwater objects
+                        </small>
+                    </div>
+                    <input type="checkbox" id="enableThreatDetection" class="threat-checkbox">
+                    <span class="threat-toggle-slider"></span>
+                </label>
 
                 <button class="process-btn" id="processButton" onclick="processImage()" disabled>
-                    ▶ ANALYZE IMAGE
+                    Analyze Image
                 </button>
             </div>
             </div>
@@ -1465,12 +1787,13 @@
                     </div>
                 </div>
                 
-                <!-- Threat Detection Summary (only stats, moved after images) -->
+                <!-- Threat Detection Summary -->
                 <div id="threatSummary" class="threat-summary-panel" style="display: none; margin-top: 30px;">
                     <div class="threat-summary-title">
-                        <span></span>
-                        <span>THREAT DETECTION REPORT</span>
+                        THREAT DETECTION REPORT
                     </div>
+                    
+                    <!-- Threat Stats -->
                     <div class="threat-stats-grid">
                         <div class="threat-stat-card">
                             <div class="threat-stat-number" id="totalThreats">0</div>
@@ -1489,13 +1812,29 @@
                             <div class="threat-stat-label">Low Risk</div>
                         </div>
                     </div>
-                    <div id="threatTypesList" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">
-                        <h4 style="color: #fff; margin-bottom: 10px;">Detected Threat Types:</h4>
-                        <div id="threatTypesContent"></div>
+
+                    <!-- Action Buttons -->
+                    <div class="threat-report-buttons">
+                        <button class="threat-btn" onclick="downloadThreatReport()">
+                            📊 Download Threat Intelligence Report
+                        </button>
+                        <button class="threat-btn secondary" onclick="generatePDFReport()">
+                            📄 Generate DRDO PDF Report
+                        </button>
+                    </div>
+
+                    <!-- Status Alert -->
+                    <div class="status-alert" id="statusAlert">
+                        <div class="status-text">⚠ STATUS: CRITICAL ALERT</div>
+                    </div>
+
+                    <!-- Threat Details List -->
+                    <div class="threat-details" id="threatDetailsList">
+                        <!-- Threat items will be dynamically inserted here -->
                     </div>
                     
-                    <!-- Additional Analysis Section (Attention Flow, Enhancement, etc.) -->
-                    <div id="additionalAnalysis" style="margin-top: 30px;"></div>
+                    <!-- Additional Analysis Section -->
+                    <div id="additionalAnalysis" style="margin-top: 1.5rem;"></div>
                 </div>
 
                 <!-- Metrics Section (moved outside threat summary) -->
@@ -1612,139 +1951,169 @@
         <!-- Video Processing Tab -->
         <div id="videoTab" class="tab-content">
         <div class="main-card">
+            <div class="main-card-content">
             <div class="upload-section">
-                <h2 style="margin-bottom: 15px;">🎥 Upload Your Underwater Video</h2>
-                <p style="color: #a0aec0; margin-bottom: 35px; font-size: 1.05rem;">Real-time frame-by-frame enhancement with AI processing</p>
+                <h2 class="panel-title">Upload Video</h2>
+                <p class="panel-subtitle">Select an underwater video for frame-by-frame enhancement and analysis</p>
                 
                 <!-- Video Upload Area -->
-                <div class="video-upload-area" id="videoUploadArea">
+                <div class="upload-area" onclick="document.getElementById('videoFile').click()">
                     <input type="file" id="videoFile" class="file-input" accept="video/*">
-                    <div class="video-icon">🎬</div>
-                    <h3 style="color: #e0e7ff; margin-bottom: 15px; font-size: 1.3rem;">Drop video here or click to browse</h3>
-                    <p style="color: #a0aec0; font-size: 1rem; line-height: 1.6;">Supported formats: MP4, AVI, MOV, MKV<br><span style="color: #8b5cf6; font-weight: 600;">(Max 500MB)</span></p>
+                    <p class="upload-text">🎬 Click to upload or drag and drop</p>
+                    <p class="upload-subtext">MP4, AVI, MOV, MKV up to 500MB</p>
                 </div>
 
-                <div class="file-info" id="videoFileInfo" style="display: none;">
-                    <strong>📹 Selected:</strong> <span id="videoFileName"></span>
+                <div class="file-info" id="videoFileInfo">
+                    <strong>Selected:</strong> <span id="videoFileName"></span>
                 </div>
 
-                <!-- Model Selector for Video -->
-                <div class="model-selector" style="margin-top: 40px; margin-bottom: 40px;">
-                    <label style="display: block; margin-bottom: 25px; color: #fff; font-size: 1.15rem; font-weight: 600; text-align: center;">Select Processing Model:</label>
-                    <div class="model-options" style="gap: 25px;">
-                        <div class="model-option">
-                            <input type="radio" id="video-uieb" name="videoModel" value="uieb" checked>
-                            <label for="video-uieb">
-                                <div style="font-size: 2rem; margin-bottom: 10px;">✨</div>
-                                <strong style="font-size: 1.1rem;">ENHANCEMENT</strong><br>
-                                <small style="color: #a0aec0; margin-top: 8px; display: block;">UIEB Model</small>
-                            </label>
-                        </div>
-                        <div class="model-option">
-                            <input type="radio" id="video-comparison" name="videoComparison" value="true" checked style="display: none;">
-                            <label for="video-comparison" style="padding: 30px 25px;">
-                                <div style="font-size: 2rem; margin-bottom: 10px;">↔️</div>
-                                <strong style="font-size: 1.1rem;">SIDE-BY-SIDE</strong><br>
-                                <small style="color: #a0aec0; margin-top: 8px; display: block;">Comparison View</small>
-                            </label>
-                        </div>
+                <!-- Model Selection -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label">Processing Model</label>
+                    <select id="videoModel" class="adaptive-mode-dropdown">
+                        <option value="uieb" selected>UIEB Enhancement Model</option>
+                        <option value="euvp">EUVP Enhancement Model</option>
+                    </select>
+                </div>
+
+                <!-- Video Options -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label">Video Output</label>
+                    <select id="videoComparison" class="adaptive-mode-dropdown">
+                        <option value="true" selected>Side-by-Side Comparison</option>
+                        <option value="false">Enhanced Only</option>
+                    </select>
+                </div>
+
+                <!-- Threat Detection Toggle -->
+                <label class="threat-toggle-container">
+                    <div class="threat-toggle-label">
+                        <strong>Enable Real-time Threat Detection</strong>
+                        <small style="display: block; color: var(--aqua-primary); margin-top: 4px; font-size: 0.85rem; font-weight: 400;">
+                            Track and detect threats frame-by-frame with distance measurement
+                        </small>
                     </div>
-                </div>
+                    <input type="checkbox" id="videoThreatDetection" class="threat-checkbox">
+                    <span class="threat-toggle-slider"></span>
+                </label>
 
-                <button class="process-button" id="processVideoButton" onclick="processVideo()" style="display: none;">
-                    ▶ Process Video
+                <button class="process-btn" id="processVideoButton" onclick="processVideo()" disabled>
+                    Process Video
                 </button>
+            </div>
             </div>
 
             <!-- Video Processing Status -->
             <div class="loading" id="videoProcessing" style="display: none;">
-                <div class="ai-indicator" style="margin-bottom: 30px;">
-                    <div class="pulse-dot"></div>
-                    <span>AI Processing Active</span>
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div class="spinner" style="margin: 0 auto 1.5rem;"></div>
+                    <h3 style="color: var(--aqua-dark); margin-bottom: 0.5rem;">Processing Video...</h3>
+                    <p style="color: var(--aqua-primary); font-size: 0.95rem;">Frame-by-frame enhancement in progress</p>
                 </div>
                 
-                <h3 style="margin-bottom: 20px;">Processing Your Video...</h3>
-                
                 <!-- Progress Bar -->
-                <div class="progress-bar-container">
+                <div class="progress-bar-container" style="margin-bottom: 2rem;">
                     <div class="progress-bar" id="videoProgressBar" style="width: 0%;">
-                        <span id="videoProgressText">0%</span>
+                        <span id="videoProgressText" style="font-size: 0.875rem; font-weight: 700;">0%</span>
                     </div>
                 </div>
 
                 <!-- Processing Stats -->
-                <div class="processing-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="statProgress">0%</div>
-                        <div class="stat-label">Progress</div>
+                <div class="metrics-grid" style="margin-bottom: 1.5rem;">
+                    <div class="metric-card">
+                        <div class="metric-name">Progress</div>
+                        <div class="metric-value" id="statProgress">0%</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="statFrames">0/0</div>
-                        <div class="stat-label">Frames</div>
+                    <div class="metric-card">
+                        <div class="metric-name">Frames</div>
+                        <div class="metric-value" id="statFrames">0/0</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="statFPS">0</div>
-                        <div class="stat-label">FPS</div>
+                    <div class="metric-card">
+                        <div class="metric-name">FPS</div>
+                        <div class="metric-value" id="statFPS">0</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="statETA">--</div>
-                        <div class="stat-label">ETA</div>
+                    <div class="metric-card">
+                        <div class="metric-name">ETA</div>
+                        <div class="metric-value" id="statETA">--</div>
                     </div>
                 </div>
 
-                <p style="color: #a0aec0; margin-top: 20px;">This may take several minutes depending on video length</p>
+                <p style="color: #a0aec0; text-align: center; font-size: 0.875rem;">This may take several minutes depending on video length</p>
             </div>
 
             <!-- Video Results -->
             <div class="preview-section" id="videoPreviewSection" style="display: none;">
-                <h2 style="text-align: center;">Video Results</h2>
+                <h2 style="text-align: center; color: var(--aqua-dark); margin-bottom: 2rem;">Video Results</h2>
                 
-                <div class="video-players">
-                    <div class="video-player-card">
-                        <h3>Original Video</h3>
-                        <div class="video-container">
-                            <video id="originalVideo" controls></video>
+                <!-- Video Players -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; padding: 1.5rem;">
+                        <h3 style="color: var(--aqua-primary); text-align: center; margin-bottom: 1rem; font-size: 1rem; font-weight: 700; text-transform: uppercase;">Original Video</h3>
+                        <div style="background: #000; border-radius: 6px; overflow: hidden;">
+                            <video id="originalVideo" controls style="width: 100%; height: auto; display: block;"></video>
                         </div>
                     </div>
-                    <div class="video-player-card">
-                        <h3>Enhanced Video</h3>
-                        <div class="video-container">
-                            <video id="enhancedVideo" controls></video>
+                    <div style="background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; padding: 1.5rem;">
+                        <h3 style="color: var(--aqua-primary); text-align: center; margin-bottom: 1rem; font-size: 1rem; font-weight: 700; text-transform: uppercase;">Enhanced Video</h3>
+                        <div style="background: #000; border-radius: 6px; overflow: hidden;">
+                            <video id="enhancedVideo" controls style="width: 100%; height: auto; display: block;"></video>
                         </div>
                     </div>
                 </div>
 
                 <!-- Video Stats -->
-                <div class="processing-stats" style="margin-top: 30px;">
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="resultTotalFrames">0</div>
-                        <div class="stat-label">Total Frames</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="resultProcessingTime">0s</div>
-                        <div class="stat-label">Processing Time</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="resultAvgFPS">0</div>
-                        <div class="stat-label">Average FPS</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"></div>
-                        <div class="stat-value" id="resultResolution">-</div>
-                        <div class="stat-label">Resolution</div>
+                <div class="metrics-section" style="padding: 1.5rem; background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; margin-bottom: 2rem;">
+                    <h3 style="color: var(--aqua-dark); margin-bottom: 1.5rem; text-align: center; font-size: 1.125rem; font-weight: 700;">Processing Statistics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-name">Total Frames</div>
+                            <div class="metric-value" id="resultTotalFrames">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Processing Time</div>
+                            <div class="metric-value" id="resultProcessingTime">0s</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Average FPS</div>
+                            <div class="metric-value" id="resultAvgFPS">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Resolution</div>
+                            <div class="metric-value" id="resultResolution">-</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="download-section" style="display: block; margin-top: 30px;">
+                <!-- Quality Metrics -->
+                <div class="metrics-section" style="padding: 1.5rem; background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; margin-bottom: 2rem;">
+                    <h3 style="color: var(--aqua-dark); margin-bottom: 1.5rem; text-align: center; font-size: 1.125rem; font-weight: 700;">Quality Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-name">PSNR</div>
+                            <div class="metric-value" id="resultPSNR">-</div>
+                            <p style="font-size: 0.75rem; color: #a0aec0; margin-top: 0.5rem;">Peak Signal-to-Noise Ratio</p>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">SSIM</div>
+                            <div class="metric-value" id="resultSSIM">-</div>
+                            <p style="font-size: 0.75rem; color: #a0aec0; margin-top: 0.5rem;">Structural Similarity</p>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">UIQM</div>
+                            <div class="metric-value" id="resultUIQM">-</div>
+                            <p style="font-size: 0.75rem; color: #a0aec0; margin-top: 0.5rem;">Underwater Quality</p>
+                        </div>
+                        <div class="metric-card" style="border-left: 3px solid #ef4444;">
+                            <div class="metric-name" style="color: #ef4444;">Threats Detected</div>
+                            <div class="metric-value" id="resultThreats" style="color: #ef4444; font-size: 2.5rem;">0</div>
+                            <p style="font-size: 0.75rem; color: #a0aec0; margin-top: 0.5rem;">Real-time Tracking</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="download-section" style="display: block; text-align: center;">
                     <a href="#" id="downloadVideoLink" class="download-button">
-                         Download Enhanced Video
+                        Download Enhanced Video
                     </a>
                 </div>
             </div>
@@ -1754,6 +2123,39 @@
     </div>
 
     <script>
+        // Carousel functionality
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicators = document.querySelectorAll('.carousel-indicator');
+        const totalSlides = slides.length;
+
+        function moveCarousel(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = totalSlides - 1;
+            if (currentSlide >= totalSlides) currentSlide = 0;
+            updateCarousel();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            const wrapper = document.getElementById('carouselWrapper');
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        // Auto-advance carousel every 5 seconds
+        setInterval(() => {
+            moveCarousel(1);
+        }, 5000);
+
+        // Rest of the JavaScript code
         let selectedFile = null;
         let resultData = null;
         let selectedVideoFile = null;
@@ -2128,304 +2530,91 @@
             const threats = data.threats;
             const advancedAnalysis = data.advanced_analysis || {};
             
-            // Update counts including CRITICAL level
+            // Update counts
             document.getElementById('totalThreats').textContent = summary.total;
             document.getElementById('highRiskThreats').textContent = summary.high_risk || 0;
             document.getElementById('mediumRiskThreats').textContent = summary.medium_risk || 0;
             document.getElementById('lowRiskThreats').textContent = summary.low_risk || 0;
             
-            // Display threat types with ADVANCED analysis
-            const typesContent = document.getElementById('threatTypesContent');
-            typesContent.innerHTML = '';
-            
-            // Add download report button if available
-            if (data.report_file) {
-                const reportButton = document.createElement('a');
-                reportButton.href = `/download_report/${data.report_file}`;
-                reportButton.download = data.report_file;
-                reportButton.style.cssText = `
-                    display: inline-block;
-                    padding: 10px 20px;
-                    margin: 10px 0;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    text-align: center;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-                `;
-                reportButton.innerHTML = '📄 Download Threat Intelligence Report';
-                reportButton.onmouseover = function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 12px rgba(102, 126, 234, 0.4)';
-                };
-                reportButton.onmouseout = function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.3)';
-                };
-                typesContent.appendChild(reportButton);
-            }
-            
-            // Add DRDO PDF Report Generation Button
-            const pdfButton = document.createElement('button');
-            pdfButton.id = 'generatePdfButton';
-            pdfButton.style.cssText = `
-                display: inline-block;
-                padding: 12px 24px;
-                margin: 10px 10px;
-                background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-                color: white;
-                border: 2px solid #1e40af;
-                border-radius: 6px;
-                font-weight: 700;
-                font-size: 14px;
-                text-align: center;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            `;
-            pdfButton.innerHTML = '🛡️ Generate DRDO PDF Report';
-            pdfButton.onclick = function() {
-                generateDRDOPDFReport(data.unique_id, data.threats, data.metrics);
-            };
-            pdfButton.onmouseover = function() {
-                this.style.background = 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)';
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 6px 12px rgba(37, 99, 235, 0.4)';
-            };
-            pdfButton.onmouseout = function() {
-                this.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)';
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 4px 8px rgba(30, 58, 138, 0.3)';
-            };
-            typesContent.appendChild(pdfButton);
-            
-            // Add overall status badge
+            // Update status alert
+            const statusAlert = document.getElementById('statusAlert');
             if (summary.status) {
-                const statusBadge = document.createElement('div');
-                const statusColors = {
-                    'CRITICAL ALERT': '#dc2626',
-                    'HIGH ALERT': '#ea580c',
-                    'ELEVATED ALERT': '#f59e0b',
-                    'LOW ALERT': '#84cc16',
-                    'MONITORING': '#10b981',
-                    'ALL CLEAR': '#06b6d4'
-                };
-                const statusColor = statusColors[summary.status] || '#6b7280';
-                
-                statusBadge.style.cssText = `
-                    padding: 12px;
-                    margin: 10px 0;
-                    background: ${statusColor}33;
-                    border: 2px solid ${statusColor};
-                    border-radius: 8px;
-                    text-align: center;
-                    font-weight: 700;
-                    font-size: 1.1em;
-                    animation: pulse 2s infinite;
-                `;
-                statusBadge.innerHTML = `🛡️ STATUS: ${summary.status}`;
-                typesContent.appendChild(statusBadge);
+                statusAlert.querySelector('.status-text').textContent = `⚠ STATUS: ${summary.status}`;
             }
             
-            // Add average threat score if available
-            if (summary.average_threat_score > 0) {
-                const scoreDiv = document.createElement('div');
-                const scoreColor = summary.average_threat_score >= 75 ? '#dc2626' : 
-                                   summary.average_threat_score >= 50 ? '#f59e0b' : '#10b981';
-                scoreDiv.style.cssText = `
-                    padding: 10px;
-                    margin: 10px 0;
-                    background: ${scoreColor}22;
-                    border-left: 4px solid ${scoreColor};
-                    border-radius: 5px;
-                `;
-                scoreDiv.innerHTML = `
-                    <div style="color: #fff; font-weight: 600;">Average Threat Score: ${summary.average_threat_score}/100</div>
-                    <div style="color: #a0aec0; font-size: 0.9em;">Maximum: ${summary.max_threat_score}/100</div>
-                `;
-                typesContent.appendChild(scoreDiv);
-            }
+            // Populate threat details
+            const threatDetailsList = document.getElementById('threatDetailsList');
+            threatDetailsList.innerHTML = '';
             
             if (threats && threats.length > 0) {
                 threats.forEach((threat, index) => {
-                    const typeDiv = document.createElement('div');
+                    const threatItem = document.createElement('div');
                     
-                    // Determine card color based on severity or risk level
-                    let borderColor = '#ef4444';  // default red
-                    let bgColor = 'rgba(239, 68, 68, 0.2)';
-                    
+                    // Determine severity class
+                    let severityClass = 'critical';
+                    let severityLabel = 'CRITICAL';
                     if (threat.severity) {
-                        if (threat.severity === 'CRITICAL') { borderColor = '#dc2626'; bgColor = 'rgba(220, 38, 38, 0.3)'; }
-                        else if (threat.severity === 'SEVERE') { borderColor = '#ea580c'; bgColor = 'rgba(234, 88, 12, 0.25)'; }
-                        else if (threat.severity === 'HIGH') { borderColor = '#f59e0b'; bgColor = 'rgba(245, 158, 11, 0.2)'; }
-                        else if (threat.severity === 'MEDIUM') { borderColor = '#84cc16'; bgColor = 'rgba(132, 204, 22, 0.2)'; }
+                        severityLabel = threat.severity;
+                        if (threat.severity === 'SEVERE') severityClass = 'severe';
+                        else if (threat.severity === 'HIGH' || threat.severity === 'MEDIUM') severityClass = 'near';
+                    } else if (threat.risk_level) {
+                        severityLabel = threat.risk_level.toUpperCase();
+                        if (threat.risk_level === 'HIGH') severityClass = 'critical';
+                        else if (threat.risk_level === 'MEDIUM') severityClass = 'severe';
+                        else severityClass = 'near';
                     }
                     
-                    typeDiv.style.cssText = `padding: 12px; margin: 8px 0; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; transition: all 0.3s ease;`;
+                    threatItem.className = `threat-item ${severityClass}`;
                     
-                    // Format threat type
+                    // Build threat item HTML
                     const threatType = threat.type.replace(/_/g, ' ').toUpperCase();
                     const confidence = (threat.confidence * 100).toFixed(0);
                     
-                    // Build comprehensive HTML
-                    let threatHTML = `
-                        <div style="color: #fff; font-weight: 700; margin-bottom: 8px; font-size: 1.05em;">
-                            🎯 THREAT #${index + 1}: ${threatType}
+                    threatItem.innerHTML = `
+                        <div class="threat-header">
+                            <div class="threat-title">🎯 THREAT #${index + 1}: ${threatType}</div>
+                            <div class="threat-severity ${severityClass}">Severity: ${severityLabel}</div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                            <div style="color: #fbbf24; font-size: 0.9em;">
-                                ⚠️ Risk: <strong>${threat.risk_level}</strong>
+                        
+                        <div class="threat-info">
+                            <div class="threat-info-item">
+                                <span class="threat-info-label">Confidence:</span>
+                                <span class="threat-info-value">${confidence}%</span>
                             </div>
-                            ${threat.severity ? `<div style="color: #f87171; font-size: 0.9em;">
-                                📊 Severity: <strong>${threat.severity}</strong>
+                            ${threat.threat_score ? `
+                            <div class="threat-info-item">
+                                <span class="threat-info-label">Threat Score:</span>
+                                <span class="threat-info-value">${threat.threat_score}/100</span>
+                            </div>` : ''}
+                            ${threat.distance ? `
+                            <div class="threat-info-item">
+                                <span class="threat-info-label">Distance:</span>
+                                <span class="threat-info-value">${threat.distance.display} (±${threat.distance.error_margin})</span>
+                            </div>` : ''}
+                            ${threat.characteristics ? `
+                            <div class="threat-info-item">
+                                <span class="threat-info-label">Position:</span>
+                                <span class="threat-info-value">${threat.characteristics.position}</span>
+                            </div>
+                            <div class="threat-info-item">
+                                <span class="threat-info-label">Size:</span>
+                                <span class="threat-info-value">${threat.characteristics.size_class}</span>
+                            </div>
+                            <div class="threat-info-item">
+                                <span class="threat-info-label">Proximity:</span>
+                                <span class="threat-info-value">${threat.characteristics.proximity}</span>
                             </div>` : ''}
                         </div>
-                        <div style="color: #10b981; font-size: 0.9em; margin-bottom: 5px;">
-                            ✓ Confidence: ${confidence}%
-                        </div>
+                        
+                        ${threat.tactical_response ? `
+                        <div class="threat-response">
+                            <div class="threat-response-label">⚡ TACTICAL RESPONSE</div>
+                            <div class="threat-response-text">${threat.tactical_response}</div>
+                        </div>` : ''}
                     `;
                     
-                    // Add threat score
-                    if (threat.threat_score !== undefined) {
-                        const scoreColor = threat.threat_score >= 75 ? '#dc2626' : 
-                                         threat.threat_score >= 50 ? '#f59e0b' : '#10b981';
-                        threatHTML += `
-                            <div style="color: ${scoreColor}; font-size: 0.95em; font-weight: 600; margin-bottom: 8px;">
-                                🎯 Threat Score: ${threat.threat_score}/100
-                            </div>
-                        `;
-                    }
-                    
-                    // Add distance information
-                    if (threat.distance) {
-                        const distColor = threat.distance.confidence === 'high' ? '#10b981' : 
-                                         threat.distance.confidence === 'medium' ? '#fbbf24' : '#f87171';
-                        threatHTML += `
-                            <div style="color: ${distColor}; font-size: 0.9em; margin-top: 5px;">
-                                📏 Distance: <strong>${threat.distance.display}</strong> <span style="color: #a0aec0;">(±${threat.distance.error_margin})</span>
-                            </div>
-                        `;
-                    }
-                    
-                    // Add characteristics
-                    if (threat.characteristics) {
-                        const char = threat.characteristics;
-                        threatHTML += `
-                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
-                                <div style="color: #a0aec0; font-size: 0.85em;">
-                                    📍 Position: ${char.position} | Size: ${char.size_class} | Proximity: ${char.proximity}
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    // Add behavior
-                    if (threat.behavior) {
-                        const behaviorColor = threat.behavior.assessment === 'AGGRESSIVE' ? '#dc2626' :
-                                             threat.behavior.assessment === 'CAUTIOUS' ? '#f59e0b' : '#10b981';
-                        threatHTML += `
-                            <div style="color: ${behaviorColor}; font-size: 0.85em; margin-top: 5px;">
-                                🔍 Behavior: <strong>${threat.behavior.assessment}</strong>
-                            </div>
-                        `;
-                    }
-                    
-                    // Add tactical response
-                    if (threat.tactical_response) {
-                        threatHTML += `
-                            <div style="margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 4px;">
-                                <div style="color: #38bdf8; font-size: 0.85em; font-weight: 600;">
-                                    ⚡ TACTICAL RESPONSE:
-                                </div>
-                                <div style="color: #e0e7ff; font-size: 0.8em; margin-top: 4px;">
-                                    ${threat.tactical_response}
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    typeDiv.innerHTML = threatHTML;
-                    typeDiv.onmouseover = function() {
-                        this.style.transform = 'scale(1.02)';
-                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-                    };
-                    typeDiv.onmouseout = function() {
-                        this.style.transform = 'scale(1)';
-                        this.style.boxShadow = 'none';
-                    };
-                    typesContent.appendChild(typeDiv);
+                    threatDetailsList.appendChild(threatItem);
                 });
-            } else if (Object.keys(summary.types).length > 0) {
-                // Fallback to simple type display
-                for (const [type, count] of Object.entries(summary.types)) {
-                    const typeDiv = document.createElement('div');
-                    typeDiv.style.cssText = 'padding: 8px; margin: 5px 0; background: rgba(239, 68, 68, 0.2); border-left: 3px solid #ef4444; border-radius: 5px;';
-                    typeDiv.innerHTML = `<span style="color: #fff; font-weight: 600;">${type.replace(/_/g, ' ').toUpperCase()}</span>: <span style="color: #fbbf24;">${count} detected</span>`;
-                    typesContent.appendChild(typeDiv);
-                }
-            } else {
-                typesContent.innerHTML = '<p style="color: #a0aec0;">No specific threat types identified</p>';
-            }
-            
-            // Get additional analysis container for attention flow, enhancement analysis, etc.
-            const additionalAnalysis = document.getElementById('additionalAnalysis');
-            if (additionalAnalysis) {
-                additionalAnalysis.innerHTML = ''; // Clear previous content
-            }
-            
-            if (data.attention_flow) {
-                console.log('🌊 Attention flow available:', data.attention_flow);
-                const flowDiv = document.createElement('div');
-                flowDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 2px solid #38bdf8;';
-                flowDiv.innerHTML = `
-                    <h3 style="color: #38bdf8; margin-bottom: 10px; font-size: 1.2em;">
-                        🌊 Advanced Attention Flow Analysis
-                    </h3>
-                    <p style="color: #a0aec0; margin-bottom: 10px; font-size: 0.9em;">
-                        Shows <strong>HOW ATTENTION FLOWS</strong> through the image. Vectors indicate attention direction, colors show intensity.
-                    </p>
-                    <img src="/result/${data.attention_flow}" 
-                         style="width: 100%; border-radius: 8px; cursor: pointer;"
-                         onclick="window.open('/result/${data.attention_flow}', '_blank')"
-                         alt="Attention Flow Map">
-                    <p style="color: #38bdf8; margin-top: 10px; font-size: 0.85em;">
-                        💡 Click to view full size | Multi-scale analysis with directional vectors
-                    </p>
-                `;
-                if (additionalAnalysis) additionalAnalysis.appendChild(flowDiv);
-            }
-            
-            if (data.enhancement_analysis) {
-                console.log('🎨 Enhancement analysis available:', data.enhancement_analysis);
-                const analysisDiv = document.createElement('div');
-                analysisDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 2px solid #667eea;';
-                analysisDiv.innerHTML = `
-                    <h3 style="color: #667eea; margin-bottom: 10px; font-size: 1.2em;">
-                        🎨 ADVANCED 12-Panel Enhancement Explainability
-                    </h3>
-                    <p style="color: #a0aec0; margin-bottom: 10px; font-size: 0.9em;">
-                        Comprehensive 4×3 grid analysis showing <strong>HOW</strong> the Deep WaveNet enhanced the image:
-                    </p>
-                    <ul style="color: #a0aec0; font-size: 0.85em; margin-left: 20px; margin-bottom: 10px;">
-                        <li>🟢 <strong>Row 1:</strong> Original & Enhanced comparison with intensity map</li>
-                        <li>🟣 <strong>Row 2:</strong> Per-channel corrections (Red, Green, Blue)</li>
-                        <li>🟡 <strong>Row 3:</strong> Color balance, contrast & brightness analysis</li>
-                        <li>🔴 <strong>Row 4:</strong> Texture & edge enhancement + underwater quality metrics</li>
-                    </ul>
-                    <img src="/result/${data.enhancement_analysis}" 
-                         style="width: 100%; border-radius: 8px; cursor: pointer; border: 1px solid #667eea;"
-                         onclick="window.open('/result/${data.enhancement_analysis}', '_blank')"
-                         alt="12-Panel Enhancement Analysis">
-                    <p style="color: #38bdf8; margin-top: 10px; font-size: 0.85em;">
-                        💡 Click to view full-size HD image | Includes SSIM, PSNR, turbidity reduction, entropy gain & more
-                    </p>
-                `;
-                if (additionalAnalysis) additionalAnalysis.appendChild(analysisDiv);
             }
             
             // Show the summary panel
@@ -2484,7 +2673,7 @@
             if (selectedVideoFile) {
                 document.getElementById('videoFileName').textContent = selectedVideoFile.name;
                 document.getElementById('videoFileInfo').style.display = 'block';
-                document.getElementById('processVideoButton').style.display = 'inline-block';
+                document.getElementById('processVideoButton').disabled = false;
             }
         }
 
@@ -2499,9 +2688,11 @@
             
             const selectedModel = document.querySelector('input[name="videoModel"]:checked').value;
             const createComparison = document.querySelector('input[name="videoComparison"]:checked') ? 'true' : 'false';
+            const enableThreats = document.getElementById('videoThreatDetection').checked ? 'true' : 'false';
             
             formData.append('model_type', selectedModel);
             formData.append('comparison', createComparison);
+            formData.append('enable_threats', enableThreats);
 
             // Hide upload section, show processing
             document.getElementById('processVideoButton').disabled = true;
@@ -2578,7 +2769,7 @@
             document.getElementById('videoPreviewSection').style.display = 'block';
             document.getElementById('processVideoButton').disabled = false;
 
-            // Display stats
+            // Display processing stats
             if (data.stats) {
                 document.getElementById('resultTotalFrames').textContent = data.stats.total_frames || 0;
                 document.getElementById('resultProcessingTime').textContent = 
@@ -2586,19 +2777,59 @@
                 document.getElementById('resultAvgFPS').textContent = 
                     (data.stats.average_fps || 0).toFixed(2);
                 document.getElementById('resultResolution').textContent = 
-                    data.stats.input_resolution || '-';
+                    data.stats.resolution || data.stats.input_resolution || '-';
+                
+                // Set quality metrics if available
+                if (data.stats.psnr) {
+                    document.getElementById('resultPSNR').textContent = data.stats.psnr.toFixed(2);
+                } else {
+                    document.getElementById('resultPSNR').textContent = 'N/A';
+                }
+                if (data.stats.ssim) {
+                    document.getElementById('resultSSIM').textContent = data.stats.ssim.toFixed(4);
+                } else {
+                    document.getElementById('resultSSIM').textContent = 'N/A';
+                }
+                if (data.stats.uiqm) {
+                    document.getElementById('resultUIQM').textContent = data.stats.uiqm.toFixed(4);
+                } else {
+                    document.getElementById('resultUIQM').textContent = 'N/A';
+                }
+                
+                // Set threat count
+                const threatCount = data.stats.threat_count || 0;
+                document.getElementById('resultThreats').textContent = threatCount;
+                
+                // Update threat card styling based on count
+                const threatCard = document.getElementById('resultThreats').closest('.stat-card');
+                if (threatCount > 0) {
+                    threatCard.style.animation = 'pulse 2s infinite';
+                    threatCard.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
+                } else {
+                    threatCard.style.animation = 'none';
+                    threatCard.style.boxShadow = 'none';
+                }
             }
 
-            // Set video sources
-            const videoPath = `/video/${outputFile}`;
-            document.getElementById('enhancedVideo').src = videoPath;
-            document.getElementById('originalVideo').src = videoPath; // For comparison video, both show same
+            // Get the input video filename from data
+            const inputFile = data.input_file || `${data.video_id}_input.mp4`;
+
+            // Set video sources - show original and enhanced
+            const originalVideoElement = document.getElementById('originalVideo');
+            const enhancedVideoElement = document.getElementById('enhancedVideo');
+            
+            originalVideoElement.src = `/video/${inputFile}`;
+            enhancedVideoElement.src = `/video/${outputFile}`;
+            
+            // Load both videos
+            originalVideoElement.load();
+            enhancedVideoElement.load();
             
             // Set download link
             document.getElementById('downloadVideoLink').href = `/download_video/${outputFile}`;
             document.getElementById('downloadVideoLink').download = `enhanced_${selectedVideoFile.name}`;
 
-            showStatus(' Video processing complete!', 'success');
+            showStatus('✅ Video processing complete! Videos ready to view.', 'success');
         }
 
         // ==================== END VIDEO FUNCTIONS ====================
@@ -2655,6 +2886,18 @@
         }
         
         // ==================== END THREAT DETECTION ====================
+
+        // Download threat intelligence report
+        function downloadThreatReport() {
+            if (resultData && resultData.report_file) {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `/download_report/${resultData.report_file}`;
+                downloadLink.download = resultData.report_file;
+                downloadLink.click();
+            } else {
+                showStatus('No threat report available', 'error');
+            }
+        }
 
         // ==================== DRDO PDF REPORT GENERATION ====================
         
@@ -2831,6 +3074,35 @@
             .catch(error => {
                 showStatus(' Server not ready. Please check if the Flask app is running.', 'error');
             });
+    </script>
+
+    <script>
+    // Theme Toggle Function
+    function toggleTheme() {
+        const body = document.body;
+        const themeIcon = document.getElementById('themeIcon');
+        
+        body.classList.toggle('light-mode');
+        
+        if (body.classList.contains('light-mode')) {
+            themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            localStorage.setItem('theme', 'light');
+        } else {
+            themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    // Load saved theme on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+        }
+    });
     </script>
 </body>
 </html>

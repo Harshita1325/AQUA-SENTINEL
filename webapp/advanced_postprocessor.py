@@ -17,7 +17,7 @@ class AdvancedPostprocessor:
     """
     
     def __init__(self):
-        print("🎨 Advanced Postprocessor initialized")
+        print(" Advanced Postprocessor initialized")
     
     def tone_map(self, image: np.ndarray, method: str = 'reinhard', 
                  gamma: float = 1.5) -> np.ndarray:
@@ -399,30 +399,30 @@ def calculate_histogram_statistics(image: np.ndarray) -> Dict:
 
 # Quick test
 if __name__ == "__main__":
-    print("🧪 Testing Advanced Postprocessor\n")
+    print(" Testing Advanced Postprocessor\n")
     
     postprocessor = AdvancedPostprocessor()
     
     # Create test image (simulated model output)
     test_image = np.random.randint(80, 180, (480, 640, 3), dtype=np.uint8)
     
-    print("📊 Input image statistics:")
+    print(" Input image statistics:")
     stats = calculate_histogram_statistics(test_image)
     print(f"  Mean: {stats['mean']:.1f}")
     print(f"  Std: {stats['std']:.1f}")
     print(f"  Range: {stats['min']:.0f} - {stats['max']:.0f}")
     
-    print("\n🚀 Applying post-processing pipeline...")
+    print("\n Applying post-processing pipeline...")
     enhanced, log = postprocessor.postprocess_pipeline(test_image)
     
-    print(f"\n📈 Output image statistics:")
+    print(f"\n Output image statistics:")
     stats_out = calculate_histogram_statistics(enhanced)
     print(f"  Mean: {stats_out['mean']:.1f}")
     print(f"  Std: {stats_out['std']:.1f}")
     print(f"  Range: {stats_out['min']:.0f} - {stats_out['max']:.0f}")
     
-    print(f"\n✅ Steps applied: {len(log['steps_applied'])}")
+    print(f"\n Steps applied: {len(log['steps_applied'])}")
     for step in log['steps_applied']:
         print(f"  • {step}")
     
-    print("\n✅ Advanced Postprocessor ready!")
+    print("\n Advanced Postprocessor ready!")

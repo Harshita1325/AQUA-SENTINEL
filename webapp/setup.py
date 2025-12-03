@@ -18,9 +18,9 @@ def setup_webapp():
         dir_path = os.path.join(webapp_dir, directory)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-            print(f"✅ Created directory: {directory}")
+            print(f" Created directory: {directory}")
         else:
-            print(f"📁 Directory exists: {directory}")
+            print(f" Directory exists: {directory}")
     
     # Copy a sample test image
     base_dir = os.path.dirname(webapp_dir)
@@ -29,13 +29,13 @@ def setup_webapp():
     
     if os.path.exists(sample_image_src):
         shutil.copy2(sample_image_src, sample_image_dst)
-        print(f"✅ Copied sample image to static folder")
+        print(f" Copied sample image to static folder")
     else:
-        print(f"❌ Sample image not found: {sample_image_src}")
+        print(f" Sample image not found: {sample_image_src}")
     
-    print("\n🎉 Web application setup complete!")
-    print(f"📂 Web app directory: {webapp_dir}")
-    print("🚀 Run 'python app.py' to start the server")
+    print("\n Web application setup complete!")
+    print(f" Web app directory: {webapp_dir}")
+    print(" Run 'python app.py' to start the server")
 
 if __name__ == "__main__":
     setup_webapp()

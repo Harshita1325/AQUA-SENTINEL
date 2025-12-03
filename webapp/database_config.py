@@ -52,7 +52,7 @@ class SecureImageDatabase:
         # Initialize buckets and tables
         self._initialize_storage()
         
-        logger.info("✅ Secure database initialized")
+        logger.info(" Secure database initialized")
     
     def _initialize_storage(self):
         """Create buckets and database tables"""
@@ -69,7 +69,7 @@ class SecureImageDatabase:
             try:
                 if not self.minio_client.bucket_exists(bucket_name=bucket):
                     self.minio_client.make_bucket(bucket_name=bucket)
-                    logger.info(f"✅ Created bucket: {bucket}")
+                    logger.info(f" Created bucket: {bucket}")
             except S3Error as e:
                 logger.error(f"Error creating bucket {bucket}: {e}")
         
@@ -172,7 +172,7 @@ class SecureImageDatabase:
             """)
             conn.commit()
             
-            logger.info("✅ Database tables created successfully")
+            logger.info(" Database tables created successfully")
             
         except Exception as e:
             conn.rollback()
@@ -240,7 +240,7 @@ class SecureImageDatabase:
                 # Log action
                 self._log_audit(user_id, 'UPLOAD_IMAGE', 'image', image_id, True)
                 
-                logger.info(f"✅ Image stored: ID={image_id}, Hash={file_hash}")
+                logger.info(f" Image stored: ID={image_id}, Hash={file_hash}")
                 return image_id
                 
             finally:
@@ -294,7 +294,7 @@ class SecureImageDatabase:
                 # Log access
                 self._log_audit(user_id, 'DOWNLOAD_IMAGE', 'image', image_id, True)
                 
-                logger.info(f"✅ Image retrieved: ID={image_id}")
+                logger.info(f" Image retrieved: ID={image_id}")
                 return True
                 
             finally:
@@ -351,7 +351,7 @@ class SecureImageDatabase:
                     # Log deletion
                     self._log_audit(user_id, 'DELETE_IMAGE', 'image', image_id, True)
                     
-                    logger.info(f"✅ Image deleted: ID={image_id}")
+                    logger.info(f" Image deleted: ID={image_id}")
                     return True
                 
                 return False
@@ -485,7 +485,7 @@ class SecureImageDatabase:
     def close(self):
         """Close all connections"""
         self.pg_pool.closeall()
-        logger.info("✅ Database connections closed")
+        logger.info(" Database connections closed")
 
 
 # Example usage
@@ -495,7 +495,7 @@ if __name__ == "__main__":
     
     # Get statistics
     stats = db.get_statistics()
-    print(f"📊 Database Statistics:")
+    print(f" Database Statistics:")
     print(f"   Total Images: {stats['total_images']}")
     print(f"   Total Size: {stats['total_size_gb']:.2f} GB")
     print(f"   Activity (24h): {stats['activity_24h']}")

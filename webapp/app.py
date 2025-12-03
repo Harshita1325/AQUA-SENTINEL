@@ -37,9 +37,9 @@ video_progress = {}
 # Initialize database
 try:
     db = SecureImageDatabase()
-    print("✅ Database connected successfully!")
+    print(" Database connected successfully!")
 except Exception as e:
-    print(f"⚠️ Database connection failed: {e}")
+    print(f" Database connection failed: {e}")
     db = None
 
 def allowed_file(filename):
@@ -112,9 +112,9 @@ def upload_file():
                     try:
                         raw_id = db.store_image(input_path, user_id=1, image_type='raw')
                         db_image_id = db.store_image(output_path, user_id=1, image_type='enhanced')
-                        print(f"✅ Images saved to database: raw={raw_id}, enhanced={db_image_id}")
+                        print(f" Images saved to database: raw={raw_id}, enhanced={db_image_id}")
                     except Exception as db_error:
-                        print(f"⚠️ Database save failed: {db_error}")
+                        print(f" Database save failed: {db_error}")
                 
                 return jsonify({
                     'success': True,
@@ -147,9 +147,9 @@ def upload_file():
                     try:
                         raw_id = db.store_image(input_path, user_id=1, image_type='raw')
                         db_image_id = db.store_image(output_path, user_id=1, image_type='enhanced')
-                        print(f"✅ Images saved to database: raw={raw_id}, enhanced={db_image_id}")
+                        print(f" Images saved to database: raw={raw_id}, enhanced={db_image_id}")
                     except Exception as db_error:
-                        print(f"⚠️ Database save failed: {db_error}")
+                        print(f" Database save failed: {db_error}")
                 
                 return jsonify({
                     'success': True,
@@ -177,7 +177,7 @@ def upload_file():
                         # Save enhanced image
                         db_image_id = db.store_image(output_path, user_id=1, image_type='enhanced')
                     except Exception as db_error:
-                        print(f"⚠️ Database save failed: {db_error}")
+                        print(f" Database save failed: {db_error}")
                 
                 return jsonify({
                     'success': True,
@@ -451,6 +451,7 @@ def upload_video():
     file = request.files['file']
     model_type = request.form.get('model_type', 'uieb')
     create_comparison = request.form.get('comparison', 'true').lower() == 'true'
+    enable_threats = request.form.get('enable_threats', 'false').lower() == 'true'
     
     if file.filename == '':
         return jsonify({'error': 'No video file selected'}), 400
@@ -488,11 +489,10 @@ def upload_video():
             try:
                 video_progress[unique_id]['status'] = 'processing'
                 
-                # Initialize video processor
-                if video_processor is None or video_processor.model_type != model_type:
-                    proc = get_video_processor(model_type)
-                else:
-                    proc = video_processor
+                # Initialize video processor with threat detection - USE V2 with OpenCV tracking
+                from video_processor_v2 import VideoProcessorV2
+                proc = VideoProcessorV2(model_type=model_type, enable_threat_detection=enable_threats)
+                print(f"🎬 Using VideoProcessorV2 with threat detection: {enable_threats}")
                 
                 # Progress callback
                 def update_progress(stats):
@@ -542,11 +542,21 @@ def get_video_progress(video_id):
 @app.route('/video/<filename>')
 def serve_video(filename):
     """
-    Serve video files
+    Serve video files with proper MIME type detection
     """
     video_path = os.path.join(app.config['VIDEO_FOLDER'], filename)
     if os.path.exists(video_path):
-        return send_file(video_path, mimetype='video/mp4')
+        # Determine MIME type based on file extension
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'mp4'
+        mime_types = {
+            'mp4': 'video/mp4',
+            'avi': 'video/x-msvideo',
+            'mov': 'video/quicktime',
+            'mkv': 'video/x-matroska',
+            'wmv': 'video/x-ms-wmv'
+        }
+        mimetype = mime_types.get(ext, 'video/mp4')
+        return send_file(video_path, mimetype=mimetype)
     return jsonify({'error': 'Video not found'}), 404
 
 @app.route('/download_video/<filename>')
@@ -750,7 +760,7 @@ def detect_threats():
                 # Detect and highlight threats with ADVANCED SYSTEM
                 start_time = time.time()
                 
-                print(f"\n🛡️ Initiating ADVANCED threat detection...")
+                print(f"\n Initiating ADVANCED threat detection...")
                 print(f"   Enhancement: {'ENABLED' if enhance_first else 'DISABLED'}")
                 print(f"   Marine life filtering: {'ON' if exclude_marine_life else 'OFF - Maximum Detection'}")
                 
@@ -773,9 +783,9 @@ def detect_threats():
                             input_path,
                             report_path
                         )
-                        print(f"📄 Comprehensive threat report generated: {report_filename}")
+                        print(f" Comprehensive threat report generated: {report_filename}")
                     except Exception as e:
-                        print(f"⚠️ Could not generate report: {str(e)}")
+                        print(f" Could not generate report: {str(e)}")
                         report_filename = None
                 
                 # Save the CLEAN enhanced image (no annotations) - for 2nd quadrant
@@ -804,7 +814,7 @@ def detect_threats():
                 distance_img = enhanced_img.copy()
                 
                 if threats:
-                    print(f"🔍 Processing {len(threats)} threats for distance visualization...")
+                    print(f" Processing {len(threats)} threats for distance visualization...")
                     threats_with_distance = 0
                     
                     for idx, threat in enumerate(threats):
@@ -816,7 +826,7 @@ def detect_threats():
                             center = threat['center']
                             dist_info = threat['distance']
                             
-                            print(f"  ✅ Threat {idx + 1}: {threat['threat_type']} at {dist_info['distance_display']}")
+                            print(f"   Threat {idx + 1}: {threat['threat_type']} at {dist_info['distance_display']}")
                             
                             # Draw a small circle at threat center
                             cv2.circle(distance_img, tuple(center), 10, (0, 255, 159), -1)
@@ -874,9 +884,9 @@ def detect_threats():
                             cv2.putText(distance_img, "CAM", (camera_point[0] - 20, camera_point[1] + 5),
                                       font, 0.5, (255, 255, 255), 2)
                         else:
-                            print(f"  ⚠️ Threat {idx + 1}: {threat['threat_type']} - No distance data available")
+                            print(f"   Threat {idx + 1}: {threat['threat_type']} - No distance data available")
                     
-                    print(f"📊 Distance visualization: {threats_with_distance}/{len(threats)} threats have distance data")
+                    print(f" Distance visualization: {threats_with_distance}/{len(threats)} threats have distance data")
                     
                     # If no threats have distance, add a message on the image
                     if threats_with_distance == 0:
@@ -902,7 +912,7 @@ def detect_threats():
                                   font, font_scale, (255, 165, 0), thickness)
                 else:
                     # NO THREATS DETECTED - Add message overlay
-                    print(f"✅ No threats detected - clean scan")
+                    print(f" No threats detected - clean scan")
                     img_height, img_width = distance_img.shape[:2]
                     message = "NO THREATS DETECTED"
                     sub_message = "Area Clear - Safe Zone"
@@ -936,7 +946,7 @@ def detect_threats():
                               font, 0.8, (0, 255, 0), 2)
                 
                 cv2.imwrite(distance_output_path, distance_img)
-                print(f"💾 Distance measurement image saved to: {distance_output_path}")
+                print(f" Distance measurement image saved to: {distance_output_path}")
                 
                 # Heatmap generation disabled for performance
                 heatmap_filename = None
@@ -956,7 +966,7 @@ def detect_threats():
                 
                 if enhance_first and os.path.exists(enhanced_output_path):
                     try:
-                        print(f"\n📊 Calculating image quality metrics...")
+                        print(f"\n Calculating image quality metrics...")
                         if metrics_calc is None:
                             metrics_calc = get_metrics_calculator()
                         
@@ -988,17 +998,17 @@ def detect_threats():
                                             np.log2(np.histogram(enh_gray, bins=256, range=(0, 256))[0] / enh_gray.size + 1e-10))
                         calculated_metrics['entropy_gain'] = round(enh_entropy - orig_entropy, 3)
                         
-                        print(f"   ✅ Metrics calculated: PSNR={calculated_metrics['psnr']} dB, SSIM={calculated_metrics['ssim']}, UIQM={calculated_metrics['uiqm']}")
+                        print(f"    Metrics calculated: PSNR={calculated_metrics['psnr']} dB, SSIM={calculated_metrics['ssim']}, UIQM={calculated_metrics['uiqm']}")
                         
                     except Exception as e:
-                        print(f"   ⚠️ Metrics calculation failed: {str(e)}")
+                        print(f"    Metrics calculation failed: {str(e)}")
                 
                 # Generate quad comparison image (Original | Enhanced | Threats | Distance)
                 quad_comparison_filename = f"{unique_id}_quad_comparison.{file_ext}"
                 quad_comparison_path = os.path.join(app.config['RESULTS_FOLDER'], quad_comparison_filename)
                 
                 try:
-                    print(f"\n🖼️ Generating quad comparison image...")
+                    print(f"\n Generating quad comparison image...")
                     original_img = cv2.imread(input_path)
                     enhanced_img = cv2.imread(enhanced_output_path)
                     threat_img = cv2.imread(threat_output_path)
@@ -1037,10 +1047,10 @@ def detect_threats():
                     quad_image = np.vstack([top_row, bottom_row])
                     
                     cv2.imwrite(quad_comparison_path, quad_image)
-                    print(f"   ✅ Quad comparison saved: {quad_comparison_filename}")
+                    print(f"    Quad comparison saved: {quad_comparison_filename}")
                     
                 except Exception as e:
-                    print(f"   ⚠️ Quad comparison generation failed: {str(e)}")
+                    print(f"    Quad comparison generation failed: {str(e)}")
                 
                 # Format threat data for JSON response with DETAILED ANALYSIS
                 threat_list = []
@@ -1145,9 +1155,9 @@ def detect_threats():
                         
                         response_data['db_saved'] = True
                         response_data['db_image_id'] = db_image_id
-                        print(f"✅ Images saved to database: raw={raw_id}, enhanced={enhanced_id}, threat={db_image_id}")
+                        print(f" Images saved to database: raw={raw_id}, enhanced={enhanced_id}, threat={db_image_id}")
                     except Exception as db_error:
-                        print(f"⚠️ Database save failed: {db_error}")
+                        print(f" Database save failed: {db_error}")
                         response_data['db_saved'] = False
                 
                 return jsonify(response_data)
@@ -1348,19 +1358,19 @@ def api_image(image_id):
 
 
 if __name__ == '__main__':
-    print("🌊 Deep WaveNet Web Application")
+    print(" Deep WaveNet Web Application")
     print("=" * 50)
     print("Initializing models...")
     
     try:
         processor = get_processor()
         info = processor.get_model_info()
-        print("✅ All models loaded successfully!")
-        print(f"🚀 Starting server on http://localhost:5000")
-        print("📁 Available models:", info['available_models'])
-        print("💻 Device:", info['device'])
+        print(" All models loaded successfully!")
+        print(f" Starting server on http://localhost:5000")
+        print(" Available models:", info['available_models'])
+        print(" Device:", info['device'])
         app.run(debug=True, host='0.0.0.0', port=5000)
     except Exception as e:
-        print(f"❌ Failed to load models: {str(e)}")
-        print("🔧 Starting server anyway (models will load on first request)...")
+        print(f" Failed to load models: {str(e)}")
+        print(" Starting server anyway (models will load on first request)...")
         app.run(debug=True, host='0.0.0.0', port=5000)

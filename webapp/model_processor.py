@@ -30,8 +30,8 @@ class DeepWaveNetProcessor:
         self.advanced_preprocessor = AdvancedPreprocessor()
         self.advanced_postprocessor = AdvancedPostprocessor()
         
-        print(f"🔧 Initializing processor on device: {self.device}")
-        print("🎨 Advanced processing modules loaded")
+        print(f" Initializing processor on device: {self.device}")
+        print(" Advanced processing modules loaded")
         
     def load_models(self):
         """Load all Deep WaveNet models"""
@@ -40,7 +40,7 @@ class DeepWaveNetProcessor:
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             
             # Load UIEB Enhancement Model
-            print("📦 Loading UIEB enhancement model...")
+            print(" Loading UIEB enhancement model...")
             
             # Use video processing model (compatible with checkpoint)
             video_path = os.path.join(base_dir, 'uw_video_processing')
@@ -57,54 +57,25 @@ class DeepWaveNetProcessor:
             if not os.path.exists(checkpoint_path):
                 raise FileNotFoundError(f"UIEB checkpoint not found: {checkpoint_path}")
             
-            print(f"   📁 Loading checkpoint: {os.path.basename(checkpoint_path)}")
+            print(f"    Loading checkpoint: {os.path.basename(checkpoint_path)}")
             checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
             self.models['uieb'].load_state_dict(checkpoint['model_state_dict'])
             self.models['uieb'].eval()
             self.models['uieb'].to(self.device)
-            print("✅ UIEB model loaded successfully")
+            print(" UIEB model loaded successfully")
             
-            # Keep video_path in sys.path for SR models (same architecture)
-            
-            # Load Super-Resolution Models (using same architecture as UIEB)
-            for scale in [2, 3, 4]:
-                print(f"📦 Loading {scale}X super-resolution model...")
-                model_key = f'sr{scale}x'
-                
-                # Use the same models module from uw_video_processing
-                importlib.reload(uieb_models)
-                self.models[model_key] = uieb_models.CC_Module(scale)
-                
-                # Load checkpoint from super-resolution folder
-                if scale == 2:
-                    checkpoint_file = 'netG_859.pt'
-                elif scale == 3:
-                    checkpoint_file = 'netG_1603.pt'
-                else:  # scale == 4
-                    checkpoint_file = 'netG_2320.pt'
-                
-                sr_dir = os.path.join(base_dir, 'super-resolution', f'{scale}X')
-                checkpoint_path = os.path.join(sr_dir, 'ckpt', checkpoint_file)
-                
-                if not os.path.exists(checkpoint_path):
-                    print(f"⚠️ Checkpoint not found: {checkpoint_path}")
-                    continue
-                    
-                print(f"   📁 Loading checkpoint: {checkpoint_file}")
-                checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
-                self.models[model_key].load_state_dict(checkpoint['model_state_dict'])
-                self.models[model_key].eval()
-                self.models[model_key].to(self.device)
-                print(f"✅ {scale}X super-resolution model loaded")
+            # Load Super-Resolution Models - DON'T use optimized versions, stick with uw_video_processing
+            print(" Super-resolution models disabled (architecture mismatch with checkpoints)")
+            print("   Using UIEB model for all enhancement tasks")
             
             # Remove video path to avoid conflicts
             sys.path.remove(video_path)
             
-            print(f"🎉 All {len(self.models)} models loaded successfully!")
+            print(f" All {len(self.models)} models loaded successfully!")
             return True
             
         except Exception as e:
-            print(f"❌ Error loading models: {str(e)}")
+            print(f" Error loading models: {str(e)}")
             import traceback
             traceback.print_exc()
             return False
@@ -160,22 +131,22 @@ class DeepWaveNetProcessor:
             if model_type not in self.models:
                 raise ValueError(f"Model '{model_type}' not available. Available models: {list(self.models.keys())}")
             
-            print(f"🔄 Processing image with {model_type} model...")
+            print(f" Processing image with {model_type} model...")
             
             # Preprocess
             input_tensor, original_shape = self.preprocess_image(input_path)
-            print(f"📐 Input shape: {original_shape}")
+            print(f" Input shape: {original_shape}")
             
             # Run inference
             with torch.no_grad():
                 model = self.models[model_type]
                 output_tensor = model(input_tensor)
             
-            print(f"📐 Output tensor shape: {output_tensor.shape}")
+            print(f" Output tensor shape: {output_tensor.shape}")
             
             # Postprocess and save
             result_path = self.postprocess_image(output_tensor, output_path)
-            print(f"💾 Saved result to: {result_path}")
+            print(f" Saved result to: {result_path}")
             
             return result_path
             
@@ -252,10 +223,10 @@ class DeepWaveNetProcessor:
         # Detect environment if auto mode
         if environment == 'auto':
             detected_env = self.detect_environment(input_path)
-            print(f"🔍 Auto-detected environment: {detected_env.upper()}")
+            print(f" Auto-detected environment: {detected_env.upper()}")
         else:
             detected_env = environment.lower()
-            print(f"🎯 Manual environment selection: {detected_env.upper()}")
+            print(f" Manual environment selection: {detected_env.upper()}")
         
         # Load image
         image = cv2.imread(input_path)
@@ -320,8 +291,8 @@ class DeepWaveNetProcessor:
         """
         try:
             if self.threat_detector is None:
-                print("🛡️ Loading ULTRA-ADVANCED threat detection system...")
-                print("⚡ Initializing high-speed military-grade detection...")
+                print(" Loading ULTRA-ADVANCED threat detection system...")
+                print(" Initializing high-speed military-grade detection...")
                 self.threat_detector = ThreatDetector(
                     model_size=model_size,           # YOLOv8-N for optimal speed (10x faster)
                     confidence_threshold=0.05,       # MAXIMUM sensitivity (95%+)
@@ -329,17 +300,17 @@ class DeepWaveNetProcessor:
                     use_ensemble=False               # Disabled for speed (single model is accurate)
                 )
                 self.threat_visualizer = ThreatVisualizer()
-                print("✅ ULTRA-ADVANCED threat detection system ready")
-                print(f"   📊 Primary Model: YOLOv8-{model_size.upper()} (SPEED-OPTIMIZED)")
-                print(f"   🎯 Sensitivity: 95%+ (MAXIMUM - Lower threshold)")
-                print(f"   📏 Distance Estimation: HIGH-PRECISION ENABLED")
-                print(f"   🔬 Ensemble Learning: DISABLED (Speed Priority)")
-                print(f"   🎭 Multi-Scale Detection: 3 SCALES")
-                print(f"   ⚡ Advanced NMS: IoU 0.45")
-                print(f"   ⚡ Speed Gain: 10x FASTER than YOLOv8-X")
+                print(" ULTRA-ADVANCED threat detection system ready")
+                print(f"    Primary Model: YOLOv8-{model_size.upper()} (SPEED-OPTIMIZED)")
+                print(f"    Sensitivity: 95%+ (MAXIMUM - Lower threshold)")
+                print(f"    Distance Estimation: HIGH-PRECISION ENABLED")
+                print(f"    Ensemble Learning: DISABLED (Speed Priority)")
+                print(f"    Multi-Scale Detection: 3 SCALES")
+                print(f"    Advanced NMS: IoU 0.45")
+                print(f"    Speed Gain: 10x FASTER than YOLOv8-X")
             return True
         except Exception as e:
-            print(f"❌ Error loading threat detector: {str(e)}")
+            print(f" Error loading threat detector: {str(e)}")
             import traceback
             traceback.print_exc()
             return False
@@ -365,7 +336,7 @@ class DeepWaveNetProcessor:
             
             # Step 1: Enhance image first if requested
             if enhance_first:
-                print("🌊 Enhancing image for better threat detection...")
+                print(" Enhancing image for better threat detection...")
                 enhanced_path = input_path.replace('.', '_enhanced.')
                 self.process_image(input_path, enhanced_path, 'uieb')
                 detection_input = enhanced_path
@@ -373,7 +344,7 @@ class DeepWaveNetProcessor:
                 detection_input = input_path
             
             # Step 2: Detect threats
-            print("🔍 Scanning for underwater threats...")
+            print(" Scanning for underwater threats...")
             threats = self.threat_detector.detect_threats(
                 detection_input, 
                 exclude_marine_life=exclude_marine_life
@@ -384,7 +355,7 @@ class DeepWaveNetProcessor:
             
             # Step 4: Visualize threats
             if threats:
-                print(f"⚠️  {summary['total']} threat(s) detected - drawing highlights...")
+                print(f"  {summary['total']} threat(s) detected - drawing highlights...")
                 self.threat_visualizer.draw_all_threats(
                     detection_input,
                     threats,
@@ -394,7 +365,7 @@ class DeepWaveNetProcessor:
                     draw_labels=True
                 )
             else:
-                print("✅ No threats detected - image is clear")
+                print(" No threats detected - image is clear")
                 # Copy input to output if no threats
                 import shutil
                 shutil.copy(detection_input, output_path)
@@ -462,7 +433,7 @@ class DeepWaveNetProcessor:
             return results
             
         except Exception as e:
-            print(f"❌ Error in processing pipeline: {str(e)}")
+            print(f" Error in processing pipeline: {str(e)}")
             raise
     
     def get_model_info(self):
@@ -499,7 +470,7 @@ class DeepWaveNetProcessor:
             Dictionary with processing results and quality metrics
         """
         try:
-            print("\n🚀 Starting SMART ENHANCEMENT pipeline...")
+            print("\n Starting SMART ENHANCEMENT pipeline...")
             results = {
                 'input_quality': {},
                 'output_quality': {},
@@ -516,7 +487,7 @@ class DeepWaveNetProcessor:
             original_rgb = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
             
             # Step 1: Assess input image quality
-            print("\n📊 Step 1: Assessing input image quality...")
+            print("\n Step 1: Assessing input image quality...")
             input_quality = self.advanced_preprocessor.assess_image_quality(original_rgb)
             results['input_quality'] = input_quality
             
@@ -531,11 +502,11 @@ class DeepWaveNetProcessor:
             
             # Step 2: Advanced preprocessing
             if needs_extreme:
-                print("\n⚡ Step 2: Applying EXTREME preprocessing...")
+                print("\n Step 2: Applying EXTREME preprocessing...")
                 preprocessed = self.advanced_preprocessor.preprocess_for_extreme_cases(original_rgb)
                 results['preprocessing_log'] = {'mode': 'extreme', 'steps': 7}
             else:
-                print("\n🎨 Step 2: Applying standard preprocessing...")
+                print("\n Step 2: Applying standard preprocessing...")
                 preprocessed, prep_log = self.advanced_preprocessor.preprocess_pipeline(
                     original_rgb, 
                     auto=True
@@ -548,7 +519,7 @@ class DeepWaveNetProcessor:
             cv2.imwrite(temp_preprocessed_path, preprocessed_bgr)
             
             # Step 3: Run deep learning model
-            print("\n🧠 Step 3: Running deep learning inference...")
+            print("\n Step 3: Running deep learning inference...")
             temp_model_output = input_path.replace('.', '_smart_model.')
             self.process_image(temp_preprocessed_path, temp_model_output, 'uieb')
             
@@ -557,7 +528,7 @@ class DeepWaveNetProcessor:
             model_output_rgb = cv2.cvtColor(model_output, cv2.COLOR_BGR2RGB)
             
             # Step 4: Advanced postprocessing
-            print("\n✨ Step 4: Applying advanced postprocessing...")
+            print("\n Step 4: Applying advanced postprocessing...")
             if aggressive or needs_extreme:
                 final_output = self.advanced_postprocessor.extreme_postprocess(model_output_rgb)
                 results['postprocessing_log'] = {'mode': 'extreme'}
@@ -569,7 +540,7 @@ class DeepWaveNetProcessor:
                 results['postprocessing_log'] = post_log
             
             # Step 5: Assess output quality
-            print("\n📈 Step 5: Assessing output quality...")
+            print("\n Step 5: Assessing output quality...")
             output_quality = self.advanced_preprocessor.assess_image_quality(final_output)
             results['output_quality'] = output_quality
             
@@ -588,7 +559,7 @@ class DeepWaveNetProcessor:
                 'quality_score_change': output_quality['quality_score'] - input_quality['quality_score']
             }
             
-            print("\n📊 Improvements:")
+            print("\n Improvements:")
             print(f"  • Brightness: {results['improvement']['brightness_change']:+.1f}")
             print(f"  • Sharpness: {results['improvement']['sharpness_change']:+.1f}")
             print(f"  • Contrast: {results['improvement']['contrast_change']:+.1f}")
@@ -604,13 +575,13 @@ class DeepWaveNetProcessor:
                 if os.path.exists(temp_file):
                     os.remove(temp_file)
             
-            print(f"\n✅ Smart enhancement complete! Saved to: {output_path}")
-            print(f"🎉 Overall quality improvement: {results['improvement']['quality_score_change']:+.1f} points")
+            print(f"\n Smart enhancement complete! Saved to: {output_path}")
+            print(f" Overall quality improvement: {results['improvement']['quality_score_change']:+.1f} points")
             
             return results
             
         except Exception as e:
-            print(f"❌ Error in smart enhancement: {str(e)}")
+            print(f" Error in smart enhancement: {str(e)}")
             import traceback
             traceback.print_exc()
             raise

@@ -34,6 +34,11 @@ class ThreatDetector:
         'train': 'missile',
         'airplane': 'missile',
         
+        # SHARKS - NEW THREAT
+        'bird': 'shark',
+        'cat': 'shark',
+        'dog': 'shark',
+        
         # MONSTERS (Large unknown creatures)
         'horse': 'monster',
         'cow': 'monster',
@@ -43,7 +48,7 @@ class ThreatDetector:
     
     # SIMPLIFIED THREAT CATEGORIZATION BY RISK LEVEL
     CRITICAL_THREATS = [
-        'submarine', 'missile'
+        'submarine', 'missile', 'shark'
     ]
     
     HIGH_RISK_THREATS = [

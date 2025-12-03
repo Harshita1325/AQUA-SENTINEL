@@ -16,7 +16,7 @@ class AdvancedPreprocessor:
     """
     
     def __init__(self):
-        print("🔬 Advanced Preprocessor initialized")
+        print(" Advanced Preprocessor initialized")
         
         # CLAHE parameters
         self.clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
@@ -375,7 +375,7 @@ class AdvancedPreprocessor:
         Returns:
             Heavily enhanced image
         """
-        print("⚡ Applying EXTREME enhancement mode...")
+        print(" Applying EXTREME enhancement mode...")
         
         # Step 1: Strong CLAHE
         processed = self.apply_clahe(image, clip_limit=4.0)
@@ -439,38 +439,38 @@ def is_low_saturation(image: np.ndarray, threshold: float = 60) -> bool:
 
 # Quick test
 if __name__ == "__main__":
-    print("🧪 Testing Advanced Preprocessor\n")
+    print(" Testing Advanced Preprocessor\n")
     
     preprocessor = AdvancedPreprocessor()
     
     # Create test image (simulated poor quality)
     test_image = np.random.randint(20, 80, (480, 640, 3), dtype=np.uint8)  # Dark image
     
-    print("📊 Assessing image quality...")
+    print(" Assessing image quality...")
     quality = preprocessor.assess_image_quality(test_image)
     
-    print(f"\n🔍 Quality Assessment:")
+    print(f"\n Quality Assessment:")
     print(f"  Brightness: {quality['brightness']:.1f}/255")
     print(f"  Sharpness: {quality['sharpness']:.1f}")
     print(f"  Contrast: {quality['contrast']:.1f}")
     print(f"  Saturation: {quality['saturation']:.1f}")
     print(f"  Quality Score: {quality['quality_score']:.1f}/100")
     
-    print(f"\n🔧 Needs:")
+    print(f"\n Needs:")
     for need, value in quality['needs'].items():
         if value:
-            print(f"  ⚠️  {need.replace('_', ' ').title()}")
+            print(f"    {need.replace('_', ' ').title()}")
     
-    print("\n🚀 Applying preprocessing pipeline...")
+    print("\n Applying preprocessing pipeline...")
     enhanced, log = preprocessor.preprocess_pipeline(test_image)
     
-    print(f"\n📈 Results:")
+    print(f"\n Results:")
     print(f"  Original quality: {log['original_quality']:.1f}")
     print(f"  Final quality: {log['final_quality']:.1f}")
     print(f"  Improvement: +{log['improvement']:.1f} points")
     
-    print(f"\n✅ Steps applied: {len(log['steps_applied'])}")
+    print(f"\n Steps applied: {len(log['steps_applied'])}")
     for step in log['steps_applied']:
         print(f"  • {step}")
     
-    print("\n✅ Advanced Preprocessor ready!")
+    print("\n Advanced Preprocessor ready!")
