@@ -66,6 +66,7 @@ webapp/results/*
 *.bmp
 *.tiff
 !imgs/
+!webapp/photos/
 !**/clean_test/
 !**/hazy_test/
 
