@@ -5,30 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Models - Aqua-Sentinel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern_theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='header_modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='page_transitions.css') }}">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
         :root {
             --aqua-primary: #00D9FF;
+            --aqua-primary-dark: #00B8CC;
+            --aqua-primary-light: #33E0FF;
+            --aqua-accent: #00F5FF;
             --aqua-dark: #FFFFFF;
-            --aqua-light: #1A1A1A;
-            --aqua-border: #333333;
-            --aqua-accent: #00B8CC;
+            --aqua-light: #000000;
+            --aqua-border: rgba(0, 217, 255, 0.2);
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #12121A;
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000000;
-            color: var(--aqua-dark);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 217, 255, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 217, 255, 0.03) 0px, transparent 50%);
+            color: var(--text-primary);
             overflow-x: hidden;
-        }
-
-        /* DRDO-Style Header */
-        .drdo-header {
-            background: #0F0F0F;
-            border-bottom: 2px solid var(--aqua-border);
-            padding: 1rem 3rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .header-top {
@@ -113,35 +124,37 @@
 
         /* Light Mode Styles */
         body.light-mode {
-            background: #FFFFFF;
-            color: #1A1A1A;
+            background: #FAFBFF;
+            color: #111827;
         }
 
         body.light-mode .drdo-header {
-            background: #F5F5F5;
-            border-bottom-color: #D0D0D0;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom-color: #E2E8F0;
+            backdrop-filter: blur(12px);
         }
 
         body.light-mode .header-title h1,
         body.light-mode .page-title,
         body.light-mode .model-name {
-            color: #1A1A1A;
+            color: #0F172A;
         }
 
         body.light-mode .model-card,
         body.light-mode .config-section {
-            background: #F9F9F9;
-            border-color: #D0D0D0;
+            background: #FFFFFF;
+            border-color: #E2E8F0;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
         }
 
         body.light-mode .model-description,
         body.light-mode .config-description,
         body.light-mode p {
-            color: #2A2A2A;
+            color: #374151;
         }
 
         body.light-mode .theme-toggle svg {
-            fill: var(--aqua-primary);
+            fill: #0284C7;
         }
 
         /* Navigation Bar */
@@ -188,19 +201,28 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 3rem 2.5rem;
+            position: relative;
+            z-index: 1;
         }
 
         .page-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--aqua-dark);
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--aqua-primary) 0%, var(--aqua-primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .page-subtitle {
-            color: var(--aqua-primary);
-            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
             margin-bottom: 2.5rem;
+            font-weight: 500;
         }
 
         .models-grid {
@@ -211,13 +233,17 @@
         }
 
         .model-card {
-            background: #0F0F0F;
-            border: 2px solid var(--aqua-border);
-            border-radius: 8px;
-            padding: 1.5rem;
+            background: rgba(18, 18, 26, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--aqua-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .model-card::before {
@@ -226,30 +252,50 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--aqua-primary), transparent);
+            height: 3px;
+            background: linear-gradient(90deg, 
+                var(--aqua-primary), 
+                var(--aqua-primary-light),
+                var(--aqua-primary)
+            );
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity var(--transition-base);
+        }
+
+        .model-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity var(--transition-base);
+            pointer-events: none;
         }
 
         .model-card:hover {
-            border-color: var(--aqua-accent);
-            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.15);
-            transform: translateY(-2px);
+            border-color: var(--aqua-primary);
+            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.3);
+            transform: translateY(-4px);
         }
 
         .model-card:hover::before {
             opacity: 1;
         }
 
+        .model-card:hover::after {
+            opacity: 1;
+        }
+
         .model-card.active {
             border-color: var(--aqua-primary);
-            border-width: 3px;
-            background: rgba(0, 217, 255, 0.05);
+            border-width: 2px;
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 40px rgba(0, 217, 255, 0.4);
         }
 
         .model-card.active::before {
             opacity: 1;
+            height: 4px;
         }
 
         .model-header {
@@ -328,20 +374,40 @@
 
         .btn-select {
             flex: 1;
-            padding: 0.65rem 1rem;
-            background: linear-gradient(135deg, var(--aqua-primary) 0%, var(--aqua-accent) 100%);
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, var(--aqua-primary) 0%, var(--aqua-primary-dark) 100%);
             border: none;
-            border-radius: 6px;
-            color: #000000;
+            border-radius: var(--radius-md);
+            color: var(--bg-primary);
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 16px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-select::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-select:hover::before {
+            left: 100%;
         }
 
         .btn-select:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.5);
         }
 
         .btn-details {
@@ -363,11 +429,14 @@
 
         /* Configuration Section */
         .config-section {
-            background: #0F0F0F;
+            background: rgba(18, 18, 26, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--aqua-border);
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             padding: 2.5rem;
             margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .config-title {
@@ -401,20 +470,22 @@
         .config-select, 
         .config-input {
             width: 100%;
-            padding: 0.85rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: var(--aqua-dark);
-            font-size: 0.9rem;
-            transition: all 0.3s;
+            padding: 0.875rem 1.25rem;
+            background: rgba(18, 18, 26, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--aqua-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all var(--transition-base);
         }
 
         .config-select:focus, 
         .config-input:focus {
             outline: none;
             border-color: var(--aqua-primary);
-            background: rgba(0, 217, 255, 0.05);
+            background: rgba(18, 18, 26, 0.8);
+            box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1), 0 0 20px rgba(0, 217, 255, 0.2);
         }
 
         .config-select option {
@@ -508,20 +579,40 @@
         .save-config-btn {
             width: 100%;
             padding: 1.25rem;
-            background: linear-gradient(135deg, var(--aqua-primary) 0%, var(--aqua-accent) 100%);
+            background: linear-gradient(135deg, var(--aqua-primary) 0%, var(--aqua-primary-dark) 100%);
             border: none;
-            border-radius: 8px;
-            color: #000000;
+            border-radius: var(--radius-md);
+            color: var(--bg-primary);
             font-weight: 700;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all var(--transition-base);
             margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .save-config-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .save-config-btn:hover::before {
+            left: 100%;
         }
 
         .save-config-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 217, 255, 0.5);
         }
 
         .back-button {
@@ -951,5 +1042,6 @@
         }
     });
     </script>
+    <script src="{{ url_for('static', filename='page_transitions.js') }}"></script>
 </body>
 </html>

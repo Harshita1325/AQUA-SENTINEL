@@ -1,0 +1,241 @@
+{
+  "tracks": [
+    {
+      "track_id": 1,
+      "first_seen": 0.022000000000000002,
+      "last_seen": 5.045,
+      "max_threat": "High",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 0.0,
+          "level": "Medium"
+        },
+        {
+          "type": "escalation",
+          "timestamp": 2.5,
+          "level": "High"
+        }
+      ]
+    },
+    {
+      "track_id": 2,
+      "first_seen": 0.022000000000000002,
+      "last_seen": 1.477,
+      "max_threat": "High",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 0.0,
+          "level": "Medium"
+        },
+        {
+          "type": "escalation",
+          "timestamp": 0.386,
+          "level": "High"
+        }
+      ]
+    },
+    {
+      "track_id": 3,
+      "first_seen": 0.045000000000000005,
+      "last_seen": 0.159,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 0.0,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 4,
+      "first_seen": 0.022000000000000002,
+      "last_seen": 0.022000000000000002,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 0.022000000000000002,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 5,
+      "first_seen": 0.25,
+      "last_seen": 0.636,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 0.545,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 6,
+      "first_seen": 0.772,
+      "last_seen": 0.772,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 0.772,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 7,
+      "first_seen": 1.113,
+      "last_seen": 1.1360000000000001,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 1.1360000000000001,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 8,
+      "first_seen": 1.7040000000000002,
+      "last_seen": 1.75,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 1.7040000000000002,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 9,
+      "first_seen": 3.068,
+      "last_seen": 3.068,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 3.068,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 10,
+      "first_seen": 4.159,
+      "last_seen": 4.522,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 4.159,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 11,
+      "first_seen": 4.181,
+      "last_seen": 4.204000000000001,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 4.181,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 12,
+      "first_seen": 4.5,
+      "last_seen": 4.5,
+      "max_threat": "Low",
+      "events": []
+    },
+    {
+      "track_id": 13,
+      "first_seen": 4.75,
+      "last_seen": 4.977,
+      "max_threat": "Medium",
+      "events": [
+        {
+          "type": "escalation",
+          "timestamp": 4.75,
+          "level": "Medium"
+        }
+      ]
+    },
+    {
+      "track_id": 14,
+      "first_seen": 4.75,
+      "last_seen": 4.75,
+      "max_threat": "Low",
+      "events": []
+    }
+  ],
+  "config": {
+    "confidence_threshold": 0.25,
+    "iou_threshold": 0.45,
+    "max_detections": 120,
+    "tracker_max_age": 15,
+    "tracker_iou_threshold": 0.35,
+    "tracker_min_hits": 2,
+    "smoothing_enabled": true,
+    "smoothing_alpha": 0.1,
+    "drop_frame_tolerance": 1.5,
+    "degrade_resolution": true,
+    "degrade_scale": 0.7,
+    "output_fps": null,
+    "output_resolution": null,
+    "yolo_weights": "yolov8n.pt",
+    "preferred_model": "uieb",
+    "fallback_model": "euvp",
+    "nms_method": "vision",
+    "log_format": "jsonl",
+    "distance_focal_length": null,
+    "stream_endpoint": null,
+    "temporal_consistency_window": 5,
+    "degrade_strategy": "skip",
+    "config_path": "C:\\Users\\SAHIL KULKARNI\\Desktop\\Aqua 2\\Aqua-Sentinel\\webapp\\video_processing_config.json",
+    "threat_rules": {
+      "submarine": {
+        "class_weight": 35,
+        "confidence_weight": 20,
+        "size_weight": 25,
+        "distance_weight": 15,
+        "speed_weight": 5,
+        "high_threshold": 80,
+        "medium_threshold": 55
+      },
+      "torpedo": {
+        "class_weight": 40,
+        "confidence_weight": 25,
+        "size_weight": 15,
+        "distance_weight": 15,
+        "speed_weight": 5,
+        "high_threshold": 85,
+        "medium_threshold": 60
+      },
+      "person": {
+        "class_weight": 25,
+        "confidence_weight": 25,
+        "size_weight": 20,
+        "distance_weight": 20,
+        "speed_weight": 10,
+        "high_threshold": 75,
+        "medium_threshold": 50
+      }
+    }
+  },
+  "input": "videos\\a9725049-1c4a-4524-9933-9baf239b568c_input.mp4",
+  "output_video": "videos\\a9725049-1c4a-4524-9933-9baf239b568c_enhanced.mp4",
+  "per_frame_log": "videos\\a9725049-1c4a-4524-9933-9baf239b568c_detections.jsonl"
+}
