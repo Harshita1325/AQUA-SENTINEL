@@ -65,9 +65,10 @@ webapp/results/*
 *.png
 *.bmp
 *.tiff
-!imgs/
-!**/clean_test/
-!**/hazy_test/
+!imgs/**
+!webapp/photos/**
+!**/clean_test/**
+!**/hazy_test/**
 
 # Logs
 *.log
