@@ -1,0 +1,214 @@
+/* Smooth Page Transitions */
+
+/* Prevent flash of unstyled content */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Page transition container - only animate if not already loaded */
+body:not(.page-loaded) {
+    opacity: 0;
+    animation: fadeInPage 0.4s ease-in-out forwards;
+}
+
+body.page-loaded {
+    opacity: 1;
+}
+
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Page content wrapper for transitions */
+.page-content {
+    animation: slideInContent 0.5s ease-out;
+}
+
+@keyframes slideInContent {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for cards */
+.fade-in-stagger {
+    animation: fadeInStagger 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.fade-in-stagger:nth-child(1) { animation-delay: 0.1s; }
+.fade-in-stagger:nth-child(2) { animation-delay: 0.2s; }
+.fade-in-stagger:nth-child(3) { animation-delay: 0.3s; }
+.fade-in-stagger:nth-child(4) { animation-delay: 0.4s; }
+.fade-in-stagger:nth-child(5) { animation-delay: 0.5s; }
+.fade-in-stagger:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInStagger {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading overlay for page transitions */
+.page-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 20%, rgba(0, 217, 255, 0.15), transparent 55%),
+                radial-gradient(circle at 80% 80%, rgba(0, 184, 204, 0.15), transparent 60%),
+                rgba(6, 8, 18, 0.95);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease-in-out;
+    overflow: hidden;
+}
+
+.page-transition-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 0%, rgba(0, 217, 255, 0.2) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: sweepLight 1.2s linear infinite;
+}
+
+.page-transition-overlay::after {
+    content: '';
+    position: absolute;
+    width: 160vw;
+    height: 160vw;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(0, 217, 255, 0.08) 0%, transparent 60%);
+    animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+.page-transition-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.transition-core {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    color: var(--aqua-primary);
+}
+
+.submarine-wrapper {
+    position: relative;
+    width: 160px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.submarine-icon {
+    width: 140px;
+    height: auto;
+    animation: subSwim 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(0, 217, 255, 0.6));
+}
+
+.submarine-bubble {
+    position: absolute;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(0, 217, 255, 0.8);
+    opacity: 0;
+}
+
+.bubble-1 { animation: bubbleUp 1.8s ease-in-out infinite; top: 20px; }
+.bubble-2 { animation: bubbleUp 2.1s ease-in-out infinite; top: 32px; }
+.bubble-3 { animation: bubbleUp 2.4s ease-in-out infinite; top: 44px; }
+
+.transition-caption {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+@keyframes subSwim {
+    0%   { transform: translateX(-12px) translateY(0); }
+    25%  { transform: translateX(0) translateY(-4px); }
+    50%  { transform: translateX(8px) translateY(0); }
+    75%  { transform: translateX(0) translateY(4px); }
+    100% { transform: translateX(-12px) translateY(0); }
+}
+
+@keyframes bubbleUp {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.4);
+    }
+    30% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-26px) scale(1);
+    }
+}
+
+@keyframes sweepLight {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.85; }
+}
+
+@keyframes rotate360 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Smooth link transitions */
+a {
+    transition: all 0.2s ease;
+}
+
+/* Prevent layout shift during transitions */
+.drdo-header {
+    will-change: transform;
+}
+
+.container,
+.container-custom {
+    will-change: opacity, transform;
+}
+

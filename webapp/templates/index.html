@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AQUA-SENTINEL - Underwater Image Enhancement</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='military_theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern_theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='header_modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='page_transitions.css') }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
         :root {
             --aqua-primary: #00D9FF;
+            --aqua-primary-dark: #00B8CC;
+            --aqua-primary-light: #33E0FF;
             --aqua-dark: #FFFFFF;
-            --aqua-bg: #000000;
-            --aqua-panel: #0F0F0F;
-            --aqua-border: #333333;
+            --aqua-bg: #0A0A0F;
+            --aqua-panel: rgba(18, 18, 26, 0.6);
+            --aqua-border: rgba(0, 217, 255, 0.2);
             --aqua-accent: #00B8CC;
         }
 
@@ -26,9 +30,14 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--aqua-bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 217, 255, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 217, 255, 0.03) 0px, transparent 50%);
             color: var(--aqua-dark);
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* DRDO-Style Header */
@@ -132,40 +141,45 @@
 
         /* Light Mode Styles */
         body.light-mode {
-            --aqua-bg: #FFFFFF;
-            --aqua-panel: #F5F5F5;
-            --aqua-dark: #1A1A1A;
-            --aqua-border: #D0D0D0;
-            background: #FFFFFF;
-            color: #1A1A1A;
+            --aqua-bg: #F5F7FB;
+            --aqua-panel: #FFFFFF;
+            --aqua-dark: #0A1020;
+            --aqua-border: #E0E5F0;
+            background:
+                radial-gradient(circle at 0% -20%, rgba(0, 217, 255, 0.08), transparent 55%),
+                radial-gradient(circle at 100% 120%, rgba(91, 140, 255, 0.08), transparent 55%),
+                #F5F7FB;
+            color: #0A1020;
         }
 
         body.light-mode .drdo-header {
-            background: #F5F5F5;
-            border-bottom-color: #D0D0D0;
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom-color: #E0E5F0;
+            backdrop-filter: blur(14px);
         }
 
         body.light-mode .header-title h1,
         body.light-mode .page-title,
         body.light-mode .carousel-title {
-            color: #1A1A1A;
+            color: #12172A;
         }
 
         body.light-mode .upload-section,
         body.light-mode .status-section,
         body.light-mode .results-section {
-            background: #F9F9F9;
-            border-color: #D0D0D0;
+            background: #FFFFFF;
+            border-color: #E0E5F0;
+            box-shadow: 0 14px 30px rgba(16, 24, 40, 0.06);
         }
 
         body.light-mode .carousel-description,
         body.light-mode p,
         body.light-mode label {
-            color: #2A2A2A;
+            color: #3B4257;
         }
 
         body.light-mode .theme-toggle svg {
-            fill: var(--aqua-primary);
+            fill: var(--aqua-primary-dark);
         }
 
         /* Navigation Bar */
@@ -514,12 +528,21 @@
             display: block;
         }
 
-        /* Main Panel - Dark Clean Style */
+        /* Main Panel - Modern Glassmorphism Style */
         .main-card {
-            background: var(--aqua-panel);
+            background: rgba(18, 18, 26, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--aqua-border);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-card:hover {
+            border-color: var(--aqua-primary);
+            box-shadow: 0 12px 40px rgba(0, 217, 255, 0.2);
         }
 
         .upload-section {
@@ -548,19 +571,37 @@
         }
 
         .upload-area {
-            border: 2px dashed var(--aqua-accent);
-            border-radius: 8px;
+            border: 2px dashed var(--aqua-border);
+            border-radius: 16px;
             padding: 3rem;
             text-align: center;
             background: rgba(0, 217, 255, 0.05);
+            backdrop-filter: blur(10px);
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 217, 255, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 300ms;
         }
 
         .upload-area:hover {
             border-color: var(--aqua-primary);
             background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .upload-area:hover::before {
+            opacity: 1;
         }
 
         .upload-text {
@@ -731,6 +772,26 @@
         .form-select option {
             background: #1A1A1A;
             color: var(--aqua-dark);
+        }
+
+        /* Light-mode dropdown refinement */
+        body.light-mode .adaptive-mode-dropdown,
+        body.light-mode .form-select {
+            background: #FFFFFF;
+            border-color: #E2E8F0;
+            color: #0F172A;
+        }
+
+        body.light-mode .adaptive-mode-dropdown:hover,
+        body.light-mode .form-select:hover {
+            background: #F9FAFB;
+            border-color: #CBD5E1;
+        }
+
+        body.light-mode .adaptive-mode-dropdown option,
+        body.light-mode .form-select option {
+            background: #FFFFFF;
+            color: #0F172A;
         }
 
         /* Environment Badge */
@@ -1201,15 +1262,20 @@
         }
 
         .image-card {
-            background: var(--aqua-panel);
-            border-radius: 8px;
+            background: rgba(18, 18, 26, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
             overflow: hidden;
             border: 1px solid var(--aqua-border);
-            transition: all 0.3s ease;
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .image-card:hover {
             border-color: var(--aqua-primary);
+            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.3);
+            transform: translateY(-4px);
         }
 
         .image-card h3 {
@@ -1269,6 +1335,33 @@
             background: var(--aqua-accent);
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        /* Light mode refinements for main panel & uploader */
+        body.light-mode .main-card {
+            background: #FFFFFF;
+            border-color: #E2E8F0;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        body.light-mode .upload-area {
+            border-color: #CFE3F5;
+            background: #F8FBFF;
+            backdrop-filter: none;
+        }
+
+        body.light-mode .upload-area:hover {
+            border-color: #38BDF8;
+            background: #F0F9FF;
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25);
+        }
+
+        body.light-mode .upload-text {
+            color: #0F172A;
+        }
+
+        body.light-mode .upload-subtext {
+            color: #0284C7;
         }
 
         @media (max-width: 1024px) {
@@ -3104,5 +3197,6 @@
         }
     });
     </script>
+    <script src="{{ url_for('static', filename='page_transitions.js') }}"></script>
 </body>
 </html>

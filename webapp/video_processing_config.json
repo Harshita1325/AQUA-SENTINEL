@@ -1,0 +1,53 @@
+{
+  "confidence_threshold": 0.25,
+  "iou_threshold": 0.45,
+  "max_detections": 120,
+  "tracker_max_age": 15,
+  "tracker_iou_threshold": 0.35,
+  "tracker_min_hits": 2,
+  "smoothing_enabled": true,
+  "smoothing_alpha": 0.1,
+  "drop_frame_tolerance": 1.5,
+  "degrade_resolution": true,
+  "degrade_scale": 0.7,
+  "output_fps": null,
+  "output_resolution": null,
+  "yolo_weights": "yolov8n.pt",
+  "preferred_model": "uieb",
+  "fallback_model": "euvp",
+  "nms_method": "vision",
+  "log_format": "jsonl",
+  "distance_focal_length": null,
+  "temporal_consistency_window": 5,
+  "degrade_strategy": "skip",
+  "threat_rules": {
+    "submarine": {
+      "class_weight": 35,
+      "confidence_weight": 20,
+      "size_weight": 25,
+      "distance_weight": 15,
+      "speed_weight": 5,
+      "high_threshold": 80,
+      "medium_threshold": 55
+    },
+    "torpedo": {
+      "class_weight": 40,
+      "confidence_weight": 25,
+      "size_weight": 15,
+      "distance_weight": 15,
+      "speed_weight": 5,
+      "high_threshold": 85,
+      "medium_threshold": 60
+    },
+    "person": {
+      "class_weight": 25,
+      "confidence_weight": 25,
+      "size_weight": 20,
+      "distance_weight": 20,
+      "speed_weight": 10,
+      "high_threshold": 75,
+      "medium_threshold": 50
+    }
+  }
+}
+
