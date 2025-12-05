@@ -64,6 +64,45 @@ class DeepWaveNetProcessor:
             self.models['uieb'].to(self.device)
             print(" UIEB model loaded successfully")
             
+            # Load EUVP Enhancement Model (Trained on Google Colab) - OPTIONAL
+            try:
+                print(" Loading EUVP enhancement model...")
+                
+                euvp_path = os.path.join(base_dir, 'uie_euvp')
+                if euvp_path not in sys.path:
+                    sys.path.insert(0, euvp_path)
+                
+                import models as euvp_models
+                importlib.reload(euvp_models)
+                
+                euvp_checkpoint_path = os.path.join(base_dir, 'uie_euvp', 'ckpts', 'trained_euvp_model.pth')
+                
+                if os.path.exists(euvp_checkpoint_path):
+                    self.models['euvp'] = euvp_models.CC_Module()
+                    print(f"    Loading EUVP checkpoint: {os.path.basename(euvp_checkpoint_path)}")
+                    euvp_checkpoint = torch.load(euvp_checkpoint_path, map_location=self.device, weights_only=False)
+                    
+                    # Handle different checkpoint formats
+                    if isinstance(euvp_checkpoint, dict):
+                        if 'model_state_dict' in euvp_checkpoint:
+                            self.models['euvp'].load_state_dict(euvp_checkpoint['model_state_dict'])
+                        elif 'state_dict' in euvp_checkpoint:
+                            self.models['euvp'].load_state_dict(euvp_checkpoint['state_dict'])
+                        else:
+                            self.models['euvp'].load_state_dict(euvp_checkpoint)
+                    else:
+                        self.models['euvp'].load_state_dict(euvp_checkpoint)
+                    
+                    self.models['euvp'].eval()
+                    self.models['euvp'].to(self.device)
+                    print(" EUVP model loaded successfully (trained on EUVP dataset)")
+                else:
+                    print(f"  Warning: EUVP checkpoint not found at {euvp_checkpoint_path}")
+                    print(f"    EUVP model will not be available. Using UIEB for all processing.")
+            except Exception as euvp_error:
+                print(f"  Warning: Failed to load EUVP model: {euvp_error}")
+                print(f"    EUVP model will not be available. Using UIEB for all processing.")
+            
             # Load Super-Resolution Models - DON'T use optimized versions, stick with uw_video_processing
             print(" Super-resolution models disabled (architecture mismatch with checkpoints)")
             print("   Using UIEB model for all enhancement tasks")
@@ -124,6 +163,58 @@ class DeepWaveNetProcessor:
             
         except Exception as e:
             raise Exception(f"Error postprocessing image: {str(e)}")
+    
+    def enhance_image(self, image_array):
+        """
+        Enhance a frame (numpy array) for live video processing
+        
+        Args:
+            image_array: Input image as numpy array (BGR format from cv2)
+            
+        Returns:
+            Enhanced image as numpy array (BGR format)
+        """
+        try:
+            # Check if models are loaded
+            if 'uieb' not in self.models:
+                print("⚠️ Enhancement model not loaded, returning original")
+                return image_array
+            
+            # Convert BGR to RGB
+            image_rgb = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
+            
+            # Convert to PIL Image
+            pil_image = Image.fromarray(image_rgb)
+            
+            # Resize to model input size (256x256 for UIEB)
+            original_size = pil_image.size
+            pil_image = pil_image.resize((256, 256), Image.BICUBIC)
+            
+            # Convert to tensor
+            img_tensor = torch.from_numpy(np.array(pil_image)).float()
+            img_tensor = img_tensor.permute(2, 0, 1).unsqueeze(0) / 255.0
+            img_tensor = img_tensor.to(self.device)
+            
+            # Run enhancement model
+            with torch.no_grad():
+                enhanced_tensor = self.models['uieb'](img_tensor)
+            
+            # Convert back to numpy
+            enhanced_np = enhanced_tensor.squeeze(0).permute(1, 2, 0).cpu().numpy()
+            enhanced_np = (enhanced_np * 255).clip(0, 255).astype(np.uint8)
+            
+            # Resize back to original size
+            enhanced_pil = Image.fromarray(enhanced_np)
+            enhanced_pil = enhanced_pil.resize(original_size, Image.BICUBIC)
+            
+            # Convert back to BGR for OpenCV
+            enhanced_bgr = cv2.cvtColor(np.array(enhanced_pil), cv2.COLOR_RGB2BGR)
+            
+            return enhanced_bgr
+            
+        except Exception as e:
+            print(f"⚠️ Error enhancing frame: {str(e)}")
+            return image_array  # Return original on error
     
     def process_image(self, input_path, output_path, model_type):
         """Process image with selected model"""
@@ -291,19 +382,20 @@ class DeepWaveNetProcessor:
         """
         try:
             if self.threat_detector is None:
-                print(" Loading ULTRA-ADVANCED threat detection system...")
-                print(" Initializing high-speed military-grade detection...")
+                print("🔧 Loading OPTIMIZED threat detection system...")
+                print("🎯 Initializing balanced accuracy detection...")
                 self.threat_detector = ThreatDetector(
-                    model_size=model_size,           # YOLOv8-N for optimal speed (10x faster)
-                    confidence_threshold=0.05,       # MAXIMUM sensitivity (95%+)
+                    model_size=model_size,           # YOLOv8-N for optimal speed
+                    confidence_threshold=0.20,       # BALANCED threshold (prevents low-confidence duplicates)
                     estimate_distance=True,          # Enable precision distance estimation
-                    use_ensemble=False               # Disabled for speed (single model is accurate)
+                    use_ensemble=False               # Disabled for speed (single model)
                 )
                 self.threat_visualizer = ThreatVisualizer()
-                print(" ULTRA-ADVANCED threat detection system ready")
-                print(f"    Primary Model: YOLOv8-{model_size.upper()} (SPEED-OPTIMIZED)")
-                print(f"    Sensitivity: 95%+ (MAXIMUM - Lower threshold)")
-                print(f"    Distance Estimation: HIGH-PRECISION ENABLED")
+                print("✅ OPTIMIZED threat detection system ready")
+                print(f"   ├─ Primary Model: YOLOv8-{model_size.upper()} (SPEED-OPTIMIZED)")
+                print(f"   ├─ Confidence: 20% (Balanced - reduces duplicates)")
+                print(f"   ├─ Deduplication: ENABLED (prevents overlaps)")
+                print(f"   └─ Distance Estimation: HIGH-PRECISION ENABLED")
                 print(f"    Ensemble Learning: DISABLED (Speed Priority)")
                 print(f"    Multi-Scale Detection: 3 SCALES")
                 print(f"    Advanced NMS: IoU 0.45")

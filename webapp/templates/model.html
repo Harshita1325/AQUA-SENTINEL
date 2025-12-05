@@ -42,6 +42,13 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* DRDO-Style Header */
+        .drdo-header {
+            background: #0F0F0F;
+            border-bottom: 2px solid var(--aqua-border);
+            padding: 1rem 3rem;
+        }
+
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -680,6 +687,7 @@
                 <li><a href="/profile">Profile</a></li>
                 <li><a href="/history">History</a></li>
                 <li><a href="/model" class="active">Models</a></li>
+                <li><a href="/live-video">Live Video</a></li>
             </ul>
         </nav>
     </header>
@@ -735,28 +743,28 @@
                         <div class="model-name">EUVP Model</div>
                     </div>
                     <div>
-                        <span class="badge badge-available">Available</span>
+                        <span class="badge badge-available">Custom Trained ✓</span>
                     </div>
                 </div>
                 <div class="model-description">
-                    Enhanced underwater video processing model. Optimized for real-time video enhancement with excellent temporal consistency.
+                    Custom EUVP model trained on Google Colab. Enhanced underwater image processing with UIEC²-Net architecture trained on EUVP dataset.
                 </div>
                 <div class="model-specs">
                     <div class="spec-item">
-                        <div class="spec-label">Accuracy</div>
-                        <div class="spec-value">92.8%</div>
+                        <div class="spec-label">Training</div>
+                        <div class="spec-value">Google Colab</div>
                     </div>
                     <div class="spec-item">
-                        <div class="spec-label">Speed</div>
-                        <div class="spec-value">3.2s/image</div>
+                        <div class="spec-label">Dataset</div>
+                        <div class="spec-value">EUVP</div>
                     </div>
                     <div class="spec-item">
-                        <div class="spec-label">Model Size</div>
-                        <div class="spec-value">128 MB</div>
+                        <div class="spec-label">Architecture</div>
+                        <div class="spec-value">UIEC²-Net</div>
                     </div>
                     <div class="spec-item">
-                        <div class="spec-label">Version</div>
-                        <div class="spec-value">v1.17</div>
+                        <div class="spec-label">Status</div>
+                        <div class="spec-value">Ready</div>
                     </div>
                 </div>
                 <div class="model-actions">
@@ -973,21 +981,261 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function selectModel(card) {
+        let currentConfig = {};
+        let selectedModelId = null;
+
+        // Load initial data on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadAvailableModels();
+            await loadConfiguration();
+            await loadModelStats();
+            loadSavedTheme();
+        });
+
+        // Load available models from backend
+        async function loadAvailableModels() {
+            try {
+                const response = await fetch('/api/model/available');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderModelCards(data.models);
+                    selectedModelId = data.current_model;
+                    highlightSelectedModel(selectedModelId);
+                }
+            } catch (error) {
+                console.error('Error loading models:', error);
+                showNotification('Failed to load models', 'error');
+            }
+        }
+
+        // Render model cards dynamically
+        function renderModelCards(models) {
+            const container = document.querySelector('.models-grid');
+            if (!container) return;
+            
+            container.innerHTML = models.map(model => `
+                <div class="model-card ${model.status === 'active' ? '' : 'disabled'}" 
+                     id="model-${model.id}" 
+                     onclick="selectModel(this, '${model.id}')">
+                    <div class="model-header">
+                        <div>
+                            <div class="model-name">${model.name}</div>
+                        </div>
+                        <span class="badge ${model.status === 'active' ? 'badge-active' : 'badge-available'}">
+                            ${model.status.toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="model-description">${model.description}</div>
+                    <div class="model-specs">
+                        <div class="spec-item">
+                            <div class="spec-label">Speed</div>
+                            <div class="spec-value">${model.speed}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Accuracy</div>
+                            <div class="spec-value">${model.accuracy}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Model Size</div>
+                            <div class="spec-value">${model.size}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Status</div>
+                            <div class="spec-value">${model.recommended ? '⭐ Recommended' : 'Available'}</div>
+                        </div>
+                    </div>
+                    <div class="model-actions">
+                        <button class="btn-select" onclick="event.stopPropagation(); selectModelAction('${model.id}')">
+                            ${selectedModelId === model.id ? 'Selected' : 'Select Model'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select model (visual update)
+        function selectModel(card, modelId) {
+            if (card.classList.contains('disabled')) return;
+            
             document.querySelectorAll('.model-card').forEach(c => {
                 c.classList.remove('active');
                 const btn = c.querySelector('.btn-select');
                 if (btn) btn.textContent = 'Select Model';
             });
+            
             card.classList.add('active');
             const btn = card.querySelector('.btn-select');
             if (btn) btn.textContent = 'Selected';
+            
+            selectedModelId = modelId;
         }
 
+        // Select model action (API call)
+        async function selectModelAction(modelId) {
+            try {
+                const response = await fetch('/api/model/select', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ model_id: modelId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    selectedModelId = modelId;
+                    highlightSelectedModel(modelId);
+                    showNotification(`✅ ${modelId.toUpperCase()} model selected successfully`, 'success');
+                } else {
+                    showNotification('❌ Failed to select model: ' + data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error selecting model:', error);
+                showNotification('❌ Error selecting model', 'error');
+            }
+        }
+
+        // Highlight selected model
+        function highlightSelectedModel(modelId) {
+            document.querySelectorAll('.model-card').forEach(c => {
+                c.classList.remove('active');
+                const btn = c.querySelector('.btn-select');
+                if (btn) btn.textContent = 'Select Model';
+            });
+            
+            const selectedCard = document.getElementById(`model-${modelId}`);
+            if (selectedCard) {
+                selectedCard.classList.add('active');
+                const btn = selectedCard.querySelector('.btn-select');
+                if (btn) btn.textContent = 'Selected';
+            }
+        }
+
+        // Load configuration from backend
+        async function loadConfiguration() {
+            try {
+                const response = await fetch('/api/model/config');
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentConfig = data.config;
+                    applyConfigurationToUI(data.config);
+                }
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+            }
+        }
+
+        // Apply configuration to UI elements
+        function applyConfigurationToUI(config) {
+            // Set dropdowns
+            if (config.processing_mode) 
+                document.getElementById('processingMode').value = config.processing_mode;
+            if (config.batch_size) 
+                document.getElementById('batchSize').value = config.batch_size;
+            if (config.output_format) 
+                document.getElementById('outputFormat').value = config.output_format;
+            if (config.cache_mode) 
+                document.getElementById('cacheMode').value = config.cache_mode;
+            
+            // Set ranges
+            if (config.enhancement_strength) {
+                document.getElementById('enhancementStrength').value = config.enhancement_strength;
+                updateRangeValue('strengthValue', config.enhancement_strength);
+            }
+            if (config.threat_confidence) {
+                document.getElementById('threatConfidence').value = config.threat_confidence;
+                updateConfidenceValue(config.threat_confidence);
+            }
+            
+            // Set toggles
+            setToggleState('gpuToggle', config.gpu_acceleration);
+            setToggleState('autoEnvToggle', config.auto_environment);
+            setToggleState('distanceToggle', config.distance_estimation);
+            
+            // Update GPU status
+            updateGPUStatus(config.gpu_available, config.device);
+        }
+
+        // Set toggle switch state
+        function setToggleState(elementId, isActive) {
+            const toggle = document.getElementById(elementId);
+            if (toggle) {
+                if (isActive) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+            }
+        }
+
+        // Update GPU status display
+        function updateGPUStatus(available, device) {
+            const gpuToggle = document.getElementById('gpuToggle');
+            const gpuLabel = gpuToggle ? gpuToggle.previousElementSibling : null;
+            
+            if (gpuLabel) {
+                if (available) {
+                    gpuLabel.innerHTML = `<span style="color: #4CAF50;">✅ GPU Available (${device})</span>`;
+                } else {
+                    gpuLabel.innerHTML = `<span style="color: #f59e0b;">⚠️ CPU Only (${device})</span>`;
+                    if (gpuToggle) gpuToggle.classList.remove('active');
+                }
+            }
+        }
+
+        // Load model statistics
+        async function loadModelStats() {
+            try {
+                const response = await fetch('/api/model/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayModelStats(data.stats);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Display model statistics
+        function displayModelStats(stats) {
+            const statsContainer = document.querySelector('.config-section');
+            if (!statsContainer) return;
+            
+            const statsHTML = `
+                <div style="background: rgba(0, 217, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--aqua-primary); margin-bottom: 1rem;">System Status</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Device</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">${stats.device}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Models Loaded</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">${stats.models_loaded}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Average Speed</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">${stats.average_speed}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Memory Usage</div>
+                            <div style="font-size: 1.1rem; font-weight: 600;">${stats.memory_usage}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            statsContainer.insertAdjacentHTML('afterbegin', statsHTML);
+        }
+
+        // Toggle switch handler
         function toggleSwitch(element) {
             element.classList.toggle('active');
         }
 
+        // Range value update handlers
         function updateRangeValue(elementId, value) {
             document.getElementById(elementId).textContent = value;
         }
@@ -996,22 +1244,82 @@
             document.getElementById('confidenceValue').textContent = value + '%';
         }
 
-        function saveConfiguration() {
+        // Save configuration
+        async function saveConfiguration() {
             const config = {
-                processingMode: document.getElementById('processingMode').value,
-                batchSize: document.getElementById('batchSize').value,
-                enhancementStrength: document.getElementById('enhancementStrength').value,
-                gpuAcceleration: document.getElementById('gpuToggle').classList.contains('active'),
-                outputFormat: document.getElementById('outputFormat').value,
-                threatConfidence: document.getElementById('threatConfidence').value,
-                autoEnvironment: document.getElementById('autoEnvToggle').classList.contains('active'),
-                distanceEstimation: document.getElementById('distanceToggle').classList.contains('active'),
-                cacheMode: document.getElementById('cacheMode').value
+                model_id: selectedModelId,
+                processing_mode: document.getElementById('processingMode').value,
+                batch_size: parseInt(document.getElementById('batchSize').value),
+                enhancement_strength: parseInt(document.getElementById('enhancementStrength').value),
+                gpu_acceleration: document.getElementById('gpuToggle').classList.contains('active'),
+                output_format: document.getElementById('outputFormat').value,
+                threat_confidence: parseInt(document.getElementById('threatConfidence').value),
+                auto_environment: document.getElementById('autoEnvToggle').classList.contains('active'),
+                distance_estimation: document.getElementById('distanceToggle').classList.contains('active'),
+                cache_mode: document.getElementById('cacheMode').value
             };
             
-            console.log('Configuration saved:', config);
-            alert('Configuration saved successfully!\n\nYour settings have been applied and will be used for all future processing operations.');
+            try {
+                const response = await fetch('/api/model/config', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentConfig = config;
+                    showNotification('✅ Configuration saved successfully!', 'success');
+                    console.log('Configuration saved:', config);
+                } else {
+                    showNotification('❌ Failed to save configuration: ' + data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving configuration:', error);
+                showNotification('❌ Error saving configuration', 'error');
+            }
         }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 600;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 
     <script>
@@ -1032,7 +1340,7 @@
     }
 
     // Load saved theme on page load
-    window.addEventListener('DOMContentLoaded', () => {
+    function loadSavedTheme() {
         const savedTheme = localStorage.getItem('theme');
         const themeIcon = document.getElementById('themeIcon');
         
@@ -1040,7 +1348,7 @@
             document.body.classList.add('light-mode');
             themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
         }
-    });
+    }
     </script>
     <script src="{{ url_for('static', filename='page_transitions.js') }}"></script>
 </body>

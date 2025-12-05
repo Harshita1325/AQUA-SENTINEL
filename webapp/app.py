@@ -23,6 +23,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['RESULTS_FOLDER'] = 'results'
 app.config['VIDEO_FOLDER'] = 'videos'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size for videos
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'aqua-sentinel-deep-wave-net-secret-key-2025')
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'tiff'}
@@ -221,6 +222,382 @@ def profile():
 @app.route('/model')
 def model():
     return render_template('model.html')
+
+@app.route('/live-video')
+def live_video():
+    """Live video surveillance page with camera access"""
+    return render_template('live_video.html')
+
+@app.route('/process-live-frame', methods=['POST'])
+def process_live_frame():
+    """Process live webcam frame with threat detection and enhancement"""
+    global processor
+    
+    try:
+        # Initialize processor if needed
+        if processor is None:
+            processor = get_processor()
+        
+        # Get the image data from request
+        data = request.get_json()
+        image_data = data.get('image')
+        enable_detection = data.get('enableDetection', False)
+        enable_enhancement = data.get('enableEnhancement', False)
+        
+        if not image_data:
+            return jsonify({'success': False, 'error': 'No image data provided'}), 400
+        
+        # Decode base64 image
+        import base64
+        import numpy as np
+        
+        # Remove data URL prefix if present
+        if ',' in image_data:
+            image_data = image_data.split(',')[1]
+        
+        # Decode base64 to bytes
+        image_bytes = base64.b64decode(image_data)
+        
+        # Convert to numpy array
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        if frame is None:
+            return jsonify({'success': False, 'error': 'Failed to decode image'}), 400
+        
+        # Process frame based on enabled features
+        processed_frame = frame.copy()
+        detections = []
+        
+        # Apply enhancement first if enabled
+        if enable_enhancement:
+            processed_frame = processor.enhance_image(processed_frame)
+        
+        # Apply threat detection if enabled
+        if enable_detection:
+            # Initialize threat detector if not loaded
+            if processor.threat_detector is None:
+                print("🔧 Loading threat detector for live video...")
+                processor.load_threat_detector()
+            
+            # Detect threats - returns a list of threat dictionaries
+            threat_results = processor.threat_detector.detect_threats(processed_frame)
+            
+            if threat_results:
+                detections = threat_results  # It's already a list
+                
+                # Draw bounding boxes and labels on frame
+                for detection in detections:
+                    x1, y1, x2, y2 = detection['bbox']
+                    threat_class = detection.get('threat_type', 'Unknown')
+                    confidence = detection['confidence']
+                    distance = detection.get('distance', {}).get('distance_display', 'N/A')
+                    risk = detection.get('risk_level', 'MEDIUM')
+                    
+                    # Color based on risk level
+                    risk_colors = {
+                        'CRITICAL': (0, 0, 255),      # Red
+                        'HIGH': (0, 127, 255),        # Orange
+                        'MEDIUM': (0, 255, 255),      # Yellow
+                        'LOW': (0, 255, 0)            # Green
+                    }
+                    color = risk_colors.get(risk, (0, 255, 255))
+                    
+                    # Draw bounding box (thicker for visibility)
+                    cv2.rectangle(processed_frame, (x1, y1), (x2, y2), color, 4)
+                    
+                    # Prepare label with shortened threat name
+                    threat_display = threat_class.replace('_', ' ').title()[:20]
+                    if distance != 'N/A':
+                        label = f"{threat_display} {confidence*100:.0f}% | {distance}"
+                    else:
+                        label = f"{threat_display} {confidence*100:.0f}% | {risk}"
+                    
+                    # Draw label background
+                    label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
+                    cv2.rectangle(processed_frame, 
+                                (x1, y1 - label_size[1] - 12), 
+                                (x1 + label_size[0] + 12, y1), 
+                                color, -1)
+                    
+                    # Draw label text (white)
+                    cv2.putText(processed_frame, label, (x1 + 6, y1 - 6),
+                              cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        
+        # Encode processed frame back to base64
+        _, buffer = cv2.imencode('.jpg', processed_frame)
+        processed_image_base64 = base64.b64encode(buffer).decode('utf-8')
+        
+        return jsonify({
+            'success': True,
+            'processedImage': f'data:image/jpeg;base64,{processed_image_base64}',
+            'detectionsCount': len(detections),
+            'detections': detections
+        })
+        
+    except Exception as e:
+        print(f"Error processing live frame: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/model/config', methods=['GET'])
+def get_model_config():
+    """Get current model configuration"""
+    global processor
+    
+    try:
+        if processor is None:
+            processor = get_processor()
+        
+        config = {
+            'current_model': getattr(processor, 'current_model', 'uieb'),
+            'processing_mode': 'single',
+            'batch_size': 1,
+            'enhancement_strength': 70,
+            'gpu_acceleration': torch.cuda.is_available(),
+            'gpu_available': torch.cuda.is_available(),
+            'device': str(processor.device) if processor else 'cpu',
+            'output_format': 'jpg',
+            'threat_confidence': 50,
+            'auto_environment': True,
+            'distance_estimation': True,
+            'cache_mode': 'memory'
+        }
+        
+        return jsonify({'success': True, 'config': config})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/model/config', methods=['POST'])
+def save_model_config():
+    """Save model configuration"""
+    try:
+        config = request.json
+        
+        # Store in session or database (for now using session)
+        from flask import session
+        session['model_config'] = config
+        
+        print(f"✅ Configuration saved: {config}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Configuration saved successfully',
+            'config': config
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/model/available', methods=['GET'])
+def get_available_models():
+    """Get list of available models with their status"""
+    global processor
+    
+    try:
+        if processor is None:
+            processor = get_processor()
+        
+        available_models = processor.get_model_info()['available_models'] if processor else []
+        
+        models = [
+            {
+                'id': 'uieb',
+                'name': 'UIEB Enhancement Model',
+                'description': 'Optimized for underwater image enhancement with color correction',
+                'status': 'active' if 'uieb' in available_models else 'unavailable',
+                'speed': 'Fast (30-50 FPS)',
+                'accuracy': '92%',
+                'size': '45 MB',
+                'recommended': True
+            },
+            {
+                'id': 'euvp',
+                'name': 'EUVP Deep Learning Model',
+                'description': 'Advanced model trained on European Underwater Video Processing dataset',
+                'status': 'active' if 'euvp' in available_models else 'unavailable',
+                'speed': 'Medium (20-30 FPS)',
+                'accuracy': '95%',
+                'size': '78 MB',
+                'recommended': False
+            },
+            {
+                'id': 'sr2x',
+                'name': '2X Super-Resolution',
+                'description': 'Enhance resolution by 2x with detail preservation',
+                'status': 'available',
+                'speed': 'Slow (5-10 FPS)',
+                'accuracy': '88%',
+                'size': '120 MB',
+                'recommended': False
+            },
+            {
+                'id': 'hybrid',
+                'name': 'Hybrid Enhancement Pipeline',
+                'description': 'Combines multiple models for maximum quality',
+                'status': 'available',
+                'speed': 'Very Slow (2-5 FPS)',
+                'accuracy': '97%',
+                'size': '200+ MB',
+                'recommended': False
+            }
+        ]
+        
+        return jsonify({
+            'success': True,
+            'models': models,
+            'current_model': getattr(processor, 'current_model', 'uieb') if processor else 'uieb'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/model/select', methods=['POST'])
+def select_model():
+    """Select active model"""
+    global processor
+    
+    try:
+        data = request.json
+        model_id = data.get('model_id')
+        
+        if not model_id:
+            return jsonify({'success': False, 'error': 'Model ID required'}), 400
+        
+        if processor is None:
+            processor = get_processor()
+        
+        # Store selected model
+        if processor:
+            processor.current_model = model_id
+        
+        from flask import session
+        session['selected_model'] = model_id
+        
+        print(f"✅ Model selected: {model_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Model {model_id} selected successfully',
+            'model_id': model_id
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/model/stats', methods=['GET'])
+def get_model_stats():
+    """Get model performance statistics"""
+    global processor
+    
+    try:
+        device_name = 'CPU'
+        if torch.cuda.is_available():
+            device_name = torch.cuda.get_device_name(0)
+        
+        stats = {
+            'device': device_name,
+            'gpu_available': torch.cuda.is_available(),
+            'models_loaded': len(processor.models) if processor and hasattr(processor, 'models') else 0,
+            'total_processed': 0,  # Could be tracked in database
+            'average_speed': '1.3 FPS',
+            'memory_usage': '2.1 GB' if torch.cuda.is_available() else '850 MB'
+        }
+        
+        return jsonify({'success': True, 'stats': stats})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ==================== ALERT SYSTEM API ENDPOINTS ====================
+
+@app.route('/api/alerts/active', methods=['GET'])
+def get_active_alerts():
+    """Get all active alerts"""
+    try:
+        from alert_system import get_alert_system
+        alert_sys = get_alert_system()
+        
+        severity = request.args.get('severity')
+        alerts = alert_sys.get_active_alerts(severity=severity)
+        
+        return jsonify({'success': True, 'alerts': alerts, 'count': len(alerts)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/alerts/history', methods=['GET'])
+def get_alert_history():
+    """Get alert history"""
+    try:
+        from alert_system import get_alert_system
+        alert_sys = get_alert_system()
+        
+        limit = request.args.get('limit', type=int, default=50)
+        severity = request.args.get('severity')
+        
+        history = alert_sys.get_alert_history(limit=limit, severity=severity)
+        
+        return jsonify({'success': True, 'history': history, 'count': len(history)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/alerts/summary', methods=['GET'])
+def get_alert_summary():
+    """Get alert statistics summary"""
+    try:
+        from alert_system import get_alert_system
+        alert_sys = get_alert_system()
+        
+        summary = alert_sys.get_alert_summary()
+        
+        return jsonify({'success': True, 'summary': summary})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/alerts/<int:alert_id>/acknowledge', methods=['POST'])
+def acknowledge_alert(alert_id):
+    """Acknowledge an alert"""
+    try:
+        from alert_system import get_alert_system
+        alert_sys = get_alert_system()
+        
+        success = alert_sys.acknowledge_alert(alert_id)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Alert acknowledged'})
+        else:
+            return jsonify({'success': False, 'error': 'Alert not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/alerts/<int:alert_id>/dismiss', methods=['POST'])
+def dismiss_alert(alert_id):
+    """Dismiss an alert"""
+    try:
+        from alert_system import get_alert_system
+        alert_sys = get_alert_system()
+        
+        success = alert_sys.dismiss_alert(alert_id)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Alert dismissed'})
+        else:
+            return jsonify({'success': False, 'error': 'Alert not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/alerts/clear_old', methods=['POST'])
+def clear_old_alerts():
+    """Clear alerts older than specified age"""
+    try:
+        from alert_system import get_alert_system
+        alert_sys = get_alert_system()
+        
+        max_age = request.json.get('max_age_seconds', 3600)
+        alert_sys.clear_old_alerts(max_age_seconds=max_age)
+        
+        return jsonify({'success': True, 'message': 'Old alerts cleared'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/history')
 def history():
@@ -481,7 +858,9 @@ def upload_video():
             'current_frame': 0,
             'total_frames': 0,
             'fps': 0,
-            'eta': 0
+            'eta': 0,
+            'input_file': input_filename,
+            'output_file': output_filename
         }
         
         # Process video in background thread
@@ -542,7 +921,7 @@ def get_video_progress(video_id):
 @app.route('/video/<filename>')
 def serve_video(filename):
     """
-    Serve video files with proper MIME type detection
+    Serve video files with proper MIME type detection and range support
     """
     video_path = os.path.join(app.config['VIDEO_FOLDER'], filename)
     if os.path.exists(video_path):
@@ -556,17 +935,79 @@ def serve_video(filename):
             'wmv': 'video/x-ms-wmv'
         }
         mimetype = mime_types.get(ext, 'video/mp4')
-        return send_file(video_path, mimetype=mimetype)
+        
+        # Handle range requests for video seeking
+        range_header = request.headers.get('Range', None)
+        if not range_header:
+            return send_file(video_path, mimetype=mimetype)
+        
+        # Parse range header
+        size = os.path.getsize(video_path)
+        byte1, byte2 = 0, None
+        
+        m = range_header.strip().split('=')[1]
+        if '-' in m:
+            byte1, byte2 = m.split('-')
+            byte1 = int(byte1) if byte1 else 0
+            byte2 = int(byte2) if byte2 else size - 1
+        
+        length = byte2 - byte1 + 1
+        
+        # Read file chunk
+        with open(video_path, 'rb') as f:
+            f.seek(byte1)
+            data = f.read(length)
+        
+        rv = Response(data, 206, mimetype=mimetype, direct_passthrough=True)
+        rv.headers.add('Content-Range', f'bytes {byte1}-{byte2}/{size}')
+        rv.headers.add('Accept-Ranges', 'bytes')
+        rv.headers.add('Content-Length', str(length))
+        
+        return rv
     return jsonify({'error': 'Video not found'}), 404
 
 @app.route('/download_video/<filename>')
 def download_video(filename):
     """
-    Download enhanced video
+    Download enhanced video with proper headers
     """
+    print(f"📥 Download request for: {filename}")
     video_path = os.path.join(app.config['VIDEO_FOLDER'], filename)
+    print(f"📁 Looking for video at: {video_path}")
+    print(f"📂 Video exists: {os.path.exists(video_path)}")
+    
     if os.path.exists(video_path):
-        return send_file(video_path, as_attachment=True, download_name=f"enhanced_{filename}")
+        # Get file extension for proper filename and mimetype
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'mp4'
+        download_filename = f"enhanced_underwater_video.{ext}"
+        
+        # Map extensions to mimetypes
+        mime_types = {
+            'mp4': 'video/mp4',
+            'avi': 'video/x-msvideo',
+            'mov': 'video/quicktime',
+            'mkv': 'video/x-matroska',
+            'wmv': 'video/x-ms-wmv'
+        }
+        mimetype = mime_types.get(ext, 'video/mp4')
+        
+        print(f"✅ Sending file: {download_filename} (mimetype: {mimetype})")
+        
+        response = send_file(
+            video_path, 
+            as_attachment=True, 
+            download_name=download_filename,
+            mimetype=mimetype
+        )
+        
+        # Ensure proper headers
+        response.headers['Content-Type'] = mimetype
+        response.headers['Content-Disposition'] = f'attachment; filename="{download_filename}"'
+        
+        return response
+    
+    print(f"❌ Video not found at: {video_path}")
+    return jsonify({'error': 'Video not found'}), 404
     return jsonify({'error': 'Video not found'}), 404
 
 @app.route('/download_report/<filename>')

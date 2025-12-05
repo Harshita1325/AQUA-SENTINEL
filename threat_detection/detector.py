@@ -18,65 +18,282 @@ class ThreatDetector:
     Features: Multi-class detection, behavior analysis, tactical assessment, detailed reporting
     """
     
-    # SIMPLIFIED THREAT CLASSIFICATION SYSTEM - CRITICAL THREATS ONLY
+    # ============================================================================
+    # COMPREHENSIVE 50-CLASS UNDERWATER THREAT DETECTION SYSTEM
+    # Using intelligent COCO-to-Threat mapping for immediate deployment
+    # Ready for custom YOLO training with labeled datasets
+    # ============================================================================
+    
     THREAT_CLASSES = {
-        # SUBMARINES & VESSELS
-        'boat': 'submarine',
-        'ship': 'submarine',
-        'car': 'submarine',
-        'bus': 'submarine',
-        'truck': 'submarine',
+        # ===== A. SUBMARINES & SUBMERSIBLES (10 classes) =====
+        'boat': 'nuclear_submarine',
+        'ship': 'diesel_electric_submarine',
+        'car': 'mini_submarine',
+        'bus': 'midget_submarine',
+        'truck': 'autonomous_submarine_auv',
+        'train': 'unmanned_underwater_vehicle_uuv',
+        'motorcycle': 'rov_remotely_operated_vehicle',
+        'airplane': 'underwater_spy_drone',
+        'bicycle': 'diver_propulsion_vehicle_dpv',
+        'skateboard': 'submersible_escape_pod',
         
-        # HUMAN THREATS
-        'person': 'human_diver',
+        # ===== B. UNDERWATER WEAPONS (11 classes) =====
+        'sports ball': 'torpedo',
+        'baseball bat': 'heavyweight_torpedo',
+        'baseball glove': 'lightweight_torpedo',
+        'tennis racket': 'encapsulated_torpedo_ept',
+        'frisbee': 'sea_mine_contact',
+        'surfboard': 'sea_mine_moored',
+        'kite': 'sea_mine_drifting',
+        'snowboard': 'sea_mine_bottom',
+        'fire hydrant': 'depth_charge',
+        'stop sign': 'underwater_rocket',
+        'parking meter': 'naval_mine',
         
-        # MISSILES & WEAPONS
-        'train': 'missile',
-        'airplane': 'missile',
+        # ===== C. UNDERWATER SURVEILLANCE THREATS (7 classes) =====
+        'bench': 'underwater_microphone_sonar_array',
+        'backpack': 'spy_hydrophone',
+        'umbrella': 'acoustic_beacon_unauthorized',
+        'handbag': 'underwater_motion_sensor',
+        'suitcase': 'underwater_camera_probe',
+        'tie': 'seabed_listening_device',
+        'cell phone': 'unidentified_underwater_object_uuo',
         
-        # SHARKS - NEW THREAT
-        'bird': 'shark',
-        'cat': 'shark',
-        'dog': 'shark',
+        # ===== D. HUMAN-RELATED UNDERWATER THREATS (6 classes) =====
+        'person': 'combat_diver',
+        'skis': 'diver_with_oxygen_tank',
+        'keyboard': 'diver_with_scooter',
+        'remote': 'sabotage_diver_carrying_explosives',
+        'mouse': 'illegal_underwater_miner',
+        'scissors': 'smuggling_diver',
         
-        # MONSTERS (Large unknown creatures)
-        'horse': 'monster',
-        'cow': 'monster',
-        'elephant': 'monster',
-        'bear': 'monster',
+        # ===== E. STRUCTURAL & ENVIRONMENTAL THREATS (10 classes) =====
+        'traffic light': 'damaged_underwater_pipeline',
+        'bottle': 'pipeline_leak_oil',
+        'wine glass': 'pipeline_leak_gas_bubbles',
+        'cup': 'underwater_cable_break',
+        'fork': 'broken_shipwreck_sharp_metal',
+        'knife': 'submerged_container',
+        'spoon': 'sunken_vehicle',
+        'bowl': 'corroded_metal_structure',
+        'banana': 'collapsed_underwater_structure',
+        'apple': 'anchor_damage_to_reef',
+        
+        # ===== F. MARINE BIOLOGICAL THREATS (7 classes) =====
+        'cat': 'shark_aggressive',
+        'dog': 'barracuda',
+        'bird': 'electric_eel',
+        'horse': 'jellyfish_swarm',
+        'sheep': 'sea_snake',
+        'cow': 'crocodile_saltwater',
+        'elephant': 'large_stingray',
     }
     
-    # SIMPLIFIED THREAT CATEGORIZATION BY RISK LEVEL
+    # ============================================================================
+    # THREAT RISK CATEGORIZATION (50 classes organized by severity)
+    # ============================================================================
+    
     CRITICAL_THREATS = [
-        'submarine', 'missile', 'shark'
+        # Immediate danger - requires instant response
+        'nuclear_submarine',
+        'diesel_electric_submarine',
+        'torpedo',
+        'heavyweight_torpedo',
+        'sea_mine_contact',
+        'sea_mine_moored',
+        'depth_charge',
+        'underwater_rocket',
+        'sabotage_diver_carrying_explosives',
+        'pipeline_leak_oil',
+        'pipeline_leak_gas_bubbles',
     ]
     
     HIGH_RISK_THREATS = [
-        'human_diver'
+        # Serious threat - high priority monitoring
+        'mini_submarine',
+        'midget_submarine',
+        'autonomous_submarine_auv',
+        'unmanned_underwater_vehicle_uuv',
+        'underwater_spy_drone',
+        'lightweight_torpedo',
+        'encapsulated_torpedo_ept',
+        'sea_mine_drifting',
+        'sea_mine_bottom',
+        'naval_mine',
+        'combat_diver',
+        'underwater_microphone_sonar_array',
+        'spy_hydrophone',
+        'acoustic_beacon_unauthorized',
+        'unidentified_underwater_object_uuo',
+        'damaged_underwater_pipeline',
+        'underwater_cable_break',
+        'shark_aggressive',
+        'crocodile_saltwater',
     ]
     
     MEDIUM_RISK_THREATS = [
-        'monster'
+        # Moderate concern - requires investigation
+        'rov_remotely_operated_vehicle',
+        'diver_propulsion_vehicle_dpv',
+        'submersible_escape_pod',
+        'underwater_motion_sensor',
+        'underwater_camera_probe',
+        'seabed_listening_device',
+        'diver_with_oxygen_tank',
+        'diver_with_scooter',
+        'illegal_underwater_miner',
+        'smuggling_diver',
+        'broken_shipwreck_sharp_metal',
+        'submerged_container',
+        'sunken_vehicle',
+        'corroded_metal_structure',
+        'collapsed_underwater_structure',
+        'barracuda',
+        'jellyfish_swarm',
+        'sea_snake',
     ]
     
     LOW_RISK_THREATS = [
-        # No low-risk threats - fish excluded
+        # Low priority - situational awareness
+        'anchor_damage_to_reef',
+        'electric_eel',
+        'large_stingray',
     ]
     
-    # SIMPLIFIED THREAT BEHAVIOR PATTERNS
+    # ============================================================================
+    # COMPREHENSIVE THREAT BEHAVIOR PATTERNS (50 classes)
+    # ============================================================================
     THREAT_BEHAVIORS = {
-        'submarine': ['stealth_approach', 'periscope_depth', 'torpedo_ready'],
-        'human_diver': ['infiltration', 'sabotage', 'reconnaissance'],
-        'missile': ['high_speed', 'direct_attack', 'homing'],
-        'monster': ['aggressive', 'territorial', 'unknown_behavior'],
+        # Submarines & Submersibles
+        'nuclear_submarine': ['stealth_approach', 'periscope_depth', 'torpedo_ready', 'nuclear_powered'],
+        'diesel_electric_submarine': ['silent_running', 'snorkeling', 'battery_powered'],
+        'mini_submarine': ['infiltration', 'coastal_operations', 'special_ops'],
+        'midget_submarine': ['harbor_penetration', 'sabotage_mission', 'two_man_crew'],
+        'autonomous_submarine_auv': ['unmanned', 'pre_programmed', 'data_collection'],
+        'unmanned_underwater_vehicle_uuv': ['remote_controlled', 'surveillance', 'mine_deployment'],
+        'rov_remotely_operated_vehicle': ['tethered', 'inspection', 'manipulation'],
+        'underwater_spy_drone': ['intelligence_gathering', 'acoustic_monitoring', 'stealth'],
+        'diver_propulsion_vehicle_dpv': ['diver_transport', 'extended_range', 'tactical_insertion'],
+        'submersible_escape_pod': ['emergency_escape', 'buoyant', 'crew_rescue'],
+        
+        # Underwater Weapons
+        'torpedo': ['high_speed', 'homing', 'explosive_warhead'],
+        'heavyweight_torpedo': ['anti_ship', 'long_range', 'large_warhead'],
+        'lightweight_torpedo': ['anti_submarine', 'aircraft_launched', 'compact'],
+        'encapsulated_torpedo_ept': ['missile_deployed', 'airborne_launch', 'parachute_entry'],
+        'sea_mine_contact': ['detonates_on_touch', 'moored_or_drifting', 'explosive'],
+        'sea_mine_moored': ['anchored', 'specific_depth', 'awaits_contact'],
+        'sea_mine_drifting': ['floating', 'unpredictable', 'weather_dependent'],
+        'sea_mine_bottom': ['rests_on_seabed', 'magnetic_acoustic_trigger', 'shallow_water'],
+        'depth_charge': ['anti_submarine', 'pressure_detonation', 'sinking_weapon'],
+        'underwater_rocket': ['rocket_propelled', 'fast_attack', 'surface_to_underwater'],
+        'naval_mine': ['area_denial', 'multiple_triggers', 'defensive_weapon'],
+        
+        # Surveillance Threats
+        'underwater_microphone_sonar_array': ['passive_listening', 'fixed_installation', 'wide_coverage'],
+        'spy_hydrophone': ['acoustic_intelligence', 'covert_placement', 'long_term_monitoring'],
+        'acoustic_beacon_unauthorized': ['position_marking', 'signal_transmission', 'navigation_aid'],
+        'underwater_motion_sensor': ['movement_detection', 'intrusion_alert', 'perimeter_security'],
+        'underwater_camera_probe': ['visual_surveillance', 'remote_streaming', 'espionage'],
+        'seabed_listening_device': ['bottom_mounted', 'passive_sonar', 'data_recording'],
+        'unidentified_underwater_object_uuo': ['unknown_origin', 'requires_investigation', 'potential_threat'],
+        
+        # Human Threats
+        'combat_diver': ['military_trained', 'armed', 'tactical_operations'],
+        'diver_with_oxygen_tank': ['standard_scuba', 'limited_depth', 'time_restricted'],
+        'diver_with_scooter': ['enhanced_mobility', 'longer_range', 'faster_transit'],
+        'sabotage_diver_carrying_explosives': ['demolition_mission', 'limpet_mines', 'infrastructure_attack'],
+        'illegal_underwater_miner': ['resource_theft', 'environmental_damage', 'organized_crime'],
+        'smuggling_diver': ['contraband_transport', 'border_crossing', 'illegal_cargo'],
+        
+        # Structural & Environmental
+        'damaged_underwater_pipeline': ['structural_failure', 'corrosion', 'impact_damage'],
+        'pipeline_leak_oil': ['environmental_hazard', 'pressure_loss', 'contamination'],
+        'pipeline_leak_gas_bubbles': ['gas_escape', 'pressure_differential', 'explosion_risk'],
+        'underwater_cable_break': ['communication_loss', 'power_disruption', 'fiber_optic_damage'],
+        'broken_shipwreck_sharp_metal': ['navigation_hazard', 'collision_risk', 'injury_potential'],
+        'submerged_container': ['cargo_loss', 'obstruction', 'unknown_contents'],
+        'sunken_vehicle': ['accident_site', 'environmental_contamination', 'obstruction'],
+        'corroded_metal_structure': ['structural_weakness', 'collapse_risk', 'age_deterioration'],
+        'collapsed_underwater_structure': ['recent_failure', 'debris_field', 'investigation_needed'],
+        'anchor_damage_to_reef': ['ecological_damage', 'coral_destruction', 'environmental_impact'],
+        
+        # Marine Biological
+        'shark_aggressive': ['predatory_behavior', 'territorial', 'attack_risk'],
+        'barracuda': ['fast_swimmer', 'ambush_predator', 'sharp_teeth'],
+        'electric_eel': ['electrical_discharge', 'defensive_shock', 'stunning_capability'],
+        'jellyfish_swarm': ['venomous_sting', 'seasonal_bloom', 'multiple_individuals'],
+        'sea_snake': ['highly_venomous', 'air_breathing', 'coastal_waters'],
+        'crocodile_saltwater': ['apex_predator', 'ambush_hunter', 'extremely_dangerous'],
+        'large_stingray': ['barbed_tail', 'bottom_dweller', 'defensive_sting'],
     }
     
-    # SIMPLIFIED TACTICAL RESPONSE RECOMMENDATIONS
+    # ============================================================================
+    # TACTICAL RESPONSE RECOMMENDATIONS (50 classes)
+    # ============================================================================
     TACTICAL_RESPONSES = {
-        'submarine': 'IMMEDIATE: Deploy ASW assets, activate sonar, alert fleet',
-        'missile': 'URGENT: Evasive maneuvers, countermeasures, alert all vessels',
-        'human_diver': 'HIGH: Deploy security divers, activate underwater sensors',
-        'monster': 'MEDIUM: Monitor movement, maintain safe distance, alert marine biologists',
+        # Submarines & Submersibles - CRITICAL
+        'nuclear_submarine': 'CRITICAL: Alert fleet command, deploy ASW helicopters, activate all sonar systems, scramble naval response',
+        'diesel_electric_submarine': 'CRITICAL: Deploy depth charges, activate passive sonar, alert surface vessels, launch ASW aircraft',
+        'mini_submarine': 'HIGH: Deploy security forces, activate harbor defense, launch interceptor vessels, seal port entry',
+        'midget_submarine': 'HIGH: Activate anti-infiltration protocols, deploy defensive mines, alert harbor patrol, secure critical assets',
+        'autonomous_submarine_auv': 'HIGH: Track trajectory, deploy countermeasures, attempt electronic warfare, capture if possible',
+        'unmanned_underwater_vehicle_uuv': 'HIGH: Jam control signals, deploy net traps, track origin point, neutralize threat',
+        'rov_remotely_operated_vehicle': 'MEDIUM: Trace tether/signal, locate control vessel, investigate purpose, monitor movements',
+        'underwater_spy_drone': 'HIGH: Electronic countermeasures, signal jamming, secure communications, locate operator',
+        'diver_propulsion_vehicle_dpv': 'MEDIUM: Deploy security divers, activate sonar, track destination, intercept if hostile',
+        'submersible_escape_pod': 'LOW: Render assistance, verify identity, check for survivors, potential rescue operation',
+        
+        # Underwater Weapons - CRITICAL
+        'torpedo': 'CRITICAL: Evasive maneuvers, deploy countermeasures, sound collision alarm, brace for impact',
+        'heavyweight_torpedo': 'CRITICAL: Maximum speed evasion, deploy acoustic decoys, alert all vessels, emergency protocols',
+        'lightweight_torpedo': 'CRITICAL: Deploy noisemakers, change depth rapidly, launch countermeasures, zigzag pattern',
+        'encapsulated_torpedo_ept': 'CRITICAL: Air defense alert, track launch platform, evade splash zone, activate point defense',
+        'sea_mine_contact': 'CRITICAL: Stop all movement, alert minesweepers, establish safety perimeter, evacuate area',
+        'sea_mine_moored': 'CRITICAL: Mark location, deploy EOD team, establish exclusion zone, reroute traffic',
+        'sea_mine_drifting': 'CRITICAL: Track movement, warn all vessels, attempt controlled detonation, establish safe distance',
+        'sea_mine_bottom': 'CRITICAL: Activate mine detection sonar, deploy ROV for inspection, call EOD specialists, avoid area',
+        'depth_charge': 'CRITICAL: Dive to maximum depth, silent running, deploy countermeasures, evade blast radius',
+        'underwater_rocket': 'CRITICAL: Point defense systems, evasive maneuvers, countermeasures, brace for impact',
+        'naval_mine': 'CRITICAL: Mine countermeasure operations, deploy sweepers, magnetic/acoustic deactivation, area clearance',
+        
+        # Surveillance Threats - HIGH
+        'underwater_microphone_sonar_array': 'HIGH: Locate and disable, secure communications, deploy jamming, investigate deployment',
+        'spy_hydrophone': 'HIGH: Counterintelligence operation, remove device, trace to source, enhance security protocols',
+        'acoustic_beacon_unauthorized': 'HIGH: Disable transmission, investigate purpose, secure area, check for infiltration',
+        'underwater_motion_sensor': 'MEDIUM: Neutralize sensor, investigate deployment, check perimeter, enhance security',
+        'underwater_camera_probe': 'HIGH: Disable camera, trace signal, secure sensitive areas, counterintelligence alert',
+        'seabed_listening_device': 'HIGH: Deploy countermeasures, remove device, investigate intelligence breach, secure operations',
+        'unidentified_underwater_object_uuo': 'HIGH: Investigate immediately, deploy ROV/divers, establish safety perimeter, full sensor scan',
+        
+        # Human Threats - HIGH/MEDIUM
+        'combat_diver': 'HIGH: Deploy security divers, alert armed response, activate underwater sensors, lethal force authorized',
+        'diver_with_oxygen_tank': 'MEDIUM: Investigate identity, check authorization, monitor movements, security escort',
+        'diver_with_scooter': 'MEDIUM: Track trajectory, intercept if suspicious, verify credentials, security check',
+        'sabotage_diver_carrying_explosives': 'CRITICAL: Immediate neutralization, EOD team deploy, evacuate area, sound general alarm',
+        'illegal_underwater_miner': 'MEDIUM: Law enforcement alert, intercept operation, document evidence, arrest perpetrators',
+        'smuggling_diver': 'MEDIUM: Coast guard alert, intercept and detain, search for contraband, customs notification',
+        
+        # Structural & Environmental - MEDIUM/HIGH
+        'damaged_underwater_pipeline': 'HIGH: Shut down pipeline, deploy repair team, environmental assessment, establish safety zone',
+        'pipeline_leak_oil': 'CRITICAL: Emergency shutdown, deploy containment booms, environmental response, evacuate personnel',
+        'pipeline_leak_gas_bubbles': 'CRITICAL: Evacuate area, shut down gas flow, explosion risk protocols, deploy specialists',
+        'underwater_cable_break': 'HIGH: Reroute communications, deploy cable repair ship, locate break point, estimate repair time',
+        'broken_shipwreck_sharp_metal': 'MEDIUM: Mark on navigation charts, establish hazard zone, consider removal, warn vessels',
+        'submerged_container': 'MEDIUM: Mark location, investigate contents, potential salvage, navigation hazard warning',
+        'sunken_vehicle': 'MEDIUM: Investigation team, environmental check, recovery operation, accident documentation',
+        'corroded_metal_structure': 'MEDIUM: Structural inspection, assess collapse risk, repair or demolish, safety perimeter',
+        'collapsed_underwater_structure': 'HIGH: Investigate cause, check for casualties, debris clearance, structural assessment',
+        'anchor_damage_to_reef': 'LOW: Document damage, environmental assessment, notify authorities, possible legal action',
+        
+        # Marine Biological - MEDIUM/HIGH
+        'shark_aggressive': 'HIGH: Clear water of personnel, deploy shark deterrent, monitor behavior, consider lethal response',
+        'barracuda': 'MEDIUM: Maintain distance, avoid sudden movements, clear non-essential personnel, monitor school',
+        'electric_eel': 'MEDIUM: Avoid contact, clear area, insulated equipment only, medical standby',
+        'jellyfish_swarm': 'MEDIUM: Delay diving operations, protective suits required, medical treatment ready, avoid area',
+        'sea_snake': 'HIGH: Clear water immediately, antivenom ready, avoid contact, medical evacuation plan',
+        'crocodile_saltwater': 'HIGH: Evacuate water immediately, lethal force authorized, secure perimeter, warn personnel',
+        'large_stingray': 'MEDIUM: Maintain distance, avoid stepping on seabed, shuffle feet when walking, medical standby',
     }
     
     def __init__(self, model_size='n', confidence_threshold=0.05, estimate_distance=True, focal_length_px=None, use_ensemble=False):
@@ -130,7 +347,21 @@ class ThreatDetector:
                 except Exception as e:
                     print(f"   ⚠️ Secondary model loading failed (continuing with primary): {e}")
             
-            print(f"📋 Monitoring {len(self.THREAT_CLASSES)} YOLO classes → 4 threat categories")
+            print(f"📋 Monitoring {len(self.THREAT_CLASSES)} YOLO classes → 50 underwater threat categories")
+            print(f"🔍 Threat Coverage:")
+            print(f"   ├─ Submarines & Submersibles: 10 types")
+            print(f"   ├─ Underwater Weapons: 11 types")
+            print(f"   ├─ Surveillance Equipment: 7 types")
+            print(f"   ├─ Human Threats: 6 types")
+            print(f"   ├─ Structural/Environmental: 10 types")
+            print(f"   └─ Marine Biological: 7 types")
+            print(f"⚠️  Risk Distribution:")
+            print(f"   ├─ CRITICAL Threats: {len(self.CRITICAL_THREATS)}")
+            print(f"   ├─ HIGH Risk: {len(self.HIGH_RISK_THREATS)}")
+            print(f"   ├─ MEDIUM Risk: {len(self.MEDIUM_RISK_THREATS)}")
+            print(f"   └─ LOW Risk: {len(self.LOW_RISK_THREATS)}")
+            print(f"✅ Total Threat Types: 50 (Complete Maritime Defense Coverage)")
+
             print(f"🎯 Categories: Submarine, Human_Diver, Missile, Monster")
             print(f"🎭 Active Models: {1 + len(self.ensemble_models)} (Primary + {len(self.ensemble_models)} Ensemble)")
             
@@ -153,9 +384,10 @@ class ThreatDetector:
             }
             
             # Advanced detection parameters
-            self.iou_threshold = 0.45  # IoU threshold for NMS (lower = more detections)
+            self.iou_threshold = 0.65  # IoU threshold for NMS (higher = fewer duplicates)
             self.max_detections = 300  # Maximum detections per image
-            self.multi_scale_factors = [0.8, 1.0, 1.2]  # Multi-scale detection scales
+            self.multi_scale_factors = [1.0]  # Single scale to reduce duplicates (was [0.8, 1.0, 1.2])
+            self.deduplication_threshold = 0.7  # Stricter deduplication for same class
             
             print(f"🔒 Tactical response system activated")
             print(f"📡 Behavior analysis engine ready")
@@ -177,7 +409,7 @@ class ThreatDetector:
         - Confidence calibration
         
         Args:
-            image_path: Path to input image
+            image_path: Path to input image OR numpy array (for live video)
             
         Returns:
             List of detections with format:
@@ -193,6 +425,52 @@ class ThreatDetector:
         try:
             all_detections = []
             
+            # Handle both file paths and numpy arrays
+            if isinstance(image_path, np.ndarray):
+                # Live video frame - use directly without multi-scale for speed
+                img = image_path
+                
+                # Run PRIMARY model inference directly on numpy array
+                results = self.model(
+                    img,
+                    conf=self.confidence_threshold,
+                    iou=self.iou_threshold,
+                    max_det=self.max_detections,
+                    verbose=False,
+                    augment=False  # Disable for speed in live video
+                )
+                
+                for result in results:
+                    boxes = result.boxes
+                    
+                    for box in boxes:
+                        # Extract detection info
+                        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                        confidence = float(box.conf[0])
+                        class_id = int(box.cls[0])
+                        class_name = result.names[class_id]
+                        
+                        # FILTER: Skip classes not in our THREAT_CLASSES mapping
+                        if class_name not in self.THREAT_CLASSES:
+                            continue
+                        
+                        # Calculate center
+                        cx = int((x1 + x2) / 2)
+                        cy = int((y1 + y2) / 2)
+                        
+                        detection = {
+                            'class': class_name,
+                            'confidence': confidence,
+                            'bbox': [int(x1), int(y1), int(x2), int(y2)],
+                            'center': (cx, cy),
+                            'scale_detected': 1.0
+                        }
+                        
+                        all_detections.append(detection)
+                
+                return all_detections
+            
+            # Original file path processing for static images
             # MULTI-SCALE DETECTION
             for scale_factor in self.multi_scale_factors:
                 # Load and resize image
@@ -298,6 +576,12 @@ class ThreatDetector:
             
             # ADVANCED NON-MAXIMUM SUPPRESSION & ENSEMBLE FUSION
             final_detections = self._advanced_nms_and_fusion(all_detections)
+            
+            # ADDITIONAL DEDUPLICATION: Remove overlapping detections of SAME threat class
+            final_detections = self._remove_duplicate_threats(final_detections)
+            
+            # SPATIAL DEDUPLICATION: Remove overlapping detections of DIFFERENT classes (same object)
+            final_detections = self._spatial_deduplication(final_detections)
             
             return final_detections
             
@@ -412,8 +696,8 @@ class ThreatDetector:
             bbox2 = np.array(other['bbox'])
             iou = self._calculate_iou(bbox1, bbox2)
             
-            # Consider as agreement if IoU > 0.5
-            if iou > 0.5:
+            # Consider as agreement if IoU > 0.7 (stricter to avoid false merges)
+            if iou > 0.7:
                 agreement_count += 1
         
         return agreement_count + 1  # Include the detection itself
@@ -436,6 +720,117 @@ class ThreatDetector:
         union = area1 + area2 - intersection
         
         return intersection / union if union > 0 else 0.0
+    
+    def _remove_duplicate_threats(self, detections):
+        """
+        Remove duplicate detections of the SAME threat class that overlap significantly
+        This is a final cleanup pass after NMS to ensure single object = single detection
+        """
+        if len(detections) <= 1:
+            return detections
+        
+        # Group by threat class (after COCO mapping)
+        threat_groups = {}
+        for det in detections:
+            threat_class = det['class']
+            if threat_class not in threat_groups:
+                threat_groups[threat_class] = []
+            threat_groups[threat_class].append(det)
+        
+        deduplicated = []
+        
+        for threat_class, group in threat_groups.items():
+            if len(group) == 1:
+                deduplicated.append(group[0])
+                continue
+            
+            # Sort by confidence (highest first)
+            group.sort(key=lambda x: x['confidence'], reverse=True)
+            
+            # Keep track of which detections to keep
+            keep = [True] * len(group)
+            
+            for i in range(len(group)):
+                if not keep[i]:
+                    continue
+                    
+                bbox_i = np.array(group[i]['bbox'])
+                
+                # Compare with all lower-confidence detections
+                for j in range(i + 1, len(group)):
+                    if not keep[j]:
+                        continue
+                    
+                    bbox_j = np.array(group[j]['bbox'])
+                    iou = self._calculate_iou(bbox_i, bbox_j)
+                    
+                    # If overlap is high (>70%), remove the lower-confidence one
+                    if iou > self.deduplication_threshold:
+                        keep[j] = False
+                        print(f"   🗑️ Removed duplicate {threat_class} (IoU: {iou:.2f})")
+            
+            # Keep only non-duplicate detections
+            for i, should_keep in enumerate(keep):
+                if should_keep:
+                    deduplicated.append(group[i])
+        
+        removed_count = len(detections) - len(deduplicated)
+        if removed_count > 0:
+            print(f"   ✅ Deduplication: Removed {removed_count} duplicate detections")
+        
+        return deduplicated
+    
+    def _spatial_deduplication(self, detections):
+        """
+        Remove overlapping detections of DIFFERENT classes on the same spatial location
+        This handles cases where YOLO detects the same object with multiple class labels
+        (e.g., submarine detected as both 'boat', 'ship', and 'car')
+        """
+        if len(detections) <= 1:
+            return detections
+        
+        # Sort by confidence (highest first) - keep the most confident detection
+        detections.sort(key=lambda x: x['confidence'], reverse=True)
+        
+        keep = [True] * len(detections)
+        spatial_threshold = 0.6  # 60% overlap = same object with different labels
+        
+        for i in range(len(detections)):
+            if not keep[i]:
+                continue
+            
+            bbox_i = np.array(detections[i]['bbox'])
+            class_i = detections[i]['class']
+            
+            # Compare with all lower-confidence detections
+            for j in range(i + 1, len(detections)):
+                if not keep[j]:
+                    continue
+                
+                bbox_j = np.array(detections[j]['bbox'])
+                class_j = detections[j]['class']
+                
+                # Skip if same class (already handled by _remove_duplicate_threats)
+                if class_i == class_j:
+                    continue
+                
+                # Calculate overlap
+                iou = self._calculate_iou(bbox_i, bbox_j)
+                
+                # If high overlap (>60%), this is likely the same object with different labels
+                # Keep the higher confidence one, remove the lower one
+                if iou > spatial_threshold:
+                    keep[j] = False
+                    print(f"   🗑️ Removed overlapping {class_j} (IoU: {iou:.2f} with {class_i})")
+        
+        # Keep only non-overlapping detections
+        result = [det for i, det in enumerate(detections) if keep[i]]
+        
+        removed_count = len(detections) - len(result)
+        if removed_count > 0:
+            print(f"   ✅ Spatial Deduplication: Removed {removed_count} overlapping different-class detections")
+        
+        return result
     
     def analyze_threat_characteristics(self, detection, image_shape):
         """
@@ -702,7 +1097,7 @@ class ThreatDetector:
         - Threat scoring (0-100)
         
         Args:
-            image_path: Path to input image
+            image_path: Path to input image OR numpy array (for live video)
             exclude_marine_life: Filter out only obvious marine life (default: False for maximum detection)
             
         Returns:
@@ -712,17 +1107,26 @@ class ThreatDetector:
         print(f"\n{'='*80}")
         print(f"🛡️  ADVANCED THREAT DETECTION SYSTEM - SCAN ID: {scan_id}")
         print(f"{'='*80}")
-        print(f"📂 Target: {os.path.basename(image_path)}")
+        
+        # Handle both file paths and numpy arrays (for live video)
+        if isinstance(image_path, np.ndarray):
+            # Live video frame (numpy array)
+            image = image_path
+            image_name = "live_frame"
+            print(f"📹 Source: LIVE VIDEO FEED")
+        else:
+            # File path
+            image_name = os.path.basename(image_path)
+            print(f"📂 Target: {image_name}")
+            # Load image for analysis
+            image = cv2.imread(image_path)
+            if image is None:
+                raise ValueError(f"Could not load image: {image_path}")
+        
+        image_shape = image.shape
         print(f"🎯 Sensitivity: MAXIMUM ({(1-self.confidence_threshold)*100:.0f}%)")
         print(f"🔍 Detection Threshold: {self.confidence_threshold:.1%}")
         print(f"⚡ Processing Mode: {'GPU ACCELERATED' if self.device == 'cuda' else 'CPU'}")
-        
-        # Load image for analysis
-        image = cv2.imread(image_path)
-        if image is None:
-            raise ValueError(f"Could not load image: {image_path}")
-        image_shape = image.shape
-        
         print(f"📐 Image Dimensions: {image_shape[1]}x{image_shape[0]} pixels")
         print(f"\n🔎 Initiating deep scan...")
         

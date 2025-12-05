@@ -117,7 +117,7 @@ class ThreatVisualizer:
     
     def draw_label(self, image, threat):
         """
-        Draw label with threat type and confidence (NO distance on image)
+        Draw label with SHORT threat name and confidence (NO distance)
         
         Args:
             image: OpenCV image (BGR)
@@ -127,13 +127,16 @@ class ThreatVisualizer:
             Modified image
         """
         bbox = threat['bbox']
-        threat_type = threat['threat_type'].replace('_', ' ').title()
+        threat_type = threat['threat_type']
         confidence = threat['confidence']
         risk_level = threat['risk_level']
         color = self.COLORS.get(risk_level, (0, 0, 255))
         
-        # Create label text WITHOUT distance (distance shown in UI card only)
-        label = f"{threat_type} {confidence:.0%}"
+        # SHORTEN threat names for better visibility
+        short_name = self._shorten_threat_name(threat_type)
+        
+        # Create SHORT label text (no distance, just name + confidence)
+        label = f"{short_name} {confidence:.0%}"
         
         risk_label = f"[{risk_level}]"
         
@@ -196,6 +199,72 @@ class ThreatVisualizer:
         )
         
         return image
+    
+    def _shorten_threat_name(self, threat_type):
+        """
+        Shorten long threat names for display on images
+        """
+        # Abbreviation mapping for common words
+        abbreviations = {
+            'nuclear_submarine': 'Nuke Sub',
+            'diesel_electric_submarine': 'Diesel Sub',
+            'mini_submarine': 'Mini Sub',
+            'midget_submarine': 'Midget Sub',
+            'autonomous_submarine_auv': 'AUV',
+            'unmanned_underwater_vehicle_uuv': 'UUV',
+            'rov_remotely_operated_vehicle': 'ROV',
+            'underwater_spy_drone': 'Spy Drone',
+            'diver_propulsion_vehicle_dpv': 'DPV',
+            'submersible_escape_pod': 'Escape Pod',
+            'torpedo': 'Torpedo',
+            'heavyweight_torpedo': 'Heavy Torpedo',
+            'lightweight_torpedo': 'Light Torpedo',
+            'encapsulated_torpedo_ept': 'EPT',
+            'sea_mine_contact': 'Contact Mine',
+            'sea_mine_moored': 'Moored Mine',
+            'sea_mine_drifting': 'Drift Mine',
+            'sea_mine_bottom': 'Bottom Mine',
+            'depth_charge': 'Depth Charge',
+            'underwater_rocket': 'U-Rocket',
+            'naval_mine': 'Mine',
+            'underwater_microphone_sonar_array': 'Sonar Array',
+            'spy_hydrophone': 'Hydrophone',
+            'acoustic_beacon_unauthorized': 'Beacon',
+            'underwater_motion_sensor': 'Motion Sensor',
+            'underwater_camera_probe': 'Camera',
+            'seabed_listening_device': 'Listener',
+            'unidentified_underwater_object_uuo': 'UUO',
+            'combat_diver': 'Combat Diver',
+            'diver_with_oxygen_tank': 'Diver',
+            'diver_with_scooter': 'Diver+Scooter',
+            'sabotage_diver_carrying_explosives': 'SABOTEUR',
+            'illegal_underwater_miner': 'Illegal Miner',
+            'smuggling_diver': 'Smuggler',
+            'damaged_underwater_pipeline': 'Damaged Pipe',
+            'pipeline_leak_oil': 'Oil Leak',
+            'pipeline_leak_gas_bubbles': 'Gas Leak',
+            'underwater_cable_break': 'Cable Break',
+            'broken_shipwreck_sharp_metal': 'Shipwreck',
+            'submerged_container': 'Container',
+            'sunken_vehicle': 'Sunken Car',
+            'corroded_metal_structure': 'Corroded Metal',
+            'collapsed_underwater_structure': 'Collapsed Struct',
+            'anchor_damage_to_reef': 'Anchor Dmg',
+            'shark_aggressive': 'Shark',
+            'barracuda': 'Barracuda',
+            'electric_eel': 'Eel',
+            'jellyfish_swarm': 'Jellyfish',
+            'sea_snake': 'Sea Snake',
+            'crocodile_saltwater': 'Crocodile',
+            'large_stingray': 'Stingray',
+        }
+        
+        # Return abbreviated name if exists, otherwise clean up
+        if threat_type in abbreviations:
+            return abbreviations[threat_type]
+        
+        # Fallback: remove underscores and capitalize
+        return threat_type.replace('_', ' ').title()[:20]  # Max 20 chars
     
     def draw_all_threats(self, image_path, threats, output_path, 
                         draw_circles=True, draw_boxes=True, draw_labels=True):

@@ -38,6 +38,16 @@ class VideoProcessorV2:
         self.trackers = []  # List of (tracker, threat_info) tuples
         self.next_track_id = 1
         
+        # Alert system
+        self.alert_system = None
+        if enable_threat_detection:
+            try:
+                from alert_system import get_alert_system
+                self.alert_system = get_alert_system()
+                print("✅ Alert system initialized")
+            except Exception as e:
+                print(f"⚠️ Could not initialize alert system: {e}")
+        
         # Threat class mappings
         self.THREAT_MAP = {
             'boat': 'submarine', 'ship': 'submarine', 'car': 'submarine',
@@ -400,6 +410,15 @@ class VideoProcessorV2:
                             print(f"   🎯 Frame {i}: Detected {len(detections)} threats - Initializing trackers")
                             self.initialize_trackers(enhanced_frame, detections)
                             self.draw_threat_boxes(enhanced_frame, detections)
+                            
+                            # Create alerts for new threats
+                            if self.alert_system:
+                                for detection in detections:
+                                    self.alert_system.create_alert(
+                                        threat=detection,
+                                        video_id=os.path.basename(output_path),
+                                        frame_number=i
+                                    )
                     else:
                         # Update trackers on other frames
                         tracked_threats = self.update_trackers(enhanced_frame)
@@ -434,10 +453,26 @@ class VideoProcessorV2:
         
         # Save video
         print("💾 Saving enhanced video...")
+        
+        # Notify that saving is starting
+        if progress_callback:
+            progress_callback({
+                'progress': 100,
+                'current_frame': total_frames,
+                'total_frames': total_frames,
+                'fps': avg_fps,
+                'eta': 0,
+                'status': 'saving'
+            })
+        
         if create_comparison:
             self._save_comparison_video(frames, enhanced_frames, output_path, fps)
         else:
             self._save_video(enhanced_frames, output_path, fps)
+        
+        # Calculate quality metrics on sample frames
+        print("📊 Calculating quality metrics...")
+        metrics_results = self._calculate_video_metrics(frames, enhanced_frames)
         
         # Stats
         processing_time = time.time() - start_time
@@ -452,24 +487,40 @@ class VideoProcessorV2:
             'resolution': f"{width}x{height}",
             'threats_detected': threat_count > 0,
             'threat_count': threat_count,
-            # Placeholder metrics - can be calculated if needed
-            'psnr': None,
-            'ssim': None,
-            'uiqm': None
+            'psnr': metrics_results['psnr'],
+            'ssim': metrics_results['ssim'],
+            'uiqm': metrics_results['uiqm'],
+            'uciqe': metrics_results.get('uciqe', 0.0),
+            'sharpness': metrics_results.get('sharpness', 0.0),
+            'contrast': metrics_results.get('contrast', 0.0),
+            'improvement': metrics_results.get('improvement', 0.0)
         }
         
         print(f"✅ Processing complete!")
         print(f"   Total time: {processing_time:.2f}s")
         print(f"   Average FPS: {avg_fps:.2f}")
         print(f"   Threats tracked: {threat_count}")
+        print(f"   Quality: PSNR={stats['psnr']:.2f} SSIM={stats['ssim']:.4f} UIQM={stats['uiqm']:.4f}")
         
         return stats
     
     def _save_video(self, frames, output_path, fps):
-        """Save frames as video"""
+        """Save frames as video in MP4 format"""
+        # Ensure output path has .mp4 extension
+        if not output_path.lower().endswith('.mp4'):
+            output_path = output_path.rsplit('.', 1)[0] + '.mp4'
+        
         height, width = frames[0].shape[:2]
+        
+        # Use mp4v codec - most reliable for Windows without external DLLs
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        
+        if not out.isOpened():
+            print("⚠️ mp4v failed, trying XVID")
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            output_path = output_path.rsplit('.', 1)[0] + '.avi'
+            out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
         
         for frame in frames:
             out.write(frame)
@@ -478,10 +529,22 @@ class VideoProcessorV2:
         print(f"✅ Video saved: {output_path}")
     
     def _save_comparison_video(self, original_frames, enhanced_frames, output_path, fps):
-        """Save side-by-side comparison video"""
+        """Save side-by-side comparison video in MP4 format"""
+        # Ensure output path has .mp4 extension
+        if not output_path.lower().endswith('.mp4'):
+            output_path = output_path.rsplit('.', 1)[0] + '.mp4'
+        
         height, width = original_frames[0].shape[:2]
+        
+        # Use mp4v codec - most reliable for Windows without external DLLs
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width * 2, height))
+        
+        if not out.isOpened():
+            print("⚠️ mp4v failed for comparison, trying XVID")
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            output_path = output_path.rsplit('.', 1)[0] + '.avi'
+            out = cv2.VideoWriter(output_path, fourcc, fps, (width * 2, height))
         
         for orig, enh in zip(original_frames, enhanced_frames):
             comparison = np.hstack([orig, enh])
@@ -489,6 +552,80 @@ class VideoProcessorV2:
         
         out.release()
         print(f"✅ Comparison video saved: {output_path}")
+    
+    def _calculate_video_metrics(self, original_frames, enhanced_frames):
+        """
+        Calculate quality metrics by sampling frames from the video
+        """
+        try:
+            from metrics_calculator import get_metrics_calculator
+            
+            calculator = get_metrics_calculator()
+            
+            # Sample frames (every 10% of the video)
+            num_samples = min(10, len(original_frames))
+            indices = np.linspace(0, len(original_frames) - 1, num_samples, dtype=int)
+            
+            all_psnr = []
+            all_ssim = []
+            all_uiqm = []
+            all_uciqe = []
+            all_sharpness = []
+            all_contrast = []
+            
+            for idx in indices:
+                orig_frame = original_frames[idx]
+                enh_frame = enhanced_frames[idx]
+                
+                # Calculate metrics for this frame
+                metrics = calculator.calculate_all_metrics(orig_frame, enh_frame, has_reference=True)
+                
+                if metrics['psnr'] > 0:
+                    all_psnr.append(metrics['psnr'])
+                if metrics['ssim'] > 0:
+                    all_ssim.append(metrics['ssim'])
+                if metrics['uiqm'] > 0:
+                    all_uiqm.append(metrics['uiqm'])
+                if metrics.get('uciqe', 0) > 0:
+                    all_uciqe.append(metrics['uciqe'])
+                if metrics.get('sharpness', 0) > 0:
+                    all_sharpness.append(metrics['sharpness'])
+                if metrics.get('contrast', 0) > 0:
+                    all_contrast.append(metrics['contrast'])
+            
+            # Average the metrics
+            result = {
+                'psnr': round(np.mean(all_psnr), 2) if all_psnr else 0.0,
+                'ssim': round(np.mean(all_ssim), 4) if all_ssim else 0.0,
+                'uiqm': round(np.mean(all_uiqm), 4) if all_uiqm else 0.0,
+                'uciqe': round(np.mean(all_uciqe), 4) if all_uciqe else 0.0,
+                'sharpness': round(np.mean(all_sharpness), 2) if all_sharpness else 0.0,
+                'contrast': round(np.mean(all_contrast), 2) if all_contrast else 0.0,
+                'improvement': 0.0
+            }
+            
+            # Calculate improvement percentage
+            if all_uiqm and len(all_uiqm) > 0:
+                # Compare first and last frame UIQM
+                orig_first_uiqm = calculator.calculate_uiqm(
+                    cv2.cvtColor(original_frames[0], cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+                )
+                if orig_first_uiqm > 0:
+                    result['improvement'] = round((result['uiqm'] - orig_first_uiqm) / orig_first_uiqm * 100, 2)
+            
+            return result
+            
+        except Exception as e:
+            print(f"⚠️ Metrics calculation error: {e}")
+            return {
+                'psnr': 0.0,
+                'ssim': 0.0,
+                'uiqm': 0.0,
+                'uciqe': 0.0,
+                'sharpness': 0.0,
+                'contrast': 0.0,
+                'improvement': 0.0
+            }
 
 
 if __name__ == "__main__":

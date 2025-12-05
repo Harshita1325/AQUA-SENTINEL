@@ -45,9 +45,6 @@
             background: var(--aqua-panel);
             border-bottom: 2px solid var(--aqua-border);
             padding: 1rem 3rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
 
         .header-top {
@@ -1337,33 +1334,6 @@
             box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
         }
 
-        /* Light mode refinements for main panel & uploader */
-        body.light-mode .main-card {
-            background: #FFFFFF;
-            border-color: #E2E8F0;
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-        }
-
-        body.light-mode .upload-area {
-            border-color: #CFE3F5;
-            background: #F8FBFF;
-            backdrop-filter: none;
-        }
-
-        body.light-mode .upload-area:hover {
-            border-color: #38BDF8;
-            background: #F0F9FF;
-            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25);
-        }
-
-        body.light-mode .upload-text {
-            color: #0F172A;
-        }
-
-        body.light-mode .upload-subtext {
-            color: #0284C7;
-        }
-
         @media (max-width: 1024px) {
             .images-container {
                 grid-template-columns: 1fr;
@@ -1721,6 +1691,7 @@
                 <li><a href="/profile">Profile</a></li>
                 <li><a href="/history">History</a></li>
                 <li><a href="/model">Models</a></li>
+                <li><a href="/live-video">Live Video</a></li>
             </ul>
         </nav>
     </div>
@@ -1816,8 +1787,13 @@
                     <span class="threat-toggle-slider"></span>
                 </label>
 
-                <button class="process-btn" id="processButton" onclick="processImage()" disabled>
-                    Analyze Image
+                <button class="process-btn" id="processButton" onclick="processImage()" disabled 
+                    style="width: 100%; max-width: 600px; padding: 24px 50px; margin: 30px auto; display: block; 
+                    background: linear-gradient(135deg, #00D9FF, #00B8CC); border: 2px solid #00D9FF; 
+                    color: #000000; font-size: 1.4rem; font-weight: 900; text-transform: uppercase; 
+                    letter-spacing: 3px; cursor: pointer; box-shadow: 0 8px 32px rgba(0, 217, 255, 0.5); 
+                    border-radius: 12px; transition: all 0.3s ease;">
+                    ▸ Analyze Image
                 </button>
             </div>
             </div>
@@ -1840,6 +1816,30 @@
                         <span>Detected Environment: <strong id="environmentType">Auto</strong></span>
                     </div>
                     <p style="color: #a0aec0; font-size: 0.95rem; margin-top: 10px;" id="environmentDescription"></p>
+                </div>
+                
+                <!-- Before/After Comparison Slider -->
+                <div id="comparisonSlider" style="display: none; margin-bottom: 30px;">
+                    <h3 style="text-align: center; color: var(--aqua-primary); margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 700;">
+                        📊 Interactive Comparison
+                    </h3>
+                    <div style="position: relative; width: 100%; max-width: 1200px; margin: 0 auto; background: var(--aqua-panel); border: 2px solid var(--aqua-border); border-radius: 8px; overflow: hidden;">
+                        <div id="comparisonContainer" style="position: relative; width: 100%; overflow: hidden;">
+                            <img id="comparisonBefore" src="" alt="Original" style="display: block; width: 100%; height: auto;">
+                            <div id="comparisonAfterContainer" style="position: absolute; top: 0; left: 0; width: 50%; height: 100%; overflow: hidden; border-right: 3px solid var(--aqua-primary);">
+                                <img id="comparisonAfter" src="" alt="Enhanced" style="display: block; width: 200%; height: 100%; object-fit: cover;">
+                            </div>
+                            <input type="range" id="comparisonSliderInput" min="0" max="100" value="50" style="position: absolute; top: 50%; left: 0; width: 100%; transform: translateY(-50%); z-index: 10; cursor: ew-resize; opacity: 0;">
+                            <div id="comparisonHandle" style="position: absolute; top: 0; left: 50%; width: 40px; height: 100%; transform: translateX(-50%); z-index: 5; pointer-events: none;">
+                                <div style="width: 3px; height: 100%; background: var(--aqua-primary); margin: 0 auto;"></div>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: var(--aqua-primary); border: 3px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 700; font-size: 18px;">⇄</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 1rem; background: rgba(0,0,0,0.5);">
+                            <span style="color: var(--aqua-text); font-weight: 600;">◀ Original</span>
+                            <span style="color: var(--aqua-text); font-weight: 600;">Enhanced ▶</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- 2x2 Image Grid: ALWAYS SHOW (moved outside threatSummary) -->
@@ -2050,7 +2050,7 @@
                 <p class="panel-subtitle">Select an underwater video for frame-by-frame enhancement and analysis</p>
                 
                 <!-- Video Upload Area -->
-                <div class="upload-area" onclick="document.getElementById('videoFile').click()">
+                <div class="upload-area" id="videoUploadArea">
                     <input type="file" id="videoFile" class="file-input" accept="video/*">
                     <p class="upload-text">🎬 Click to upload or drag and drop</p>
                     <p class="upload-subtext">MP4, AVI, MOV, MKV up to 500MB</p>
@@ -2090,8 +2090,13 @@
                     <span class="threat-toggle-slider"></span>
                 </label>
 
-                <button class="process-btn" id="processVideoButton" onclick="processVideo()" disabled>
-                    Process Video
+                <button class="process-btn" id="processVideoButton" onclick="processVideo()" disabled
+                    style="width: 100%; max-width: 600px; padding: 24px 50px; margin: 30px auto; display: block; 
+                    background: linear-gradient(135deg, #00D9FF, #00B8CC); border: 2px solid #00D9FF; 
+                    color: #000000; font-size: 1.4rem; font-weight: 900; text-transform: uppercase; 
+                    letter-spacing: 3px; cursor: pointer; box-shadow: 0 8px 32px rgba(0, 217, 255, 0.5); 
+                    border-radius: 12px; transition: all 0.3s ease;">
+                    ▸ Process Video
                 </button>
             </div>
             </div>
@@ -2143,13 +2148,62 @@
                     <div style="background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; padding: 1.5rem;">
                         <h3 style="color: var(--aqua-primary); text-align: center; margin-bottom: 1rem; font-size: 1rem; font-weight: 700; text-transform: uppercase;">Original Video</h3>
                         <div style="background: #000; border-radius: 6px; overflow: hidden;">
-                            <video id="originalVideo" controls style="width: 100%; height: auto; display: block;"></video>
+                            <video id="originalVideo" controls preload="metadata" style="width: 100%; height: auto; display: block;">
+                                <source type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
                     </div>
                     <div style="background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; padding: 1.5rem;">
                         <h3 style="color: var(--aqua-primary); text-align: center; margin-bottom: 1rem; font-size: 1rem; font-weight: 700; text-transform: uppercase;">Enhanced Video</h3>
                         <div style="background: #000; border-radius: 6px; overflow: hidden;">
-                            <video id="enhancedVideo" controls style="width: 100%; height: auto; display: block;"></video>
+                            <video id="enhancedVideo" controls preload="metadata" style="width: 100%; height: auto; display: block;">
+                                <source type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Playback Controls -->
+                <div style="background: var(--aqua-panel); border: 1px solid var(--aqua-border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="color: var(--aqua-dark); margin-bottom: 1rem; font-size: 1rem; font-weight: 700;">🎮 Playback Controls</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <!-- Playback Speed -->
+                        <div>
+                            <label style="color: var(--aqua-text); font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">⚡ Speed</label>
+                            <select id="playbackSpeed" onchange="changePlaybackSpeed()" style="width: 100%; padding: 0.5rem; border: 1px solid var(--aqua-border); border-radius: 4px; background: var(--aqua-bg); color: var(--aqua-text);">
+                                <option value="0.25">0.25x (Slow)</option>
+                                <option value="0.5">0.5x</option>
+                                <option value="1" selected>1x (Normal)</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x (Fast)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sync Toggle -->
+                        <div>
+                            <label style="color: var(--aqua-text); font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">🔗 Synchronization</label>
+                            <button id="syncToggle" onclick="toggleSync()" style="width: 100%; padding: 0.5rem; border: 1px solid var(--aqua-border); border-radius: 4px; background: var(--aqua-primary); color: #000; font-weight: 600; cursor: pointer;">
+                                ✅ Synced
+                            </button>
+                        </div>
+                        
+                        <!-- Frame Step -->
+                        <div>
+                            <label style="color: var(--aqua-text); font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">⏭️ Frame Navigation</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="stepFrame(-1)" style="flex: 1; padding: 0.5rem; border: 1px solid var(--aqua-border); border-radius: 4px; background: var(--aqua-panel); color: var(--aqua-text); cursor: pointer;">◀️ Prev</button>
+                                <button onclick="stepFrame(1)" style="flex: 1; padding: 0.5rem; border: 1px solid var(--aqua-border); border-radius: 4px; background: var(--aqua-panel); color: var(--aqua-text); cursor: pointer;">Next ▶️</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Screenshot -->
+                        <div>
+                            <label style="color: var(--aqua-text); font-size: 0.875rem; display: block; margin-bottom: 0.5rem;">📸 Capture</label>
+                            <button onclick="captureScreenshot()" style="width: 100%; padding: 0.5rem; border: 1px solid var(--aqua-border); border-radius: 4px; background: var(--aqua-accent); color: #000; font-weight: 600; cursor: pointer;">
+                                Screenshot
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -2204,10 +2258,18 @@
                     </div>
                 </div>
 
-                <div class="download-section" style="display: block; text-align: center;">
-                    <a href="#" id="downloadVideoLink" class="download-button">
-                        Download Enhanced Video
-                    </a>
+                <div class="download-section" style="display: block; text-align: center; margin-top: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="#" id="downloadEnhancedOnly" class="download-button" style="opacity: 0.5; pointer-events: none; cursor: not-allowed; padding: 0.75rem 1.5rem;" onclick="return false;">
+                            📥 Download Enhanced Video
+                        </a>
+                        <a href="#" id="downloadComparison" class="download-button" style="opacity: 0.5; pointer-events: none; cursor: not-allowed; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);" onclick="return false;">
+                            🎬 Download Side-by-Side
+                        </a>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.75rem;">
+                        Download options will be enabled after processing completes
+                    </p>
                 </div>
             </div>
         </div>
@@ -2282,6 +2344,129 @@
                 }, 5000);
             }
         }
+
+        // ==================== ALERT SYSTEM ====================
+        
+        function toggleAlertPanel() {
+            const panel = document.getElementById('alertPanel');
+            panel.classList.toggle('open');
+        }
+        
+        async function loadAlerts() {
+            try {
+                const response = await fetch('/api/alerts/active');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAlerts(data.alerts);
+                    updateAlertBadge(data.count);
+                }
+            } catch (error) {
+                console.error('Error loading alerts:', error);
+            }
+        }
+        
+        function displayAlerts(alerts) {
+            const alertList = document.getElementById('alertList');
+            const alertCount = document.getElementById('alertCount');
+            const criticalCount = document.getElementById('criticalCount');
+            
+            if (alerts.length === 0) {
+                alertList.innerHTML = '<div style="padding: 2rem; text-align: center; color: #64748b;">No active alerts</div>';
+                alertCount.textContent = '0 Active';
+                criticalCount.textContent = '0 Critical';
+                return;
+            }
+            
+            // Count by severity
+            const critical = alerts.filter(a => a.severity === 'CRITICAL').length;
+            alertCount.textContent = `${alerts.length} Active`;
+            criticalCount.textContent = `${critical} Critical`;
+            
+            // Display alerts
+            alertList.innerHTML = '';
+            alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert-item ${alert.severity}`;
+                alertDiv.innerHTML = `
+                    <div class="alert-item-header">
+                        <span class="alert-threat-type">${alert.threat_type.replace('_', ' ')}</span>
+                        <span class="alert-confidence">${(alert.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="alert-timestamp">${new Date(alert.timestamp).toLocaleString()}</div>
+                    <div style="font-size: 0.75rem; color: #cbd5e1; margin: 0.5rem 0;">
+                        ${alert.distance && alert.distance.distance_display ? `📍 ${alert.distance.distance_display}` : ''}
+                        ${alert.frame_number ? `| Frame: ${alert.frame_number}` : ''}
+                    </div>
+                    <div class="alert-actions">
+                        <button class="alert-btn ack" onclick="acknowledgeAlert(${alert.alert_id})">✓ Ack</button>
+                        <button class="alert-btn dismiss" onclick="dismissAlert(${alert.alert_id})">✗ Dismiss</button>
+                    </div>
+                `;
+                alertList.appendChild(alertDiv);
+            });
+            
+            // Play alert sound for critical threats
+            if (critical > 0 && !window.alertSoundPlayed) {
+                playAlertSound();
+                window.alertSoundPlayed = true;
+                setTimeout(() => { window.alertSoundPlayed = false; }, 5000);
+            }
+        }
+        
+        function updateAlertBadge(count) {
+            const badge = document.getElementById('alertBadge');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        async function acknowledgeAlert(alertId) {
+            try {
+                await fetch(`/api/alerts/${alertId}/acknowledge`, { method: 'POST' });
+                loadAlerts();
+                showStatus('Alert acknowledged', 'success');
+            } catch (error) {
+                console.error('Error acknowledging alert:', error);
+            }
+        }
+        
+        async function dismissAlert(alertId) {
+            try {
+                await fetch(`/api/alerts/${alertId}/dismiss`, { method: 'POST' });
+                loadAlerts();
+                showStatus('Alert dismissed', 'success');
+            } catch (error) {
+                console.error('Error dismissing alert:', error);
+            }
+        }
+        
+        function playAlertSound() {
+            // Create simple beep sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+        
+        // Poll for alerts every 5 seconds
+        setInterval(loadAlerts, 5000);
+        // Load alerts on page load
+        setTimeout(loadAlerts, 1000);
 
         function calculateAndDisplayMetrics(inputFile, outputFile) {
             document.getElementById('metricsSection').style.display = 'block';
@@ -2457,6 +2642,9 @@
                         document.getElementById('processedImage').src = `/result/${data.enhanced_output_file}`;
                         document.getElementById('processedImage').style.display = 'block';
                         
+                        // Setup comparison slider
+                        setupComparisonSlider(`/uploads/${selectedFile.name}`, `/result/${data.enhanced_output_file}`);
+                        
                         // 3. Threat Detection Image (ALWAYS SHOW - backend adds "NO THREATS" message)
                         document.getElementById('threatImage').src = `/result/${data.threat_output_file}`;
                         document.getElementById('threatImage').style.display = 'block';
@@ -2489,6 +2677,9 @@
                         document.getElementById('processedImage').src = `/result/${outputFile}`;
                         document.getElementById('downloadLink').href = `/result/${outputFile}`;
                         document.getElementById('downloadLink').download = `enhanced_${selectedFile.name}`;
+                        
+                        // Setup comparison slider
+                        setupComparisonSlider(`/uploads/${selectedFile.name}`, `/result/${outputFile}`);
                         
                         // Show "not performed" messages for threat/distance
                         document.getElementById('threatImage').style.display = 'none';
@@ -2759,6 +2950,40 @@
             }
         });
 
+        // ==================== COMPARISON SLIDER ====================
+        
+        function setupComparisonSlider(originalSrc, enhancedSrc) {
+            const slider = document.getElementById('comparisonSlider');
+            const before = document.getElementById('comparisonBefore');
+            const after = document.getElementById('comparisonAfter');
+            const afterContainer = document.getElementById('comparisonAfterContainer');
+            const sliderInput = document.getElementById('comparisonSliderInput');
+            const handle = document.getElementById('comparisonHandle');
+            
+            // Set images
+            before.src = originalSrc;
+            after.src = enhancedSrc;
+            
+            // Show slider
+            slider.style.display = 'block';
+            
+            // Handle slider input
+            sliderInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                afterContainer.style.width = value + '%';
+                handle.style.left = value + '%';
+            });
+            
+            // Reset to 50% on load
+            setTimeout(() => {
+                sliderInput.value = 50;
+                afterContainer.style.width = '50%';
+                handle.style.left = '50%';
+            }, 100);
+        }
+        
+        // ==================== VIDEO FUNCTIONS ====================
+
         videoFileInput.addEventListener('change', handleVideoSelect);
 
         function handleVideoSelect(e) {
@@ -2779,8 +3004,8 @@
             const formData = new FormData();
             formData.append('file', selectedVideoFile);
             
-            const selectedModel = document.querySelector('input[name="videoModel"]:checked').value;
-            const createComparison = document.querySelector('input[name="videoComparison"]:checked') ? 'true' : 'false';
+            const selectedModel = document.getElementById('videoModel').value;
+            const createComparison = document.getElementById('videoComparison').value;
             const enableThreats = document.getElementById('videoThreatDetection').checked ? 'true' : 'false';
             
             formData.append('model_type', selectedModel);
@@ -2821,12 +3046,15 @@
                 fetch(`/video_progress/${videoId}`)
                     .then(response => response.json())
                     .then(data => {
+                        console.log('Video progress update:', data.status, data.progress);
                         updateVideoProgress(data);
                         
                         if (data.status === 'completed') {
+                            console.log('✅ Video processing completed!');
                             clearInterval(videoProcessingInterval);
                             displayVideoResults(data, outputFile);
                         } else if (data.status === 'error') {
+                            console.error('❌ Video processing error:', data.error);
                             clearInterval(videoProcessingInterval);
                             document.getElementById('videoProcessing').style.display = 'none';
                             document.getElementById('processVideoButton').disabled = false;
@@ -2845,6 +3073,7 @@
             const totalFrames = data.total_frames || 0;
             const fps = data.fps || 0;
             const eta = data.eta || 0;
+            const status = data.status || 'processing';
 
             // Update progress bar
             document.getElementById('videoProgressBar').style.width = progress + '%';
@@ -2854,7 +3083,14 @@
             document.getElementById('statProgress').textContent = progress.toFixed(1) + '%';
             document.getElementById('statFrames').textContent = `${currentFrame}/${totalFrames}`;
             document.getElementById('statFPS').textContent = fps.toFixed(1);
-            document.getElementById('statETA').textContent = eta > 0 ? eta.toFixed(0) + 's' : '--';
+            
+            // Show "Saving..." when progress is 100% but not completed yet
+            if (status === 'saving' || (progress >= 100 && status === 'processing')) {
+                document.getElementById('statETA').textContent = 'Saving...';
+                showStatus('💾 Saving video file... Almost done!', 'info');
+            } else {
+                document.getElementById('statETA').textContent = eta > 0 ? eta.toFixed(0) + 's' : '--';
+            }
         }
 
         function displayVideoResults(data, outputFile) {
@@ -2904,28 +3140,181 @@
                 }
             }
 
-            // Get the input video filename from data
-            const inputFile = data.input_file || `${data.video_id}_input.mp4`;
+            // Get the input and output video filenames from data
+            const inputFile = data.input_file || outputFile.replace('_enhanced.', '_input.');
+            const enhancedFile = data.output_file || outputFile;
+            
+            console.log('🎬 Setting up video display:');
+            console.log('  Input file:', inputFile);
+            console.log('  Enhanced file:', enhancedFile);
 
             // Set video sources - show original and enhanced
             const originalVideoElement = document.getElementById('originalVideo');
             const enhancedVideoElement = document.getElementById('enhancedVideo');
             
-            originalVideoElement.src = `/video/${inputFile}`;
-            enhancedVideoElement.src = `/video/${outputFile}`;
+            // Clear existing sources and set new ones with cache busting
+            const timestamp = new Date().getTime();
             
-            // Load both videos
+            // Original video
+            originalVideoElement.innerHTML = `<source src="/video/${inputFile}?t=${timestamp}" type="video/mp4">`;
             originalVideoElement.load();
-            enhancedVideoElement.load();
+            originalVideoElement.onerror = (e) => {
+                console.error('❌ Original video load error:', e);
+                showStatus('⚠️ Could not load original video', 'warning');
+            };
             
-            // Set download link
-            document.getElementById('downloadVideoLink').href = `/download_video/${outputFile}`;
-            document.getElementById('downloadVideoLink').download = `enhanced_${selectedVideoFile.name}`;
+            // Enhanced video
+            enhancedVideoElement.innerHTML = `<source src="/video/${enhancedFile}?t=${timestamp}" type="video/mp4">`;
+            enhancedVideoElement.load();
+            enhancedVideoElement.onerror = (e) => {
+                console.error('❌ Enhanced video load error:', e);
+                showStatus('⚠️ Could not load enhanced video', 'warning');
+            };
+            
+            // Initialize video synchronization
+            setTimeout(() => {
+                syncVideos();
+                console.log('✅ Video synchronization initialized');
+            }, 500);
+            
+            // Enable download buttons - Enhanced Only
+            const downloadEnhanced = document.getElementById('downloadEnhancedOnly');
+            if (downloadEnhanced) {
+                const enhancedUrl = `/download_video/${enhancedFile}`;
+                downloadEnhanced.href = enhancedUrl;
+                downloadEnhanced.setAttribute('download', 'enhanced_underwater_video.mp4');
+                downloadEnhanced.style.pointerEvents = 'auto';
+                downloadEnhanced.style.opacity = '1';
+                downloadEnhanced.style.cursor = 'pointer';
+                downloadEnhanced.onclick = null; // Remove the return false blocker
+                downloadEnhanced.target = '_blank';
+                console.log('✅ Enhanced download button enabled:', enhancedUrl);
+            }
+            
+            // Enable download buttons - Comparison
+            const downloadComparison = document.getElementById('downloadComparison');
+            if (downloadComparison) {
+                const comparisonUrl = `/download_video/${enhancedFile}`;
+                downloadComparison.href = comparisonUrl;
+                downloadComparison.setAttribute('download', 'comparison_underwater_video.mp4');
+                downloadComparison.style.pointerEvents = 'auto';
+                downloadComparison.style.opacity = '1';
+                downloadComparison.style.cursor = 'pointer';
+                downloadComparison.onclick = null; // Remove the return false blocker
+                downloadComparison.target = '_blank';
+                console.log('✅ Comparison download button enabled:', comparisonUrl);
+            }
 
-            showStatus('✅ Video processing complete! Videos ready to view.', 'success');
+            showStatus('✅ Video processing complete! Videos ready to view and download.', 'success');
         }
 
         // ==================== END VIDEO FUNCTIONS ====================
+
+        // ==================== VIDEO PLAYBACK CONTROLS ====================
+        
+        let videosSynced = true;
+        
+        function changePlaybackSpeed() {
+            const speed = parseFloat(document.getElementById('playbackSpeed').value);
+            const originalVideo = document.getElementById('originalVideo');
+            const enhancedVideo = document.getElementById('enhancedVideo');
+            
+            if (originalVideo) originalVideo.playbackRate = speed;
+            if (enhancedVideo) enhancedVideo.playbackRate = speed;
+            
+            showStatus(`⚡ Playback speed set to ${speed}x`, 'info');
+        }
+        
+        function toggleSync() {
+            videosSynced = !videosSynced;
+            const button = document.getElementById('syncToggle');
+            
+            if (videosSynced) {
+                button.textContent = '✅ Synced';
+                button.style.background = 'var(--aqua-primary)';
+                syncVideos();
+                showStatus('🔗 Videos synchronized', 'success');
+            } else {
+                button.textContent = '❌ Independent';
+                button.style.background = '#6b7280';
+                showStatus('🔓 Videos can play independently', 'info');
+            }
+        }
+        
+        function syncVideos() {
+            const originalVideo = document.getElementById('originalVideo');
+            const enhancedVideo = document.getElementById('enhancedVideo');
+            
+            if (!originalVideo || !enhancedVideo || !videosSynced) return;
+            
+            // Sync playback events
+            originalVideo.addEventListener('play', () => {
+                if (videosSynced) enhancedVideo.play();
+            });
+            
+            originalVideo.addEventListener('pause', () => {
+                if (videosSynced) enhancedVideo.pause();
+            });
+            
+            originalVideo.addEventListener('seeked', () => {
+                if (videosSynced) enhancedVideo.currentTime = originalVideo.currentTime;
+            });
+            
+            enhancedVideo.addEventListener('play', () => {
+                if (videosSynced) originalVideo.play();
+            });
+            
+            enhancedVideo.addEventListener('pause', () => {
+                if (videosSynced) originalVideo.pause();
+            });
+            
+            enhancedVideo.addEventListener('seeked', () => {
+                if (videosSynced) originalVideo.currentTime = enhancedVideo.currentTime;
+            });
+        }
+        
+        function stepFrame(direction) {
+            const originalVideo = document.getElementById('originalVideo');
+            const enhancedVideo = document.getElementById('enhancedVideo');
+            
+            if (!originalVideo || !enhancedVideo) return;
+            
+            // Assume 30 FPS, step 1 frame = 1/30 second
+            const frameTime = 1 / 30;
+            const newTime = originalVideo.currentTime + (direction * frameTime);
+            
+            if (newTime >= 0 && newTime <= originalVideo.duration) {
+                originalVideo.currentTime = newTime;
+                if (videosSynced) {
+                    enhancedVideo.currentTime = newTime;
+                }
+            }
+        }
+        
+        function captureScreenshot() {
+            const video = document.getElementById('enhancedVideo');
+            if (!video) return;
+            
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw current frame
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob and download
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `screenshot_${Date.now()}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showStatus('📸 Screenshot saved!', 'success');
+            });
+        }
 
         // ==================== THREAT DETECTION & DISTANCE MEASUREMENT ====================
         
@@ -3090,13 +3479,18 @@
             const btn = document.getElementById('hamburgerBtn');
             const menu = document.getElementById('menuDropdown');
             
-            btn.classList.toggle('active');
-            menu.classList.toggle('active');
+            if (btn && menu) {
+                btn.classList.toggle('active');
+                menu.classList.toggle('active');
+            }
         }
 
         function navigateTo(page) {
             // Close menu
-            toggleMenu();
+            const menu = document.getElementById('menuDropdown');
+            if (menu && menu.classList.contains('active')) {
+                toggleMenu();
+            }
             
             // Handle navigation
             switch(page) {
@@ -3146,7 +3540,7 @@
             const menu = document.getElementById('menuDropdown');
             const btn = document.getElementById('hamburgerBtn');
             
-            if (menu.classList.contains('active') && 
+            if (menu && btn && menu.classList.contains('active') && 
                 !menu.contains(event.target) && 
                 !btn.contains(event.target)) {
                 toggleMenu();

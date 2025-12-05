@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Video - AQUA-SENTINEL</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='military_theme.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --aqua-primary: #00D9FF;
+            --aqua-dark: #FFFFFF;
+            --aqua-bg: #000000;
+            --aqua-panel: #0F0F0F;
+            --aqua-border: #333333;
+            --aqua-accent: #00B8CC;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--aqua-bg);
+            color: var(--aqua-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* DRDO-Style Header */
+        .drdo-header {
+            background: var(--aqua-panel);
+            border-bottom: 2px solid var(--aqua-border);
+            padding: 1rem 3rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .gov-emblem {
+            height: 60px;
+            width: auto;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--aqua-dark);
+            letter-spacing: 0.5px;
+        }
+
+        .header-title .subtitle {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--aqua-primary);
+            letter-spacing: 0.3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .drdo-logo {
+            height: 70px;
+            width: auto;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(0, 217, 255, 0.05);
+            padding: 0;
+            border-top: 1px solid var(--aqua-border);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li {
+            flex: 1;
+        }
+
+        .nav-links a {
+            display: block;
+            padding: 1rem 2rem;
+            color: var(--aqua-dark);
+            text-decoration: none;
+            font-weight: 500;
+            text-align: center;
+            border-right: 1px solid var(--aqua-border);
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li:last-child a {
+            border-right: none;
+        }
+
+        .nav-links a:hover {
+            background: rgba(0, 217, 255, 0.1);
+            color: var(--aqua-primary);
+        }
+
+        .nav-links a.active {
+            background: rgba(0, 217, 255, 0.15);
+            color: var(--aqua-primary);
+            border-bottom: 2px solid var(--aqua-primary);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--aqua-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Video Section */
+        .video-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .video-container {
+            background: var(--aqua-panel);
+            border: 2px solid var(--aqua-border);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--aqua-border);
+        }
+
+        .video-header h2 {
+            font-size: 1.5rem;
+            color: var(--aqua-primary);
+        }
+
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.active {
+            background: #00ff00;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .video-display {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #overlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 10;
+            display: none;
+        }
+
+        #overlayCanvas.active {
+            display: block;
+        }
+
+        #videoElement {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+
+        #videoElement.active {
+            display: block;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .video-placeholder svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Controls */
+        .controls-section {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem 2rem;
+            border: 2px solid var(--aqua-primary);
+            background: transparent;
+            color: var(--aqua-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background: var(--aqua-primary);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .control-btn.primary {
+            background: var(--aqua-primary);
+            color: #000;
+        }
+
+        .control-btn.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .control-btn.danger:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: var(--aqua-panel);
+            border: 2px solid var(--aqua-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--aqua-border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--aqua-primary);
+        }
+
+        /* Feature Toggles */
+        .feature-toggles {
+            background: var(--aqua-panel);
+            border: 2px solid var(--aqua-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--aqua-border);
+            transition: 0.4s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--aqua-primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .toggle-label {
+            font-size: 1rem;
+            color: var(--aqua-dark);
+            font-weight: 500;
+        }
+
+        .detection-info {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--aqua-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(0, 217, 255, 0.1);
+            border-top: 3px solid var(--aqua-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .drdo-header {
+                padding: 1rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .controls-section {
+                flex-direction: column;
+            }
+
+            .control-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="drdo-header">
+        <div class="header-top">
+            <div class="header-left">
+                <img src="/photos/drdo.png" alt="DRDO" class="drdo-logo">
+                <div class="header-title">
+                    <h1>AQUA-SENTINEL</h1>
+                    <div class="subtitle">Live Video Surveillance System</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <img src="/photos/emblem.png" alt="Government of India" class="gov-emblem">
+            </div>
+        </div>
+        
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/analytics">Analytics</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/history">History</a></li>
+                <li><a href="/model">Models</a></li>
+                <li><a href="/live-video" class="active">Live Video</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>🎥 Live Camera Feed</h1>
+            <p>Real-time underwater threat detection and monitoring</p>
+        </div>
+
+        <!-- Video Section -->
+        <div class="video-section">
+            <div class="video-container">
+                <div class="video-header">
+                    <h2>Camera Feed</h2>
+                    <div class="camera-status">
+                        <div class="status-indicator" id="statusIndicator"></div>
+                        <span id="statusText">Camera Inactive</span>
+                    </div>
+                </div>
+
+                <div class="video-display" id="videoDisplay">
+                    <video id="videoElement" autoplay playsinline></video>
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <p>Click "Start Camera" to begin video feed</p>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <button class="control-btn primary" id="startBtn" onclick="startCamera()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Start Camera
+                    </button>
+                    <button class="control-btn danger" id="stopBtn" onclick="stopCamera()" disabled>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                        </svg>
+                        Stop Camera
+                    </button>
+                    <button class="control-btn" id="captureBtn" onclick="captureFrame()" disabled>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Capture Frame
+                    </button>
+                </div>
+
+                <!-- Feature Toggles -->
+                <div class="feature-toggles">
+                    <h3 style="color: var(--aqua-primary); margin-bottom: 1rem;">⚙️ Detection Features</h3>
+                    <div class="toggle-row">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="threatDetectionToggle" onchange="toggleFeature('detection')">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">🎯 Threat Detection (YOLO)</span>
+                    </div>
+                    <div class="toggle-row">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enhancementToggle" onchange="toggleFeature('enhancement')">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">✨ Image Enhancement</span>
+                    </div>
+                    <div class="detection-info" id="detectionInfo" style="display: none;">
+                        <p style="color: var(--aqua-primary); font-size: 0.9rem; margin-top: 0.5rem;">
+                            <strong>Detections:</strong> <span id="detectionCount">0</span> threats found
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <h3 style="color: var(--aqua-primary); margin-bottom: 1rem;">📊 Session Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Duration</div>
+                    <div class="stat-value" id="duration">00:00:00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Frames Captured</div>
+                    <div class="stat-value" id="frameCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Resolution</div>
+                    <div class="stat-value" id="resolution">N/A</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">FPS</div>
+                    <div class="stat-value" id="fps">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stream = null;
+        let startTime = null;
+        let durationInterval = null;
+        let frameCount = 0;
+        let processingInterval = null;
+        let isDetectionEnabled = false;
+        let isEnhancementEnabled = false;
+        let canvas = null;
+        let ctx = null;
+
+        // Initialize canvas for frame processing
+        function initCanvas() {
+            if (!canvas) {
+                canvas = document.createElement('canvas');
+                ctx = canvas.getContext('2d');
+            }
+        }
+
+        function toggleFeature(feature) {
+            if (feature === 'detection') {
+                isDetectionEnabled = document.getElementById('threatDetectionToggle').checked;
+                const detectionInfo = document.getElementById('detectionInfo');
+                detectionInfo.style.display = isDetectionEnabled ? 'block' : 'none';
+                console.log(`🎯 Threat Detection: ${isDetectionEnabled ? 'ON' : 'OFF'}`);
+            } else if (feature === 'enhancement') {
+                isEnhancementEnabled = document.getElementById('enhancementToggle').checked;
+                console.log(`✨ Enhancement: ${isEnhancementEnabled ? 'ON' : 'OFF'}`);
+            }
+
+            // Start/stop processing based on enabled features
+            if ((isDetectionEnabled || isEnhancementEnabled) && stream) {
+                startFrameProcessing();
+            } else {
+                stopFrameProcessing();
+            }
+        }
+
+        function startFrameProcessing() {
+            if (processingInterval) return;
+
+            initCanvas();
+            
+            // Process frames every 500ms (2 FPS for processing)
+            processingInterval = setInterval(async () => {
+                await processFrame();
+            }, 500);
+
+            console.log('🔄 Frame processing started');
+        }
+
+        function stopFrameProcessing() {
+            if (processingInterval) {
+                clearInterval(processingInterval);
+                processingInterval = null;
+                console.log('⏸️ Frame processing stopped');
+            }
+        }
+
+        async function processFrame() {
+            try {
+                const videoElement = document.getElementById('videoElement');
+                
+                if (!videoElement || !stream || videoElement.paused) return;
+
+                // Set canvas dimensions
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+
+                // Draw current frame to canvas
+                ctx.drawImage(videoElement, 0, 0);
+
+                // Convert to base64
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Send to backend for processing
+                const response = await fetch('/process-live-frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: imageData,
+                        enableDetection: isDetectionEnabled,
+                        enableEnhancement: isEnhancementEnabled
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(`✅ Processed frame - ${result.detectionsCount} detections`);
+                    
+                    // Create or get overlay canvas
+                    let overlayCanvas = document.getElementById('overlayCanvas');
+                    const videoDisplay = document.getElementById('videoDisplay');
+                    
+                    if (!overlayCanvas) {
+                        overlayCanvas = document.createElement('canvas');
+                        overlayCanvas.id = 'overlayCanvas';
+                        videoDisplay.appendChild(overlayCanvas);
+                        console.log('📺 Created overlay canvas');
+                    }
+                    
+                    // Update with processed frame
+                    const img = new Image();
+                    img.onload = () => {
+                        // Set canvas size to match image
+                        overlayCanvas.width = img.width;
+                        overlayCanvas.height = img.height;
+                        
+                        // Draw processed image with bounding boxes
+                        const overlayCtx = overlayCanvas.getContext('2d');
+                        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                        overlayCtx.drawImage(img, 0, 0);
+                        
+                        console.log(`🎨 Drew frame ${overlayCanvas.width}x${overlayCanvas.height}`);
+                        
+                        // Hide video when showing processed frames
+                        videoElement.style.opacity = '0';
+                        overlayCanvas.style.display = 'block';
+                        overlayCanvas.classList.add('active');
+                    };
+                    img.onerror = () => {
+                        console.error('❌ Failed to load processed image');
+                    };
+                    img.src = result.processedImage;
+
+                    // Update detection count
+                    if (isDetectionEnabled && result.detectionsCount !== undefined) {
+                        document.getElementById('detectionCount').textContent = result.detectionsCount;
+                    }
+                } else {
+                    console.error('Processing failed:', result.error);
+                }
+            } catch (error) {
+                console.error('Error processing frame:', error);
+            }
+        }
+
+        async function startCamera() {
+            try {
+                // Request camera access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+
+                const videoElement = document.getElementById('videoElement');
+                const videoPlaceholder = document.getElementById('videoPlaceholder');
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+
+                videoElement.srcObject = stream;
+                videoElement.classList.add('active');
+                videoPlaceholder.style.display = 'none';
+
+                // Update UI
+                statusIndicator.classList.add('active');
+                statusText.textContent = 'Camera Active';
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('captureBtn').disabled = false;
+
+                // Update resolution
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                document.getElementById('resolution').textContent = 
+                    `${settings.width}×${settings.height}`;
+
+                // Start duration timer
+                startTime = Date.now();
+                durationInterval = setInterval(updateDuration, 1000);
+
+                // Start frame processing if features enabled
+                if (isDetectionEnabled || isEnhancementEnabled) {
+                    startFrameProcessing();
+                }
+
+                console.log('✅ Camera started successfully');
+            } catch (error) {
+                console.error('❌ Error accessing camera:', error);
+                alert('Unable to access camera. Please ensure:\n1. Camera is connected\n2. Browser has permission\n3. Camera is not being used by another app');
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+
+                const videoElement = document.getElementById('videoElement');
+                const videoPlaceholder = document.getElementById('videoPlaceholder');
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+
+                videoElement.classList.remove('active');
+                videoElement.style.opacity = '1';
+                videoPlaceholder.style.display = 'block';
+
+                // Remove overlay canvas if exists
+                const overlayCanvas = document.getElementById('overlayCanvas');
+                if (overlayCanvas) {
+                    overlayCanvas.remove();
+                }
+
+                // Update UI
+                statusIndicator.classList.remove('active');
+                statusText.textContent = 'Camera Inactive';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('captureBtn').disabled = true;
+
+                // Stop duration timer
+                if (durationInterval) {
+                    clearInterval(durationInterval);
+                    durationInterval = null;
+                }
+
+                // Stop frame processing
+                stopFrameProcessing();
+
+                console.log('🛑 Camera stopped');
+            }
+        }
+
+        function captureFrame() {
+            const overlayCanvas = document.getElementById('overlayCanvas');
+            const videoElement = document.getElementById('videoElement');
+            
+            // Use overlay canvas if processing is active, otherwise use video
+            const sourceCanvas = overlayCanvas || (() => {
+                initCanvas();
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                ctx.drawImage(videoElement, 0, 0);
+                return canvas;
+            })();
+
+            // Convert to blob and download
+            sourceCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `aqua_sentinel_frame_${Date.now()}.jpg`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                frameCount++;
+                document.getElementById('frameCount').textContent = frameCount;
+
+                console.log('📸 Frame captured with detections');
+            }, 'image/jpeg', 0.95);
+        }
+
+        function updateDuration() {
+            if (!startTime) return;
+
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+
+            document.getElementById('duration').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stopCamera();
+            }
+        });
+
+        // Calculate FPS (approximate)
+        setInterval(() => {
+            const videoElement = document.getElementById('videoElement');
+            if (stream && videoElement.videoWidth > 0) {
+                document.getElementById('fps').textContent = '30'; // Most webcams run at 30fps
+            } else {
+                document.getElementById('fps').textContent = '0';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

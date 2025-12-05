@@ -7,9 +7,72 @@ import math
 import numpy as np
 
 # Known object sizes in meters (real-world dimensions)
-# Maps both YOLO class names and threat types to real-world dimensions
+# Maps both YOLO class names and 50 underwater threat types to real-world dimensions
 KNOWN_OBJECT_SIZES = {
-    # YOLO Original Classes
+    # ========== A. SUBMARINES & SUBMERSIBLES (10 types) ==========
+    'nuclear_submarine': {'length': 150.0, 'width': 15.0, 'height': 18.0},
+    'diesel_electric_submarine': {'length': 70.0, 'width': 8.0, 'height': 10.0},
+    'mini_submarine': {'length': 15.0, 'width': 2.5, 'height': 3.0},
+    'midget_submarine': {'length': 12.0, 'width': 2.0, 'height': 2.5},
+    'autonomous_submarine_auv': {'length': 5.0, 'width': 0.5, 'height': 0.5},
+    'unmanned_underwater_vehicle_uuv': {'length': 6.0, 'width': 0.7, 'height': 0.7},
+    'rov_remotely_operated_vehicle': {'length': 2.0, 'width': 1.0, 'height': 1.0},
+    'underwater_spy_drone': {'length': 1.5, 'width': 0.4, 'height': 0.4},
+    'diver_propulsion_vehicle_dpv': {'length': 1.2, 'width': 0.4, 'height': 0.3},
+    'submersible_escape_pod': {'length': 3.0, 'width': 1.5, 'height': 1.5},
+    
+    # ========== B. UNDERWATER WEAPONS (11 types) ==========
+    'torpedo': {'length': 6.0, 'diameter': 0.53},
+    'heavyweight_torpedo': {'length': 7.5, 'diameter': 0.65},
+    'lightweight_torpedo': {'length': 3.0, 'diameter': 0.32},
+    'encapsulated_torpedo_ept': {'length': 4.5, 'diameter': 0.45},
+    'sea_mine_contact': {'diameter': 1.0, 'radius': 0.5},
+    'sea_mine_moored': {'diameter': 1.2, 'radius': 0.6},
+    'sea_mine_drifting': {'diameter': 0.8, 'radius': 0.4},
+    'sea_mine_bottom': {'diameter': 1.5, 'radius': 0.75},
+    'depth_charge': {'diameter': 0.6, 'height': 1.0},
+    'underwater_rocket': {'length': 4.0, 'diameter': 0.4},
+    'naval_mine': {'diameter': 1.3, 'radius': 0.65},
+    
+    # ========== C. UNDERWATER SURVEILLANCE THREATS (7 types) ==========
+    'underwater_microphone_sonar_array': {'length': 5.0, 'width': 1.0, 'height': 0.5},
+    'spy_hydrophone': {'length': 0.5, 'width': 0.2, 'height': 0.2},
+    'acoustic_beacon_unauthorized': {'length': 0.4, 'width': 0.1, 'height': 0.1},
+    'underwater_motion_sensor': {'length': 0.3, 'width': 0.15, 'height': 0.15},
+    'underwater_camera_probe': {'length': 0.6, 'width': 0.2, 'height': 0.2},
+    'seabed_listening_device': {'length': 0.8, 'width': 0.3, 'height': 0.2},
+    'unidentified_underwater_object_uuo': {'length': 2.0, 'width': 1.0, 'height': 1.0},
+    
+    # ========== D. HUMAN-RELATED UNDERWATER THREATS (6 types) ==========
+    'combat_diver': {'height': 1.75, 'width': 0.7, 'depth': 0.4},
+    'diver_with_oxygen_tank': {'height': 1.75, 'width': 0.6, 'depth': 0.5},
+    'diver_with_scooter': {'length': 2.0, 'width': 0.6, 'height': 0.5},
+    'sabotage_diver_carrying_explosives': {'height': 1.75, 'width': 0.8, 'depth': 0.5},
+    'illegal_underwater_miner': {'height': 1.75, 'width': 0.6, 'depth': 0.4},
+    'smuggling_diver': {'height': 1.75, 'width': 0.7, 'depth': 0.5},
+    
+    # ========== E. STRUCTURAL & ENVIRONMENTAL THREATS (10 types) ==========
+    'damaged_underwater_pipeline': {'length': 10.0, 'diameter': 1.0},
+    'pipeline_leak_oil': {'length': 5.0, 'diameter': 1.0},
+    'pipeline_leak_gas_bubbles': {'diameter': 2.0, 'height': 3.0},
+    'underwater_cable_break': {'length': 20.0, 'diameter': 0.1},
+    'broken_shipwreck_sharp_metal': {'length': 15.0, 'width': 8.0, 'height': 5.0},
+    'submerged_container': {'length': 12.0, 'width': 2.4, 'height': 2.6},
+    'sunken_vehicle': {'length': 4.5, 'width': 1.8, 'height': 1.5},
+    'corroded_metal_structure': {'length': 10.0, 'width': 5.0, 'height': 8.0},
+    'collapsed_underwater_structure': {'length': 20.0, 'width': 10.0, 'height': 5.0},
+    'anchor_damage_to_reef': {'length': 3.0, 'width': 2.0, 'height': 1.0},
+    
+    # ========== F. MARINE BIOLOGICAL THREATS (7 types) ==========
+    'shark_aggressive': {'length': 4.0, 'width': 0.6, 'height': 0.8},
+    'barracuda': {'length': 1.8, 'width': 0.2, 'height': 0.25},
+    'electric_eel': {'length': 2.0, 'width': 0.1, 'height': 0.1},
+    'jellyfish_swarm': {'diameter': 0.5, 'count': 20},
+    'sea_snake': {'length': 1.5, 'diameter': 0.05},
+    'crocodile_saltwater': {'length': 5.0, 'width': 0.8, 'height': 0.6},
+    'large_stingray': {'length': 2.5, 'width': 2.0, 'height': 0.3},
+    
+    # ========== YOLO ORIGINAL CLASSES (for fallback) ==========
     'person': {'height': 1.75, 'width': 0.6, 'depth': 0.3},
     'boat': {'length': 50.0, 'width': 10.0, 'height': 8.0},
     'ship': {'length': 150.0, 'width': 25.0, 'height': 40.0},

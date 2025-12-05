@@ -488,39 +488,43 @@ input:checked + .slider:before {
 /* Process Button */
 .process-btn {
     width: 100%;
-    max-width: 500px;
-    padding: 16px 40px;
-    margin: 0 auto;
+    max-width: 600px;
+    padding: 24px 50px;
+    margin: 30px auto;
     display: block;
-    background: linear-gradient(135deg, #10b981, #059669);
-    border: 1px solid #10b981;
+    background: linear-gradient(135deg, #00D9FF, #00B8CC);
+    border: 2px solid #00D9FF;
     color: #000000;
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 217, 255, 0.5);
     position: relative;
     overflow: hidden;
-    border-radius: 5px;
+    border-radius: 12px;
 }
 
 .process-btn::before {
     content: '▸ ';
+    font-size: 1.6rem;
+    margin-right: 8px;
 }
 
 .process-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #059669, #047857);
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #00F5FF, #00D9FF);
+    box-shadow: 0 12px 48px rgba(0, 217, 255, 0.8);
+    transform: translateY(-3px);
+    border-color: #00F5FF;
 }
 
 .process-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* Loading Animation */
