@@ -15,7 +15,7 @@ A modern web interface for Deep WaveNet underwater image restoration, featuring 
 
 ### 1. Clone & Setup
 ```bash
-git clone https://github.com/Kunalrpawar/underwater.git
+git clone username 
 cd underwater
 python -m venv deepwave_env
 ```
