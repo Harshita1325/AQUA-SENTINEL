@@ -92,15 +92,4 @@ The web application features:
 ##  License
 
 This project is for **academic use only**. Commercial use is prohibited.
-
-
-
-##  Contact
-
-**Kunal Ramesh Pawar**
-- GitHub: [@Kunalrpawar](https://github.com/Kunalrpawar)
-- Project: [underwater](https://github.com/Kunalrpawar/underwater)
-
----
-
 **Transform your underwater images with AI!
